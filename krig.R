@@ -1,6 +1,7 @@
 rm(list = ls())
 source('functions.R')
 load('data/hf.RData')
+rm.list <- ls()
 
 # Kriging
 # Filter data
@@ -24,8 +25,6 @@ k100.w <- purrr::map(
     plot = T
   )
 ) %>% purrr::set_names(nm = unique(shp.hf$segment))
-# Save
-save(k100.w, file = 'data/k100w.RData')
 
 # Calculate experimental variogram, fit experimental variogram, krig, and interpolate
 k100.n <- purrr::map(
@@ -45,61 +44,19 @@ k100.n <- purrr::map(
     plot = T
   )
 ) %>% purrr::set_names(nm = unique(shp.hf$segment))
+
+# Check number of point pairs
+seg.np <- bind_rows(purrr::map(k100.n, ~.x$variogram), .id = 'segment') %>%
+  group_by(segment) %>%
+  summarise(np.max = max(np), np.min = min(np), np.mean = mean(np), np.median = median(np)) %>%
+  arrange(desc(np.median))
+
+# Filter out segments with median point pairs less than 30
+seg.30np <- np %>% filter(np.median > 30)
+
+# Clean up environment
+rm(list = rm.list)
+rm(dat, rm.list)
+
 # Save
-save(k100.n, file = 'data/k100n.RData')
-
-# Composition layout
-lyt <- '
-1111122
-1111122
-3333333
-3333333
-3333333
-3333333
-3333333
-'
-
-# Draw and save compositions
-purrr::pmap(list(
-  purrr::map(k100.w, ~ .x$v.plot),
-  purrr::map(k100.w, ~ .x$hist),
-  purrr::map(k100.w, ~ .x$k.plot),
-  unique(shp.hf$segment)
-),
-~ {
-  ..1 + (
-    ..2 + ylab(bquote(Heat~Flow~(mW/m^2))) +
-      theme(
-      axis.title.y = element_blank(),
-      axis.text.y = element_blank(),
-      axis.ticks.y = element_blank()
-    )
-  ) +
-    ..3  & theme(plot.background = element_rect(fill = "transparent", color = NA)) +
-    plot_layout(design = lyt) +
-    plot_annotation(tag_levels = 'a', title = ..4)
-  ggsave(filename = paste0('figs/maps/kriged/k100.w', ..4, '.png'), device = 'png')
-})
-
-# Draw and save compositions
-purrr::pmap(list(
-  purrr::map(k100.n, ~ .x$v.plot),
-  purrr::map(k100.n, ~ .x$hist),
-  purrr::map(k100.n, ~ .x$k.plot),
-  unique(shp.hf$segment)
-),
-~ {
-  ..1 + (
-    ..2 + ylab(bquote(Heat~Flow~(mW/m^2))) +
-      theme(
-        axis.title.y = element_blank(),
-        axis.text.y = element_blank(),
-        axis.ticks.y = element_blank()
-      )
-  ) +
-    ..3 &
-    theme(plot.background = element_rect(fill = "transparent", color = NA)) + 
-    plot_layout(design = lyt) +
-    plot_annotation(tag_levels = 'a', title = ..4)
-  ggsave(filename = paste0('figs/maps/kriged/k100.n', ..4, '.png'), device = 'png')
-})
+save.image('data/krig.RData')
