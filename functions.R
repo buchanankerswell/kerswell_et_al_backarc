@@ -1,6 +1,7 @@
 if(!identical(getOption("bitmapType"), "cairo") && isTRUE(capabilities()[["cairo"]])){
   options(bitmapType = "cairo")
 }
+library(tidyr)
 library(leaflet)
 library(ggsflabel)
 library(ggplot2)
