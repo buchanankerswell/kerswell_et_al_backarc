@@ -23,7 +23,7 @@ k100.w <- purrr::map(
     v.mod = 'Sph',
     plot = T
   )
-)
+) %>% purrr::set_names(nm = unique(shp.hf$segment))
 # Save
 save(k100.w, file = 'data/k100w.RData')
 
@@ -44,7 +44,7 @@ k100.n <- purrr::map(
     v.mod = 'Sph',
     plot = T
   )
-)
+) %>% purrr::set_names(nm = unique(shp.hf$segment))
 # Save
 save(k100.n, file = 'data/k100n.RData')
 
@@ -64,7 +64,7 @@ purrr::pmap(list(
   purrr::map(k100.w, ~ .x$v.plot),
   purrr::map(k100.w, ~ .x$hist),
   purrr::map(k100.w, ~ .x$k.plot),
-  1:13
+  unique(shp.hf$segment)
 ),
 ~ {
   ..1 + (
@@ -75,7 +75,9 @@ purrr::pmap(list(
       axis.ticks.y = element_blank()
     )
   ) +
-    ..3 + plot_layout(design = lyt) + plot_annotation(tag_levels = 'a') + theme(plot.background = element_rect(fill = "transparent", color = NA))
+    ..3  & theme(plot.background = element_rect(fill = "transparent", color = NA)) +
+    plot_layout(design = lyt) +
+    plot_annotation(tag_levels = 'a', title = ..4)
   ggsave(filename = paste0('figs/maps/kriged/k100.w', ..4, '.png'), device = 'png')
 })
 
@@ -84,7 +86,7 @@ purrr::pmap(list(
   purrr::map(k100.n, ~ .x$v.plot),
   purrr::map(k100.n, ~ .x$hist),
   purrr::map(k100.n, ~ .x$k.plot),
-  1:13
+  unique(shp.hf$segment)
 ),
 ~ {
   ..1 + (
@@ -95,6 +97,9 @@ purrr::pmap(list(
         axis.ticks.y = element_blank()
       )
   ) +
-    ..3 + plot_layout(design = lyt) + plot_annotation(tag_levels = 'a') + theme(plot.background = element_rect(fill = "transparent", color = NA))
+    ..3 &
+    theme(plot.background = element_rect(fill = "transparent", color = NA)) + 
+    plot_layout(design = lyt) +
+    plot_annotation(tag_levels = 'a', title = ..4)
   ggsave(filename = paste0('figs/maps/kriged/k100.n', ..4, '.png'), device = 'png')
 })
