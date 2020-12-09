@@ -1,10 +1,9 @@
 rm(list = ls())
 source('functions.R')
 load('data/hf.RData')
-# load('data/krig_filter.RData')
 
 # Open PDF device
-# cairo_pdf('./figs/maps/hf.pdf', onefile = T, width = 10, height = 7)
+cairo_pdf('figs/maps/hf.pdf', onefile = T, width = 10, height = 7)
 
 # Pacific centered world map
 # World plot [all]
@@ -30,10 +29,9 @@ plot_hf(
   box.limits = shp.grats30,
   legend.pos = 'top',
   legend.just = 'right',
-  legend.size = unit(8, 'lines')#,
-  # plot.labs = 'Composition: Global'
+  legend.size = unit(8, 'lines')
 )
-ggsave('./figs/maps/full.comp/global.png', device = 'png', dpi = 320, bg = 'transparent', width = 10, height = 7)
+ggsave('figs/maps/full.comp/global.png', device = 'png', dpi = 320, bg = 'transparent', width = 10, height = 7)
 
 # World plot [segments]
 plot_hf(
@@ -50,10 +48,9 @@ plot_hf(
   box.limits = shp.grats30,
   legend.pos = 'top',
   legend.just = 'right',
-  legend.size = unit(8, 'lines'),
-  plot.labs = 'Arc Segments'
+  legend.size = unit(8, 'lines')
 )
-ggsave('./figs/maps/segments/global_segments.png', device = 'png', dpi = 320, bg = 'transparent', width = 10, height = 7)
+ggsave('figs/maps/segments/global_segments.png', device = 'png', dpi = 320, bg = 'transparent', width = 10, height = 7)
 
 # World plot [segments + heatflow]
 plot_hf(
@@ -72,10 +69,9 @@ plot_hf(
   box.limits = shp.grats30,
   legend.pos = 'top',
   legend.just = 'right',
-  legend.size = unit(8, 'lines'),
-  plot.labs = 'Heat Flow Near Arcs'
+  legend.size = unit(8, 'lines')
 )
-ggsave('./figs/maps/heatflow/global_segs_hf.png', device = 'png', dpi = 320, bg = 'transparent', width = 10, height = 7)
+ggsave('figs/maps/heatflow/global_segs_hf.png', device = 'png', dpi = 320, bg = 'transparent', width = 10, height = 7)
 
 # World plot [segments + volcanoes]
 plot_hf(
@@ -96,10 +92,9 @@ plot_hf(
   box.limits = shp.grats30,
   legend.pos = 'top',
   legend.just = 'right',
-  legend.size = unit(8, 'lines'),
-  plot.labs = 'Arc Volcanoes'
+  legend.size = unit(8, 'lines')
 )
-ggsave('./figs/maps/volcano/global_segs_volc.png', device = 'png', dpi = 320, bg = 'transparent', width = 10, height = 7)
+ggsave('figs/maps/volcano/global_segs_volc.png', device = 'png', dpi = 320, bg = 'transparent', width = 10, height = 7)
 
 # Pacific centered regional map
 # Pacific Region Map [All]
@@ -124,10 +119,9 @@ plot_hf(
   box.limits = box.segs.all.wide,
   legend.pos = 'top',
   legend.just = 'right',
-  legend.size = unit(8, 'lines')#,
-  # plot.labs = 'Composition: Global'
+  legend.size = unit(8, 'lines')
 )
-ggsave('./figs/maps/full.comp/pacific.png', device = 'png', dpi = 320, bg = 'transparent', width = 10, height = 7)
+ggsave('figs/maps/full.comp/pacific.png', device = 'png', dpi = 320, bg = 'transparent', width = 10, height = 7)
 
 # Pacific Region Map [Segments]
 plot_hf(
@@ -143,10 +137,9 @@ plot_hf(
   box.limits = box.segs.all.wide,
   legend.pos = 'top',
   legend.just = 'right',
-  legend.size = unit(8, 'lines'),
-  plot.labs = 'Arc Segments'
+  legend.size = unit(8, 'lines')
 )
-ggsave('./figs/maps/segments/pacific_segments.png', device = 'png', dpi = 320, bg = 'transparent', width = 10, height = 7)
+ggsave('figs/maps/segments/pacific_segments.png', device = 'png', dpi = 320, bg = 'transparent', width = 10, height = 7)
 
 # Pacific Region Map [Segments + heatflow]
 plot_hf(
@@ -165,10 +158,9 @@ plot_hf(
   box.limits = box.segs.all.wide,
   legend.pos = 'top',
   legend.just = 'right',
-  legend.size = unit(8, 'lines'),
-  plot.labs = 'Heat Flow Near Arcs'
+  legend.size = unit(8, 'lines')
 )
-ggsave('./figs/maps/heatflow/pacific_segs_hf.png', device = 'png', dpi = 320, bg = 'transparent', width = 10, height = 7)
+ggsave('figs/maps/heatflow/pacific_segs_hf.png', device = 'png', dpi = 320, bg = 'transparent', width = 10, height = 7)
 
 # Pacific Region Map [Segments + volcanoes]
 plot_hf(
@@ -189,10 +181,9 @@ plot_hf(
   box.limits = box.segs.all.wide,
   legend.pos = 'top',
   legend.just = 'right',
-  legend.size = unit(8, 'lines'),
-  plot.labs = 'Arc Volcanoes'
+  legend.size = unit(8, 'lines')
 )
-ggsave('./figs/maps/volcano/pacific_segs_volc.png', device = 'png', dpi = 320, bg = 'transparent', width = 10, height = 7)
+ggsave('figs/maps/volcano/pacific_segs_volc.png', device = 'png', dpi = 320, bg = 'transparent', width = 10, height = 7)
 
 # Individual arc segment closeups
 
@@ -240,10 +231,10 @@ purrr::pmap(
       legend.pos = 'right',
       legend.just = 'left',
       legend.size = unit(8, 'lines'),
-      plot.labs = paste0('Composition: ', ..3)
+      plot.labs = ..3
     )
     ggsave(
-      paste0('./figs/maps/full.comp/', ..4, '.png'),
+      paste0('figs/maps/full.comp/', ..4, '.png'),
       device = 'png',
       dpi = 320,
       bg = 'transparent',
@@ -275,10 +266,10 @@ purrr::pmap(
       legend.pos = 'right',
       legend.just = 'left',
       legend.size = unit(8, 'lines'),
-      plot.labs = paste0('Arc Segment: ', ..3)
+      plot.labs = ..3
     )
     ggsave(
-      paste0('./figs/maps/segments/', ..4, '_segment.png'),
+      paste0('figs/maps/segments/', ..4, '_segment.png'),
       device = 'png',
       dpi = 320,
       bg = 'transparent',
@@ -313,10 +304,10 @@ purrr::pmap(
       legend.pos = 'right',
       legend.just = 'left',
       legend.size = unit(8, 'lines'),
-      plot.labs = paste0('Heat Flow: ', ..3)
+      plot.labs = ..3
     )
     ggsave(
-      paste0('./figs/maps/heatflow/', ..4, '_heatflow.png'),
+      paste0('figs/maps/heatflow/', ..4, '_heatflow.png'),
       device = 'png',
       dpi = 320,
       bg = 'transparent',
@@ -353,10 +344,10 @@ purrr::pmap(
       legend.pos = 'right',
       legend.just = 'left',
       legend.size = unit(8, 'lines'),
-      plot.labs = paste0('Volcanoes: ', ..3)
+      plot.labs = ..3
     )
     ggsave(
-      paste0('./figs/maps/volcano/', ..4, '_volc.png'),
+      paste0('figs/maps/volcano/', ..4, '_volc.png'),
       device = 'png',
       dpi = 320,
       bg = 'transparent',
@@ -398,10 +389,10 @@ purrr::pmap(
       legend.pos = 'top',
       legend.just = 'right',
       legend.size = unit(8, 'lines'),
-      plot.labs = paste0('Composition: ', ..3)
+      plot.labs = ..3
     )
     ggsave(
-      paste0('./figs/maps/full.comp/', ..4, '.png'),
+      paste0('figs/maps/full.comp/', ..4, '.png'),
       device = 'png',
       dpi = 320,
       bg = 'transparent',
@@ -433,10 +424,10 @@ purrr::pmap(
       legend.pos = 'top',
       legend.just = 'right',
       legend.size = unit(8, 'lines'),
-      plot.labs = paste0('Arc Segment: ', ..3)
+      plot.labs = ..3
     )
     ggsave(
-      paste0('./figs/maps/segments/', ..4, '_segment.png'),
+      paste0('figs/maps/segments/', ..4, '_segment.png'),
       device = 'png',
       dpi = 320,
       bg = 'transparent',
@@ -471,10 +462,10 @@ purrr::pmap(
       legend.pos = 'top',
       legend.just = 'right',
       legend.size = unit(8, 'lines'),
-      plot.labs = paste0('Heat Flow: ', ..3)
+      plot.labs = ..3
     )
     ggsave(
-      paste0('./figs/maps/heatflow/', ..4, '_heatflow.png'),
+      paste0('figs/maps/heatflow/', ..4, '_heatflow.png'),
       device = 'png',
       dpi = 320,
       bg = 'transparent',
@@ -511,10 +502,10 @@ purrr::pmap(
       legend.pos = 'top',
       legend.just = 'right',
       legend.size = unit(8, 'lines'),
-      plot.labs = paste0('Volcanoes: ', ..3)
+      plot.labs = ..3
     )
     ggsave(
-      paste0('./figs/maps/volcano/', ..4, '_volc.png'),
+      paste0('figs/maps/volcano/', ..4, '_volc.png'),
       device = 'png',
       dpi = 320,
       bg = 'transparent',
@@ -543,7 +534,7 @@ ggplot(d.volcano) +
     panel.grid.minor.y = element_blank()
   )
 ggsave(
-  paste0('./figs/H_boxplot.png'),
+  paste0('figs/H_boxplot.png'),
   device = 'png',
   dpi = 320,
   bg = 'transparent',
@@ -564,7 +555,7 @@ ggplot(d.volcano) +
     panel.grid.minor.y = element_blank()
   )
 ggsave(
-  paste0('./figs/Phi_boxplot.png'),
+  paste0('figs/Phi_boxplot.png'),
   device = 'png',
   dpi = 320,
   bg = 'transparent',
@@ -584,7 +575,7 @@ ggplot(d.volcano) +
     panel.grid.minor.y = element_blank()
   )
 ggsave(
-  paste0('./figs/Tdis_boxplot.png'),
+  paste0('figs/Tdis_boxplot.png'),
   device = 'png',
   dpi = 320,
   bg = 'transparent',
@@ -604,7 +595,7 @@ ggplot(d.volcano.long) +
   ) +
   facet_wrap(~ factor(name, levels = c('H', 'Phi/100', 'Vc', 'Age', 'DesRat', 'Tdis')), scales = 'free_y', ncol = 2)
 ggsave(
-  paste0('./figs/facet_boxplot.png'),
+  paste0('figs/facet_boxplot.png'),
   device = 'png',
   dpi = 320,
   bg = 'transparent',
@@ -621,7 +612,7 @@ ggplot(d.volcano) +
   theme_bw() +
   theme(plot.background = element_rect(fill = "transparent", color = NA))
 ggsave(
-  paste0('./figs/H_Tdis.png'),
+  paste0('figs/H_Tdis.png'),
   device = 'png',
   dpi = 320,
   bg = 'transparent',
@@ -637,7 +628,7 @@ ggplot(d.volcano) +
   theme_bw() +
   theme(plot.background = element_rect(fill = "transparent", color = NA))
 ggsave(
-  paste0('./figs/H_Phi.png'),
+  paste0('figs/H_Phi.png'),
   device = 'png',
   dpi = 320,
   bg = 'transparent',
@@ -660,7 +651,7 @@ ggsave(
       page = .x
     )
   ggsave(
-    paste0('./figs/H_Tdis_', .x, '.png'),
+    paste0('figs/H_Tdis_', .x, '.png'),
     device = 'png',
     dpi = 320,
     bg = 'transparent',
@@ -684,7 +675,7 @@ ggsave(
       page = .x
     )
   ggsave(
-    paste0('./figs/H_Phi_', .x, '.png'),
+    paste0('figs/H_Phi_', .x, '.png'),
     device = 'png',
     dpi = 320,
     bg = 'transparent',
@@ -701,69 +692,13 @@ ggplot(d.volcano) +
   theme_bw() +
   theme(plot.background = element_rect(fill = "transparent", color = NA))
 ggsave(
-  paste0('./figs/Age_Vc_H.png'),
+  paste0('figs/Age_Vc_H.png'),
   device = 'png',
   dpi = 320,
   bg = 'transparent',
   width = 7,
   height = 5.5
 )
-
-# Kriging
-# Filter data
-dat <- shp.hf %>% filter(Heat_Flow > 10 & Heat_Flow < 120 & minD < maxD & Gradient > 0 & Gradient < 500)
-
-# Calculate experimental variogram, fit experimental variogram, krig, and interpolate
-k100 <- purrr::map(
-  unique(shp.hf$segment),
-  ~ krg(
-    data = dat %>% filter(segment == .x),
-    lags = 100,
-    param = 'Heat_Flow',
-    krg.shp = shp.sa.segs.robin.pacific.buffer %>% filter(segment == .x),
-    seg = shp.sa.segs.robin.pacific %>% filter(segment == .x),
-    contours = shp.sa.countours.robin.pacific %>% filter(segment == .x),
-    crs = proj4.robin.pacific,
-    ngrid = 3.2e5,
-    grid.method = 'hexagonal',
-    v.mod = 'Sph',
-    plot = T
-  )
-)
-
-# Composition layout
-lyt <- '
-1111122
-1111122
-3333333
-3333333
-3333333
-3333333
-3333333
-'
-
-# Draw and save compositions
-purrr::pmap(list(
-  purrr::map(k100, ~ .x$v.plot),
-  purrr::map(k100, ~ .x$hist),
-  purrr::map(k100, ~ .x$k.plot),
-  1:13
-),
-~ {
-  ..1 + (
-    ..2 + theme(
-      axis.title.y = element_blank(),
-      axis.text.y = element_blank(),
-      axis.ticks.y = element_blank()
-    )
-  ) +
-    ..3 + plot_layout(design = lyt) + plot_annotation(tag_levels = 'a') + theme(plot.background = element_rect(fill = "transparent", color = NA))
-  ggsave(filename = paste0('figs/maps/kriged/k100', ..4, '.png'), device = 'png')
-})
-
-# Plot all kriging results with void theme
-wrap_plots(purrr::map(k100, ~.x$k.plot)) & theme_void() & theme(legend.position = 'none', plot.background = element_rect(fill = "transparent", color = NA))
-ggsave(filename = 'figs/maps/kriged/void.png', device = 'png')
 
 # Close device
 dev.off()
