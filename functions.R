@@ -14,26 +14,6 @@ library(stars)
 library(patchwork)
 library(ggrepel)
 
-# Define a function to fix the bbox to be in EPSG:3857
-ggmap_bbox <- function(map) {
-  if (!inherits(map, "ggmap")) stop("map must be a ggmap object")
-  # Extract the bounding box (in lat/lon) from the ggmap to a numeric vector, 
-  # and set the names to what sf::st_bbox expects:
-  map_bbox <- setNames(unlist(attr(map, "bb")), 
-                       c("ymin", "xmin", "ymax", "xmax"))
-  
-  # Coonvert the bbox to an sf polygon, transform it to 3857, 
-  # and convert back to a bbox (convoluted, but it works)
-  bbox_3857 <- st_bbox(st_transform(st_as_sfc(st_bbox(map_bbox, crs = 4326)), 3857))
-  
-  # Overwrite the bbox of the ggmap object with the transformed coordinates 
-  attr(map, "bb")$ll.lat <- bbox_3857["ymin"]
-  attr(map, "bb")$ll.lon <- bbox_3857["xmin"]
-  attr(map, "bb")$ur.lat <- bbox_3857["ymax"]
-  attr(map, "bb")$ur.lon <- bbox_3857["xmax"]
-  map
-}
-
 # Draw a widened box from a st_bbox object
 bbox_widen <- function(bbox, crs, borders = c('left' = 0.5, 'right' = 0.5, 'top' = 0, 'bottom' = 0)) {
   b <- bbox # current bounding box
@@ -44,28 +24,6 @@ bbox_widen <- function(bbox, crs, borders = c('left' = 0.5, 'right' = 0.5, 'top'
   b[2] <- b[2] - (borders['bottom'] * yrange) # ymin - bottom
   b[4] <- b[4] + (borders['top'] * yrange) # ymax - top
   box <- st_polygon(list(matrix(c(b$xmin, b$ymax, b$xmin, b$ymin, b$xmax, b$ymin, b$xmax, b$ymax, b$xmin, b$ymax), ncol = 2, byrow = TRUE))) %>%
-    st_sfc(crs = crs)
-  return(box)
-}
-
-# Add alpha to ggmap
-ggmap_alpha <- function(map, alpha = 0.5) {
-  b.at <- attributes(map)
-  n.map <- matrix(adjustcolor(map, alpha.f = alpha), nrow = nrow(map))
-  attributes(n.map) <- b.at
-  return(n.map)
-}
-
-# Get bbox of multiple sf objects
-bbox_stitch <- function(bbox, crs) {
-  b <- bind_rows(bbox)
-  box <- st_polygon(list(matrix(c(
-    min(b$xmin), max(b$ymax),
-    min(b$xmin), min(b$ymin),
-    max(b$xmax), min(b$ymin),
-    max(b$xmax), max(b$ymax),
-    min(b$xmin), max(b$ymax)),
-    ncol = 2, byrow = TRUE))) %>%
     st_sfc(crs = crs)
   return(box)
 }
@@ -161,9 +119,9 @@ plot_hf <- function(
 }
 
 # Kriging
-krg <- function(data, lags = 50, param, krg.shp, seg, contours, crs, ngrid = 3e5, grid.method = 'hexagonal', v.mod = 'Sph', plot = TRUE){
+krg <- function(data, lags = 50, lag.cutoff = 5, param, krg.shp, seg, contours, crs, ngrid = 3e5, grid.method = 'hexagonal', v.mod = 'Sph', plot = TRUE){
   d <- data
-  cutoff <- max(st_distance(data))/5 %>% as.numeric()
+  cutoff <- max(st_distance(data))/lag.cutoff %>% as.numeric()
   class(cutoff) <- 'numeric'
   b <- krg.shp
   s <- b %>% st_sample(size = ngrid, grid.method)
