@@ -45,6 +45,32 @@ k100.n <- purrr::map(
   )
 ) %>% purrr::set_names(nm = unique(shp.hf$segment))
 
+# Summarise experimental variograms (narrow variograms)
+nugs.n <- bind_rows(purrr::map(k100.n, ~.x$v.model), .id = 'segment') %>%
+  filter(model == 'Nug') %>%
+  select(c(segment, psill)) %>%
+  as_tibble() %>%
+  rename(nug = psill)
+params.n <- bind_rows(purrr::map(k100.n, ~.x$v.model), .id = 'segment') %>%
+  filter(model == 'Sph') %>%
+  select(c(segment, psill, range)) %>%
+  as_tibble() %>%
+  rename(sill = psill)
+v.mods.n <- left_join(nugs.n, params.n)
+
+# Summarise experimental variograms (wide variograms)
+nugs.w <- bind_rows(purrr::map(k100.w, ~.x$v.model), .id = 'segment') %>%
+  filter(model == 'Nug') %>%
+  select(c(segment, psill)) %>%
+  as_tibble() %>%
+  rename(nug = psill)
+params.w <- bind_rows(purrr::map(k100.w, ~.x$v.model), .id = 'segment') %>%
+  filter(model == 'Sph') %>%
+  select(c(segment, psill, range)) %>%
+  as_tibble() %>%
+  rename(sill = psill)
+v.mods.w <- left_join(nugs.n, params.n)
+
 # Check number of point pairs
 seg.np <- bind_rows(purrr::map(k100.n, ~.x$variogram), .id = 'segment') %>%
   group_by(segment) %>%
@@ -56,7 +82,7 @@ seg.30np <- np %>% filter(np.median > 30)
 
 # Clean up environment
 rm(list = rm.list)
-rm(dat, rm.list)
+rm(dat, rm.list, nugs.n, nugs.w, params.n, params.w)
 
 # Save
 save.image('data/krig.RData')
