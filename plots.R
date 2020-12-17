@@ -715,25 +715,14 @@ lyt <- '
 '
 
 # Draw and save compositions for segments with np > 30
-purrr::pmap(list(purrr::map(k100.w[seg.30np$segment], ~ .x$v.plot), purrr::map(k100.w[seg.30np$segment], ~ .x$hist), purrr::map(k100.w[seg.30np$segment], ~ .x$k.plot), seg.30np$segment),
+purrr::pmap(list(purrr::map(k100, ~ .x$v.plot), purrr::map(k100, ~ .x$hist), purrr::map(k100, ~ .x$k.plot), names(k100)),
             ~ {..1 +
                 (..2 + ylab(bquote(Heat~Flow~(mW/m^2))) + theme(axis.title.y = element_blank(), axis.text.y = element_blank(), axis.ticks.y = element_blank())) +
                 ..3 +
                 plot_layout(design = lyt) +
                 plot_annotation(tag_levels = 'a', title = ..4) &
                 theme(plot.background = element_rect(fill = "transparent", color = NA))
-              ggsave(filename = paste0('figs/maps/kriged/k100w.', ..4, '.png'), device = 'png')
-            })
-
-# Draw and save compositions for segments with np > 30
-purrr::pmap(list(purrr::map(k100.n[seg.30np$segment], ~ .x$v.plot), purrr::map(k100.n[seg.30np$segment], ~ .x$hist), purrr::map(k100.n[seg.30np$segment], ~ .x$k.plot), seg.30np$segment),
-            ~ {..1 +
-                (..2 + ylab(bquote(Heat~Flow~(mW/m^2))) + theme(axis.title.y = element_blank(), axis.text.y = element_blank(), axis.ticks.y = element_blank())) +
-                ..3 +
-                plot_layout(design = lyt) +
-                plot_annotation(tag_levels = 'a', title = ..4) &
-                theme(plot.background = element_rect(fill = "transparent", color = NA))
-              ggsave(filename = paste0('figs/maps/kriged/k100n.', ..4, '.png'), device = 'png')
+              ggsave(filename = paste0('figs/maps/kriged/k100.', ..4, '.png'), device = 'png')
             })
 
 # Close device
