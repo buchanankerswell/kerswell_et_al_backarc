@@ -119,21 +119,73 @@ plot_hf <- function(
   return(p)
 }
 
+# Segment lines into intervals defined by grouping equal number of points
+splt <- function(object, cut.length = 1000000, buffer = TRUE, buffer.dist = 500000) {
+  # Cast to points
+  obj.pnts <- object %>% st_cast("POINT")
+  # Calculate distances between consecutive points
+  dst <- as.vector(c(units::as_units(0, 'm'), st_distance(obj.pnts[-1,],obj.pnts[-nrow(obj.pnts),],by_element=TRUE)))
+  if(cumsum(dst)[length(cumsum(dst))] < cut.length) {
+    if (buffer != TRUE) {
+      warning('Segment length is shorter than cut length. Returning original segment')
+      return(object)
+    } else if (buffer == TRUE) {
+      warning('Segment length is shorter than cut length. Returning original segment with buffer')
+      return(st_buffer(object, buffer.dist))
+    }
+  } else {
+    # Find indices to split points into groups with equal distances
+    cut.ind <- rep(NA, floor(cumsum(dst)[length(cumsum(dst))]/cut.length))
+    save.ind <- 1
+    start.ind <- 1
+    for(i in 1:length(dst)) {
+      cmsm <- cumsum(dst[start.ind:i])
+      tot <- cmsm[length(cmsm)]
+      if(tot < cut.length) {
+        i <- i + 1
+      } else {
+        cut.ind[save.ind] <- i
+        start.ind <- i
+        save.ind <- save.ind + 1
+      }
+    }
+    # Split the object using the saved cut indices, group by subsegment, and cast back into linestrings
+    if(cut.ind[length(cut.ind)] != nrow(obj.pnts)) {
+      obj.splt <-
+        purrr::pmap_df(list(cut.ind, c(cut.ind[-1], nrow(obj.pnts)), 1:length(cut.ind)),~{obj.pnts[..1:..2,] %>% mutate(subseg = ..3, .before = geometry)}) %>%
+        group_by(subseg) %>% summarise(do_union = F) %>% st_cast("LINESTRING")
+    } else {
+      obj.splt <-
+        purrr::pmap_df(list(cut.ind[-length(cut.ind)], c(cut.ind[-1]), 1:(length(cut.ind)-1)),~{obj.pnts[..1:..2,] %>% mutate(subseg = ..3, .before = geometry)}) %>%
+        group_by(subseg) %>% summarise(do_union = F) %>% st_cast("LINESTRING")
+    }
+    if (buffer != TRUE) {
+      return(obj.splt)
+    } else if (buffer == TRUE) {
+      return(st_buffer(obj.splt, buffer.dist) %>% group_by(subseg) %>% summarise())
+    }
+  }
+}
+
 # Kriging
 krg <- function(data, lags = 50, lag.cutoff = 5, param, krg.shp, seg, contours, crs, ngrid = 3e5, grid.method = 'hexagonal', v.mod = 'Sph', plot = TRUE){
   d <- data
-  cutoff <- max(st_distance(data))/lag.cutoff %>% as.numeric()
-  class(cutoff) <- 'numeric'
+  # Remove zero-distance duplicates
+  dup <- sp::zerodist(sf::as_Spatial(d))
+  if(nrow(dup) != 0) {
+    d <- d[-dup[,1],]
+  }
+  cutoff <- max(st_distance(data))/lag.cutoff
   b <- krg.shp
   s <- b %>% st_sample(size = ngrid, grid.method)
-  v <- variogram(get(param)~1, locations = d, cutoff = cutoff, width = cutoff/lags)
-  f <- fit.variogram(v, vgm(NA, 'Sph', NA, NA))
+  v <- variogram(get(param)~1, locations = d, cutoff = as.vector(cutoff), width = as.vector(cutoff/lags))
+  f <- fit.variogram(v, vgm(NA, v.mod, NA, NA))
   v.m <- variogramLine(f, maxdist = max(v$dist))
-  k <- krige(formula = get(param)~1, locations = d, newdata = s) %>% select(-var1.var)
+  k <- krige(formula = get(param)~1, locations = d, newdata = s, model = f) %>% select(-var1.var)
   if(plot == TRUE){
     p.h <- ggplot() +
       geom_histogram(data = d, aes_string(x = param, y = '..density..'), alpha = 0.8, color = 'white') +
-      labs(x = param, y = 'Density') +
+      labs(x = bquote('Heat Flow'~mW/m^2), y = 'Density') +
       theme_bw()
     p.v <- ggplot() +
       geom_point(data = v, aes(x = dist/1000, y = gamma), size = 0.5) +
