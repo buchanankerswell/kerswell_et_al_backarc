@@ -32,7 +32,6 @@ shp.world.robin.pacific10 <- rnaturalearth::ne_countries(returnclass = 'sf', sca
   tibble::as_tibble() %>%
   st_as_sf() %>% st_transform(proj4.robin.pacific)
 
-
 # Read syracuse et al 2006 Segments
 # seg.names <- list.files('./sa2006/gmts/') %>% purrr::map_chr(~ gsub('.contours.gmt', '', .x))
 seg.names <- c('Alaska Aleutians', 'Andes', 'Central America', 'Kamchatka Marianas', 'Kyushu Ryukyu', 'Lesser Antilles', 'N. Philippines', 'New Britain Solomon', 'S. Philippines', 'Scotia', 'Sumatra Banda Sea', 'Tonga New Zealand', 'Vanuatu')
@@ -53,16 +52,32 @@ box.segs.wide <- box.segs.bbox %>% purrr::map(~bbox_widen(.x, crs = proj4.robin.
 # Draw box to stuff pacific labels into
 box.lab <- st_bbox(shp.sa.segs.robin.pacific) %>% bbox_widen(proj4.robin.pacific, borders = c('left' = -0.3, 'right' = -0.25, 'top' = -0.12, 'bottom' = -0.40))
 
+# Subsegments
+shp.sa.segs.robin.pacific.subseg <- purrr::map_df(seg.names, ~{
+  shp.sa.segs.robin.pacific %>% filter(segment == .x) %>%
+    splt(cut.length = 500000, buffer = F, buffer.dist = 500000) %>% mutate(segment = .x, .before = geometry)
+})
+
+# Subsegment buffers
+shp.sa.segs.robin.pacific.subseg.buffer <- purrr::map_df(seg.names, ~{
+  shp.sa.segs.robin.pacific %>% filter(segment == .x) %>%
+    splt(cut.length = 500000, buffer = T, buffer.dist = 500000) %>% mutate(segment = .x, .before = geometry)
+})
+
 # Read global heat flow database (IHFC 2010), turn into tibble,
 # remove useless columns & filter heat flow between 0 and 200, then crop to buffers
-shp.hf <- st_read('data/hf/', coords = c(3,2), crs = proj.wgs, quiet = T) %>%
+hf <- st_read('data/hf/', coords = c(3,2), crs = proj.wgs, quiet = T) %>%
   st_transform(proj4.robin.pacific) %>%
   tibble::as_tibble() %>% st_as_sf() %>%
   select(-Data_Numbe, -Codes, -Year_of_Pu, -Comments, 
          -F21, -F22, -F23, -F24, -F25, -F26, -ben, -europe) %>%
   filter(Heat_Flow <= 200 & Heat_Flow >= 0) %>%
-  mutate('No__Temps' = as.numeric(No__Temps), 'No_Heat_Pr' = as.numeric(No_Heat_Pr), 'Heat_Prod_' = as.numeric(Heat_Prod_)) %>%
-  st_join(shp.sa.segs.robin.pacific.buffer, left = F)
+  mutate('No__Temps' = as.numeric(No__Temps), 'No_Heat_Pr' = as.numeric(No_Heat_Pr), 'Heat_Prod_' = as.numeric(Heat_Prod_))
+shp.hf <- hf %>% st_join(shp.sa.segs.robin.pacific.buffer, left = F)
+
+# Read global heat flow database (IHFC 2010), turn into tibble,
+# remove useless columns & filter heat flow between 0 and 200, then crop to subsegment buffers
+shp.hf.subseg <- hf %>% st_join(shp.sa.segs.robin.pacific.subseg.buffer, left = F)
 
 # Read syracuse et al 2006 volcanoes
 # Header
@@ -115,6 +130,9 @@ shp.volc.no.spread <- volcano.no.spread %>%
   st_set_crs(proj.wgs) %>%
   st_transform(proj4.robin.pacific)
 
+# Clean up environment
 rm(list = lsf.str())
 rm(files, h.volc, h.volc.no.spread)
+
+# Save
 save.image('data/hf.RData')
