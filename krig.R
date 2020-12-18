@@ -5,7 +5,7 @@ rm.list <- ls()
 
 # Kriging
 
-cairo_pdf('figs/subseg/plots.pdf', onefile = T)
+# cairo_pdf('figs/subseg/plots.pdf', onefile = T)
 k.subseg <- purrr::map(seg.names, ~{
   d <- shp.hf.subseg %>% filter(segment == .x) %>% filter(Heat_Flow > 10 & Heat_Flow < 120 & minD < maxD & Gradient > 0 & Gradient < 500)
   sg <- shp.sa.segs.robin.pacific.subseg.buffer %>% filter(segment == .x)
@@ -28,7 +28,7 @@ k.subseg <- purrr::map(seg.names, ~{
     )
   })
 }) %>% purrr::set_names(nm = seg.names)
-dev.off()
+# dev.off()
 
 # Filter data
 dat <- shp.hf %>% filter(Heat_Flow > 10 & Heat_Flow < 120 & minD < maxD & Gradient > 0 & Gradient < 500)
@@ -47,7 +47,7 @@ k <- purrr::map(
     crs = proj4.robin.pacific,
     ngrid = 3.2e5,
     grid.method = 'hexagonal',
-    v.mod = 'Sph',
+    v.mod <- c('Sph', 'Nug', 'Gau', 'Mat', 'Lin', 'Cir', 'Per', 'Wav'),
     plot = T
   )
 ) %>% purrr::set_names(nm = unique(shp.hf$segment))
