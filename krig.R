@@ -4,36 +4,37 @@ load('data/hf.RData')
 rm.list <- ls()
 
 # Kriging
-# Filter data
-dat <- shp.hf %>% filter(Heat_Flow > 10 & Heat_Flow < 120 & minD < maxD & Gradient > 0 & Gradient < 500)
-dat.subseg <- shp.hf.subseg %>% filter(Heat_Flow > 10 & Heat_Flow < 120 & minD < maxD & Gradient > 0 & Gradient < 500)
 
-andes <- shp.hf.subseg %>% filter(segment == 'Andes') %>% filter(Heat_Flow > 10 & Heat_Flow < 120 & minD < maxD & Gradient > 0 & Gradient < 500)
-andes.seg <- shp.sa.segs.robin.pacific.subseg %>% filter(segment == 'Andes')
-andes.buf <- shp.sa.segs.robin.pacific.subseg.buffer %>% filter(segment == 'Andes')
-
-cairo_pdf('figs/andes.sub.krig/plots.pdf', onefile = T)
-purrr::map(
-  unique(andes$subseg) %>% sort(),
-  ~ krg(
-    data = andes %>% filter(subseg == .x),
-    lags = 20,
-    lag.cutoff = 3,
-    param = 'Heat_Flow',
-    krg.shp = andes.buf %>% filter(subseg == .x),
-    seg = andes.seg %>% filter(subseg == .x),
-    contours = NULL,
-    crs = proj4.robin.pacific,
-    ngrid = 3e5,
-    grid.method = 'hexagonal',
-    v.mod = 'Sph',
-    plot = T
-  )
-)
+cairo_pdf('figs/subseg/plots.pdf', onefile = T)
+k.subseg <- purrr::map(seg.names, ~{
+  d <- shp.hf.subseg %>% filter(segment == .x) %>% filter(Heat_Flow > 10 & Heat_Flow < 120 & minD < maxD & Gradient > 0 & Gradient < 500)
+  sg <- shp.sa.segs.robin.pacific.subseg.buffer %>% filter(segment == .x)
+  buf <- shp.sa.segs.robin.pacific.subseg.buffer %>% filter(segment == .x)
+  cntr <- shp.sa.countours.robin.pacific %>% filter(segment == .x)
+  purrr::map(unique(d$subseg) %>% sort(), ~{
+    krg(
+      data = d %>% filter(subseg == .x),
+      lags = 30,
+      lag.cutoff = 3,
+      param = 'Heat_Flow',
+      krg.shp = buf %>% filter(subseg == .x),
+      seg = sg %>% filter(subseg == .x),
+      contours = cntr,
+      crs = proj4.robin.pacific,
+      ngrid = 3e5,
+      grid.method = 'hexagonal',
+      v.mod <- c('Sph', 'Nug', 'Gau', 'Mat', 'Lin', 'Cir', 'Per', 'Wav'),
+      plot = T
+    )
+  })
+}) %>% purrr::set_names(nm = seg.names)
 dev.off()
 
+# Filter data
+dat <- shp.hf %>% filter(Heat_Flow > 10 & Heat_Flow < 120 & minD < maxD & Gradient > 0 & Gradient < 500)
+
 # Calculate experimental variogram, fit experimental variogram, krig, and interpolate
-k100 <- purrr::map(
+k <- purrr::map(
   unique(shp.hf$segment),
   ~ krg(
     data = dat %>% filter(segment == .x),
