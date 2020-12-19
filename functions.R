@@ -214,3 +214,54 @@ splt <- function(object, cut.length = 1000000, buffer = TRUE, buffer.dist = 5000
     }
   }
 }
+
+plot.subseg <- function(obj.subseg, obj.hf, seg.name, param, obj.buf, obj.seg, obj.cont, crs, animate = FALSE) {
+  b <- obj.buf %>% filter(segment == seg.name)
+  k <- purrr::map2_df(obj.subseg, 1:length(obj.subseg), ~.x$krg %>% mutate(subseg = .y))
+  d <- obj.hf %>% filter(segment == seg.name)
+  c <- obj.cont %>% filter(segment == seg.name)
+  seg <- obj.seg %>% filter(segment == seg.name)
+  if(animate != TRUE) {
+    # Draw plot
+    p <- ggplot() +
+      geom_sf(data = bbox_widen(st_bbox(b), crs = crs, c('left' = 0.1, 'right' = 0.1, 'top' = 0.1, 'bottom' = 0.1)), fill = 'cornflowerblue', alpha = 0.2, color = NA) +
+      geom_stars(data = st_rasterize(k) %>% st_crop(b)) +
+      geom_sf(data = d, aes_string(color = param), size = 0.5, show.legend = F) +
+      geom_sf(data = c, color = 'white', alpha = 0.8, size = 0.3) +
+      geom_sf(data = seg, fill = NA, color = 'black', size = 1.25) +
+      labs(x = NULL, y = NULL) +
+      scale_color_viridis_c(option = 1) +
+      scale_fill_viridis_c(name = bquote(atop('Heat Flow', mW/m^2)), option = 1, na.value = 'transparent') +
+      theme_map(font_size = 11) + 
+      theme(
+        axis.text = element_text(),
+        panel.border = element_blank(),
+        panel.grid = element_line(size = 0.25, color = rgb(0.1, 0.1, 0.1, 0.5)),
+        panel.background = element_blank(),
+        panel.ontop = TRUE,
+        plot.background = element_rect(fill = "transparent", color = NA)
+      )
+  } else if(animate == TRUE) {
+    # Draw plot (animate)
+    p <- ggplot() +
+      geom_sf(data = bbox_widen(st_bbox(b), crs = crs, c('left' = 0.1, 'right' = 0.1, 'top' = 0.1, 'bottom' = 0.1)), fill = 'cornflowerblue', alpha = 0.2, color = NA) +
+      geom_stars(data = st_rasterize(k) %>% st_crop(b)) +
+      geom_sf(data = d, aes_string(color = param, group = 'subseg'), size = 0.5, show.legend = F) +
+      geom_sf(data = c, color = 'white', alpha = 0.8, size = 0.3) +
+      geom_sf(data = seg, fill = NA, color = 'black', size = 1.25) +
+      labs(x = NULL, y = NULL) +
+      scale_color_viridis_c(option = 1) +
+      scale_fill_viridis_c(name = bquote(atop('Heat Flow', mW/m^2)), option = 1, na.value = 'transparent') +
+      theme_map(font_size = 11) + 
+      theme(
+        axis.text = element_text(),
+        panel.border = element_blank(),
+        panel.grid = element_line(size = 0.25, color = rgb(0.1, 0.1, 0.1, 0.5)),
+        panel.background = element_blank(),
+        panel.ontop = TRUE,
+        plot.background = element_rect(fill = "transparent", color = NA)
+      ) +
+      gganimate::transition_states(~subseg) +
+      gganimate::ease_aes('linear')
+  }
+}
