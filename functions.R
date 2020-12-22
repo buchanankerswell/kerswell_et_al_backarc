@@ -1,19 +1,18 @@
 if(!identical(getOption("bitmapType"), "cairo") && isTRUE(capabilities()[["cairo"]])){
   options(bitmapType = "cairo")
 }
-library(tidyr)
-library(leaflet)
-library(ggsflabel)
-library(ggplot2)
-library(dplyr)
-library(sf)
-library(ggmap)
-library(cowplot)
-library(gstat)
+
+library(rgeos)
 library(sp)
+library(raster)
+library(sf)
 library(stars)
-library(patchwork)
+library(gstat)
 library(ggrepel)
+library(cowplot)
+library(purrr)
+library(dplyr)
+library(tidyr)
 
 # Draw a widened box from a st_bbox object
 bbox_widen <- function(bbox, crs, borders = c('left' = 0.5, 'right' = 0.5, 'top' = 0, 'bottom' = 0)) {
@@ -126,7 +125,7 @@ krg <- function(data, lags = 50, lag.cutoff = 5, param, krg.shp, seg, contours, 
   if(nrow(sp::zerodist(sf::as_Spatial(d))) != 0) {
     d <- d[-sp::zerodist(sf::as_Spatial(d))[,1],]
   }
-  cutoff <- max(st_distance(data))/lag.cutoff
+  cutoff <- max(abs(st_distance(data)))/lag.cutoff
   b <- krg.shp
   s <- b %>% st_sample(size = ngrid, grid.method)
   v <- variogram(get(param)~1, locations = d, cutoff = as.vector(cutoff), width = as.vector(cutoff/lags))
@@ -168,7 +167,7 @@ krg <- function(data, lags = 50, lag.cutoff = 5, param, krg.shp, seg, contours, 
   }
 }
 
-splt <- function(object, cut.length = 1000000, buffer = TRUE, buffer.dist = 500000) {
+splt <- function(object, cut.length = 1000000, buffer = TRUE, buffer.dist = 500000, cap.style = 'FLAT') {
   # Cast to points
   obj.pnts <- object %>% st_cast("POINT")
   # Calculate distances between consecutive points
@@ -179,7 +178,7 @@ splt <- function(object, cut.length = 1000000, buffer = TRUE, buffer.dist = 5000
       return(object)
     } else if (buffer == TRUE) {
       warning('Segment length is shorter than cut length. Returning original segment with buffer')
-      return(st_buffer(object, buffer.dist))
+      return(st_buffer(object, buffer.dist, endCapStyle = cap.style))
     }
   } else {
     # Find indices to split points into groups with equal distances
@@ -210,7 +209,7 @@ splt <- function(object, cut.length = 1000000, buffer = TRUE, buffer.dist = 5000
     if(buffer != TRUE) {
       return(obj.splt)
     } else if (buffer == TRUE) {
-      return(st_buffer(obj.splt, buffer.dist))
+      return(st_buffer(obj.splt, buffer.dist, endCapStyle = cap.style))
     }
   }
 }
