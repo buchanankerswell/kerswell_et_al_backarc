@@ -55,13 +55,13 @@ box.lab <- st_bbox(shp.sa.segs.robin.pacific) %>% bbox_widen(proj4.robin.pacific
 # Subsegments
 shp.sa.segs.robin.pacific.subseg <- purrr::map_df(seg.names, ~{
   shp.sa.segs.robin.pacific %>% filter(segment == .x) %>%
-    splt(cut.length = 2500000, buffer = F, buffer.dist = 500000) %>% mutate(segment = .x, .before = geometry)
+    splt(cut.length = 1500000, buffer = F, buffer.dist = 500000) %>% mutate(segment = .x, .before = geometry)
 })
 
 # Subsegment buffers
 shp.sa.segs.robin.pacific.subseg.buffer <- purrr::map_df(seg.names, ~{
   shp.sa.segs.robin.pacific %>% filter(segment == .x) %>%
-    splt(cut.length = 2500000, buffer = T, buffer.dist = 500000) %>% mutate(segment = .x, .before = geometry)
+    splt(cut.length = 1500000, buffer = T, buffer.dist = 500000) %>% mutate(segment = .x, .before = geometry)
 })
 
 # Read global heat flow database (IHFC 2010), turn into tibble,
