@@ -125,10 +125,17 @@ krg <- function(data, lags = 50, lag.cutoff = 5, param, krg.shp, seg, contours, 
   if(nrow(sp::zerodist(sf::as_Spatial(d))) != 0) {
     d <- d[-sp::zerodist(sf::as_Spatial(d))[,1],]
   }
-  cutoff <- max(abs(st_distance(data)))/lag.cutoff
+  cutoff <- max(st_distance(data))/lag.cutoff
+  if(cutoff <= units::as_units(0, 'm')) {
+    cutoff <- units::as_units(1, 'm')
+  }
   b <- krg.shp
   s <- b %>% st_sample(size = ngrid, grid.method)
   v <- variogram(get(param)~1, locations = d, cutoff = as.vector(cutoff), width = as.vector(cutoff/lags))
+  if(is.null(v)) {
+    warning('Only one data point. Cannot calculate variogram: returning nothing')
+    return(NULL)
+  }
   f <- fit.variogram(v, vgm(v.mod))
   v.m <- variogramLine(f, maxdist = max(v$dist))
   k <- krige(formula = get(param)~1, locations = d, newdata = s, model = f) %>% select(-var1.var)

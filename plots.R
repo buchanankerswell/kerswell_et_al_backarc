@@ -725,5 +725,10 @@ purrr::pmap(list(purrr::map(k100, ~ .x$v.plot), purrr::map(k100, ~ .x$hist), pur
               ggsave(filename = paste0('figs/maps/kriged/k100.', ..4, '.png'), device = 'png')
             })
 
+# Krig subsegments
+load('data/krig_subseg.RData')
+
+
+
 # Close device
 dev.off()
