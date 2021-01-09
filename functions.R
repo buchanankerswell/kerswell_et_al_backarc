@@ -13,6 +13,8 @@ library(cowplot)
 library(purrr)
 library(dplyr)
 library(tidyr)
+library(patchwork)
+library(geosphere)
 
 # Draw a widened box from a st_bbox object
 bbox_widen <- function(bbox, crs, borders = c('left' = 0.5, 'right' = 0.5, 'top' = 0, 'bottom' = 0)) {
@@ -141,24 +143,27 @@ krg <- function(data, lags = 50, lag.cutoff = 5, param, krg.shp, seg, contours, 
   k <- krige(formula = get(param)~1, locations = d, newdata = s, model = f) %>% select(-var1.var)
   if(plot == TRUE){
     p.h <- ggplot() +
-      geom_histogram(data = d, aes_string(x = param, y = '..density..'), alpha = 0.8, color = 'white') +
-      labs(x = bquote(atop('Heat Flow', mW/m^2)), y = 'Density') +
-      theme_bw()
+      geom_histogram(data = d, aes_string(x = param), alpha = 0.8) +
+      labs(x = bquote(Heat~Flow~~(mWm^-2)), y = 'Frequency') +
+      theme_classic(base_size = 14) +
+      theme(axis.text = element_text(color = 'black'), axis.ticks = element_line(color = 'black'))
     p.v <- ggplot() +
-      geom_point(data = v, aes(x = dist/1000, y = gamma), size = 0.5) +
+      geom_point(data = v, aes(x = dist/1000, y = gamma, size = np)) +
       geom_path(data = v.m, aes(x = dist/1000, y = gamma)) +
-      labs(x = 'Lag (km)', y = 'Semivariance') +
+      labs(x = bquote(Lag~~(km)), y = 'Semivariance') +
       coord_cartesian(ylim = c(0, NA)) +
-      theme_bw()
+      scale_size(range = c(0.5, 3)) +
+      theme_classic(base_size = 14) +
+      theme(axis.text = element_text(color = 'black'), axis.ticks = element_line(color = 'black'))
     p <- ggplot() +
       geom_sf(data = bbox_widen(st_bbox(b), crs = crs, c('left' = 0.1, 'right' = 0.1, 'top' = 0.1, 'bottom' = 0.1)), fill = 'cornflowerblue', alpha = 0.2, color = NA) +
       geom_stars(data = st_rasterize(k) %>% st_crop(b)) +
       geom_sf(data = d, aes_string(color = param), size = 0.5, show.legend = F) +
-      geom_sf(data = contours, color = 'white', alpha = 0.8, size = 0.3) +
+      geom_sf(data = contours %>% st_crop(bbox_widen(st_bbox(b), crs = crs, c('left' = 0.1, 'right' = 0.1, 'top' = 0.1, 'bottom' = 0.1))), color = 'white', alpha = 0.8, size = 0.3) +
       geom_sf(data = seg, fill = NA, color = 'black', size = 1.25) +
       labs(x = NULL, y = NULL) +
       scale_color_viridis_c(option = 1) +
-      scale_fill_viridis_c(name = bquote(atop('Heat Flow', mW/m^2)), option = 1, na.value = 'transparent') +
+      scale_fill_viridis_c(name = bquote(mWm^-2), option = 1, na.value = 'transparent') +
       theme_map(font_size = 11) + 
       theme(
         axis.text = element_text(),
@@ -220,54 +225,62 @@ splt <- function(object, cut.length = 1000000, buffer = TRUE, buffer.dist = 5000
     }
   }
 }
-
-plot.subseg <- function(obj.subseg, obj.hf, seg.name, param, obj.buf, obj.seg, obj.cont, crs, animate = FALSE) {
-  b <- obj.buf %>% filter(segment == seg.name)
-  k <- purrr::map2_df(obj.subseg, 1:length(obj.subseg), ~.x$krg %>% mutate(subseg = .y))
-  d <- obj.hf %>% filter(segment == seg.name)
-  c <- obj.cont %>% filter(segment == seg.name)
-  seg <- obj.seg %>% filter(segment == seg.name)
-  if(animate != TRUE) {
-    # Draw plot
-    p <- ggplot() +
-      geom_sf(data = bbox_widen(st_bbox(b), crs = crs, c('left' = 0.1, 'right' = 0.1, 'top' = 0.1, 'bottom' = 0.1)), fill = 'cornflowerblue', alpha = 0.2, color = NA) +
-      geom_stars(data = st_rasterize(k) %>% st_crop(b)) +
-      geom_sf(data = d, aes_string(color = param), size = 0.5, show.legend = F) +
-      geom_sf(data = c, color = 'white', alpha = 0.8, size = 0.3) +
-      geom_sf(data = seg, fill = NA, color = 'black', size = 1.25) +
-      labs(x = NULL, y = NULL) +
-      scale_color_viridis_c(option = 1) +
-      scale_fill_viridis_c(name = bquote(atop('Heat Flow', mW/m^2)), option = 1, na.value = 'transparent') +
-      theme_map(font_size = 11) + 
-      theme(
-        axis.text = element_text(),
-        panel.border = element_blank(),
-        panel.grid = element_line(size = 0.25, color = rgb(0.1, 0.1, 0.1, 0.5)),
-        panel.background = element_blank(),
-        panel.ontop = TRUE,
-        plot.background = element_rect(fill = "transparent", color = NA)
-      )
-  } else if(animate == TRUE) {
-    # Draw plot (animate)
-    p <- ggplot() +
-      geom_sf(data = bbox_widen(st_bbox(b), crs = crs, c('left' = 0.1, 'right' = 0.1, 'top' = 0.1, 'bottom' = 0.1)), fill = 'cornflowerblue', alpha = 0.2, color = NA) +
-      geom_stars(data = st_rasterize(k) %>% st_crop(b)) +
-      geom_sf(data = d, aes_string(color = param, group = 'subseg'), size = 0.5, show.legend = F) +
-      geom_sf(data = c, color = 'white', alpha = 0.8, size = 0.3) +
-      geom_sf(data = seg, fill = NA, color = 'black', size = 1.25) +
-      labs(x = NULL, y = NULL) +
-      scale_color_viridis_c(option = 1) +
-      scale_fill_viridis_c(name = bquote(atop('Heat Flow', mW/m^2)), option = 1, na.value = 'transparent') +
-      theme_map(font_size = 11) + 
-      theme(
-        axis.text = element_text(),
-        panel.border = element_blank(),
-        panel.grid = element_line(size = 0.25, color = rgb(0.1, 0.1, 0.1, 0.5)),
-        panel.background = element_blank(),
-        panel.ontop = TRUE,
-        plot.background = element_rect(fill = "transparent", color = NA)
-      ) +
-      gganimate::transition_states(~subseg) +
-      gganimate::ease_aes('linear')
+# Find point positions relative to the trench
+pts_position <- function(sf.pts, sf.line, offset.x, offset.y, direction = c('updown', 'leftright'), arc.direction = c('up', 'down', 'left', 'right')){
+  if(direction == 'leftright'){
+    # Make polygon to left of segment
+    poly.left <- rbind(c(st_coordinates(sf.line)[nrow(st_coordinates(sf.line)), 1], st_coordinates(sf.line)[nrow(st_coordinates(sf.line)), 2] + offset.y),
+                    c(st_bbox(sf.line)['xmin'] - offset.x, st_bbox(sf.line)['ymax'] + offset.y),
+                    c(st_bbox(sf.line)['xmin'] - offset.x, st_coordinates(sf.line)[1, 2] - offset.y),
+                    c(st_coordinates(sf.line)[1, 1], st_coordinates(sf.line)[1, 2] - offset.y),
+                    as.data.frame(st_coordinates(sf.line))[,c(1,2)],
+                    c(st_coordinates(sf.line)[nrow(st_coordinates(sf.line)), 1], st_coordinates(sf.line)[nrow(st_coordinates(sf.line)), 2] + offset.y)) %>%
+      as.matrix() %>% list() %>% st_polygon() %>% st_sfc(crs = st_crs(sf.line)) %>% st_sf()
+    # Make polygon to right of segment
+    poly.right <- rbind(c(st_coordinates(sf.line)[nrow(st_coordinates(sf.line)), 1], st_coordinates(sf.line)[nrow(st_coordinates(sf.line)), 2] + offset.y),
+                    c(st_bbox(sf.line)['xmin'] + offset.x, st_bbox(sf.line)['ymax'] + offset.y),
+                    c(st_bbox(sf.line)['xmin'] + offset.x, st_coordinates(sf.line)[1, 2] - offset.y),
+                    c(st_coordinates(sf.line)[1, 1], st_coordinates(sf.line)[1, 2] - offset.y),
+                    as.data.frame(st_coordinates(sf.line))[,c(1,2)],
+                    c(st_coordinates(sf.line)[nrow(st_coordinates(sf.line)), 1], st_coordinates(sf.line)[nrow(st_coordinates(sf.line)), 2] + offset.y)) %>%
+      as.matrix() %>% list() %>% st_polygon() %>% st_sfc(crs = st_crs(sf.buffer)) %>% st_sf()
+    # Find points to the left of segment
+    pts.left <- st_intersects(sf.pts, poly.left, sparse = F)
+    # Determine position of points relative to the segment on the arc-side or outbound of the trench
+    if(arc.direction == 'left'){
+      return(ifelse(pts.left, 'arc', 'outbound'))
+    } else if(arc.direction == 'right'){
+      return(ifelse(pts.left, 'outbound', 'arc'))
+    }
+  } else if(direction == 'updown'){
+    # Make polygon above segment
+    poly.up <- rbind(c(st_coordinates(sf.line)[nrow(st_coordinates(sf.line)), 1] + offset.x, st_coordinates(sf.line)[nrow(st_coordinates(sf.line)), 2]),
+                    c(st_coordinates(sf.line)[nrow(st_coordinates(sf.line)), 1] + offset.x, st_bbox(sf.line)['ymax'] + offset.y),
+                    c(st_bbox(sf.line)['xmin'] - offset.x, st_coordinates(sf.line)[1, 2] + offset.y),
+                    c(st_coordinates(sf.line)[1, 1] - offset.x, st_coordinates(sf.line)[1, 2]),
+                    as.data.frame(st_coordinates(sf.line))[,c(1,2)],
+                    c(st_coordinates(sf.line)[nrow(st_coordinates(sf.line)), 1] + offset.x, st_coordinates(sf.line)[nrow(st_coordinates(sf.line)), 2])) %>%
+      as.matrix() %>% list() %>% st_polygon() %>% st_sfc(crs = st_crs(sf.line)) %>% st_sf()
+    # Make polygon below segment
+    poly.down <- rbind(c(st_coordinates(sf.line)[nrow(st_coordinates(sf.line)), 1] + offset.x, st_coordinates(sf.line)[nrow(st_coordinates(sf.line)), 2]),
+                    c(st_coordinates(sf.line)[nrow(st_coordinates(sf.line)), 1] + offset.x, st_bbox(sf.line)['ymax'] - offset.y),
+                    c(st_bbox(sf.line)['xmin'] - offset.x, st_coordinates(sf.line)[1, 2] - offset.y),
+                    c(st_coordinates(sf.line)[1, 1] - offset.x, st_coordinates(sf.line)[1, 2]),
+                    as.data.frame(st_coordinates(sf.line))[,c(1,2)],
+                    c(st_coordinates(sf.line)[nrow(st_coordinates(sf.line)), 1] + offset.x, st_coordinates(sf.line)[nrow(st_coordinates(sf.line)), 2])) %>%
+      as.matrix() %>% list() %>% st_polygon() %>% st_sfc(crs = st_crs(sf.buffer)) %>% st_sf()
+    # Find points above segment
+    pts.up <- st_intersects(sf.pts, poly.up, sparse = F)
+    if(arc.direction == 'up'){
+      return(ifelse(pts.up, 'arc', 'outbound'))
+    } else if(arc.direction == 'down'){
+      return(ifelse(pts.up, 'outbound', 'arc'))
+    }
   }
+}
+# Calculate point distances relative to trench (positive and negative)
+trench_distance <- function(sf.pts, pos, sf.trench){
+  dist <- st_distance(sf.pts, sf.trench) %>% as.vector()
+  dist[pos == 'outbound'] <- -dist[pos == 'outbound']
+  return(dist)
 }
