@@ -20,7 +20,7 @@ k <- purrr::map(
     crs = proj4.robin.pacific,
     ngrid = 3e5,
     grid.method = 'hexagonal',
-    v.mod <- c('Sph', 'Nug', 'Gau', 'Mat', 'Lin', 'Cir', 'Per', 'Wav', 'Log', 'Pow'),
+    v.mod <- c('Sph', 'Nug', 'Gau', 'Mat', 'Lin', 'Cir', 'Per', 'Wav', 'Log'),
     plot = T
   )
 ) %>% purrr::set_names(nm = unique(shp.hf$segment))
@@ -43,7 +43,7 @@ k.subseg <- purrr::map(seg.names, ~{
       crs = proj4.robin.pacific,
       ngrid = 3e5,
       grid.method = 'hexagonal',
-      v.mod <- c('Sph', 'Nug', 'Gau', 'Mat', 'Lin', 'Cir', 'Per', 'Wav', 'Log', 'Pow'),
+      v.mod <- c('Sph', 'Nug', 'Gau', 'Mat', 'Lin', 'Cir', 'Per', 'Wav', 'Log'),
       plot = T
     )
   })
