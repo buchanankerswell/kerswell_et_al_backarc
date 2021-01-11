@@ -225,6 +225,7 @@ splt <- function(object, cut.length = 1000000, buffer = TRUE, buffer.dist = 5000
     }
   }
 }
+
 # Find point positions relative to the trench
 pts_position <- function(sf.pts, sf.line, offset.x, offset.y, direction = c('updown', 'leftright'), arc.direction = c('up', 'down', 'left', 'right')){
   if(direction == 'leftright'){
@@ -243,7 +244,7 @@ pts_position <- function(sf.pts, sf.line, offset.x, offset.y, direction = c('upd
                     c(st_coordinates(sf.line)[1, 1], st_coordinates(sf.line)[1, 2] - offset.y),
                     as.data.frame(st_coordinates(sf.line))[,c(1,2)],
                     c(st_coordinates(sf.line)[nrow(st_coordinates(sf.line)), 1], st_coordinates(sf.line)[nrow(st_coordinates(sf.line)), 2] + offset.y)) %>%
-      as.matrix() %>% list() %>% st_polygon() %>% st_sfc(crs = st_crs(sf.buffer)) %>% st_sf()
+      as.matrix() %>% list() %>% st_polygon() %>% st_sfc(crs = st_crs(sf.line)) %>% st_sf()
     # Find points to the left of segment
     pts.left <- st_intersects(sf.pts, poly.left, sparse = F)
     # Determine position of points relative to the segment on the arc-side or outbound of the trench
@@ -268,7 +269,7 @@ pts_position <- function(sf.pts, sf.line, offset.x, offset.y, direction = c('upd
                     c(st_coordinates(sf.line)[1, 1] - offset.x, st_coordinates(sf.line)[1, 2]),
                     as.data.frame(st_coordinates(sf.line))[,c(1,2)],
                     c(st_coordinates(sf.line)[nrow(st_coordinates(sf.line)), 1] + offset.x, st_coordinates(sf.line)[nrow(st_coordinates(sf.line)), 2])) %>%
-      as.matrix() %>% list() %>% st_polygon() %>% st_sfc(crs = st_crs(sf.buffer)) %>% st_sf()
+      as.matrix() %>% list() %>% st_polygon() %>% st_sfc(crs = st_crs(sf.line)) %>% st_sf()
     # Find points above segment
     pts.up <- st_intersects(sf.pts, poly.up, sparse = F)
     if(arc.direction == 'up'){
