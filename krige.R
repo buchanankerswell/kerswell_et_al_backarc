@@ -167,6 +167,11 @@ d.hf.filtered %>%
     max = max(value, na.rm = T),
     median = median(value, na.rm = T),
     mean = mean(value, na.rm = T))
+# Plot all (unfiltered) heat flow relative to trench
+purrr::map(unique(shp.hf$segment), ~shp.hf %>% filter(segment == .x) %>%
+             mutate(pos = pts_position(shp.hf %>% filter(segment == .x), shp.sa.segs.robin.pacific %>% filter(segment == .x), 5e6, 5e6, 'updown', 'up'),
+                    t.dist = trench_distance(shp.hf %>% filter(segment == .x), pos, shp.sa.segs.robin.pacific %>% filter(segment == .x))) %>%
+             ggplot() + geom_point(aes(x = t.dist/1000, y = Heat_Flow)) + labs(x = bquote(Distance~~km), y = bquote(Heat~Flow~~mWm^-2), title = .x) + theme_classic(base_size = 14))
 
 # Alaska Aleutians ----
 # Data
@@ -208,15 +213,14 @@ d.hf.filtered %>%
 # Save Plot
 ggsave('figs/aa-summary.png', device = 'png', dpi = 330, width = 7, height = 7, bg = 'transparent')
 # Plot all (unfiltered) heat flow vs. distance to trench
-purrr::map(unique(shp.hf$segment), ~shp.hf %>% filter(segment == .x) %>%
-             mutate(pos = pts_position(shp.hf %>% filter(segment == .x), shp.sa.segs.robin.pacific %>% filter(segment == .x), 5e6, 5e6, 'updown', 'up'),
-                    t.dist = trench_distance(shp.hf %>% filter(segment == .x), pos, shp.sa.segs.robin.pacific %>% filter(segment == .x))) %>%
-             ggplot() + geom_point(aes(x = t.dist, y = Heat_Flow)) + labs(title = .x))
-
 shp.hf %>% filter(segment == 'Alaska Aleutians') %>%
   mutate(pos = pts_position(shp.hf %>% filter(segment == 'Alaska Aleutians'), shp.sa.segs.robin.pacific %>% filter(segment == 'Alaska Aleutians'), 5e6, 5e6, 'updown', 'up'),
          t.dist = trench_distance(shp.hf %>% filter(segment == 'Alaska Aleutians'), pos, shp.sa.segs.robin.pacific %>% filter(segment == 'Alaska Aleutians'))) %>%
   ggplot() + geom_point(aes(x = t.dist, y = Heat_Flow))
+shp.hf %>% filter(segment == 'Alaska Aleutians') %>%
+  mutate(pos = pts_position(shp.hf %>% filter(segment == 'Alaska Aleutians'), shp.sa.segs.robin.pacific %>% filter(segment == 'Alaska Aleutians'), 5e6, 5e6, 'updown', 'up'),
+         t.dist = trench_distance(shp.hf %>% filter(segment == 'Alaska Aleutians'), pos, shp.sa.segs.robin.pacific %>% filter(segment == 'Alaska Aleutians'))) %>%
+  ggplot() + geom_sf(data = shp.sa.segs.robin.pacific %>% filter(segment == 'Alaska Aleutians')) + geom_sf(aes(color = Heat_Flow, shape = pos))
 # Krige entire segment
 k.aa <- krg(
   data = shp.hf.filtered %>% filter(segment == 'Alaska Aleutians') %>% rename('Heat_Flow' = `Heat Flow`),
