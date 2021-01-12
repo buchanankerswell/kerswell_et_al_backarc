@@ -41,6 +41,7 @@ files <- list.files('data/sa2006/gmts', full.names = TRUE)
 shp.sa.countours.robin.pacific <- read_wrap_latlong(files, seg.names, proj4.robin.pacific)
 shp.sa.segs.robin.pacific <- shp.sa.countours.robin.pacific %>% group_by(segment) %>% filter(row_number() == 1)
 shp.sa.segs.robin.pacific.buffer <- shp.sa.segs.robin.pacific %>% st_buffer(500000, endCapStyle = 'ROUND') %>% st_wrap_dateline(options = c("WRAPDATELINE=YES"))
+shp.sa.segs.robin.pacific.buffer.flat <- shp.sa.segs.robin.pacific %>% st_buffer(500000, endCapStyle = 'FLAT') %>% st_wrap_dateline(options = c("WRAPDATELINE=YES"))
 
 # Make boxes around segments
 box.segs.all <- st_bbox(shp.sa.segs.robin.pacific.buffer) %>% bbox_widen(proj4.robin.pacific, c('left' = 0, 'right' = 0, 'top' = 0, 'bottom' = 0))
@@ -52,18 +53,6 @@ box.segs.wide <- box.segs.bbox %>% purrr::map(~bbox_widen(.x, crs = proj4.robin.
 # Draw box to stuff pacific labels into
 box.lab <- st_bbox(shp.sa.segs.robin.pacific) %>% bbox_widen(proj4.robin.pacific, borders = c('left' = -0.3, 'right' = -0.25, 'top' = -0.12, 'bottom' = -0.40))
 
-# Subsegments
-shp.sa.segs.robin.pacific.subseg <- purrr::map_df(seg.names, ~{
-  shp.sa.segs.robin.pacific %>% filter(segment == .x) %>%
-    splt(cut.length = 1500000, buffer = F, buffer.dist = 500000) %>% mutate(segment = .x, .before = geometry)
-})
-
-# Subsegment buffers
-shp.sa.segs.robin.pacific.subseg.buffer <- purrr::map_df(seg.names, ~{
-  shp.sa.segs.robin.pacific %>% filter(segment == .x) %>%
-    splt(cut.length = 1500000, buffer = T, buffer.dist = 500000) %>% mutate(segment = .x, .before = geometry)
-})
-
 # Read global heat flow database (IHFC 2010), turn into tibble,
 # remove useless columns & filter heat flow between 0 and 200, then crop to buffers
 hf <- st_read('data/hf/', coords = c(3,2), crs = proj.wgs, quiet = T) %>%
@@ -74,11 +63,7 @@ hf <- st_read('data/hf/', coords = c(3,2), crs = proj.wgs, quiet = T) %>%
   filter(Heat_Flow <= 200 & Heat_Flow >= 0) %>%
   mutate('No__Temps' = as.numeric(No__Temps), 'No_Heat_Pr' = as.numeric(No_Heat_Pr), 'Heat_Prod_' = as.numeric(Heat_Prod_))
 shp.hf <- hf %>% st_join(shp.sa.segs.robin.pacific.buffer, left = F)
-
-# Read global heat flow database (IHFC 2010), turn into tibble,
-# remove useless columns & filter heat flow between 0 and 200, then crop to subsegment buffers
-shp.hf.subseg <- hf %>% st_join(shp.sa.segs.robin.pacific.subseg.buffer, left = F)
-
+shp.hf.flat <- hf %>% st_join(shp.sa.segs.robin.pacific.buffer.flat, left = F)
 # Read syracuse et al 2006 volcanoes
 # Header
 h.volc <- readr::read_table('data/sa2006/volcanoes.txt', n_max = 1)
