@@ -1,20 +1,25 @@
+# Use cairo for png device
 if(!identical(getOption("bitmapType"), "cairo") && isTRUE(capabilities()[["cairo"]])){
   options(bitmapType = "cairo")
 }
-
-library(rgeos)
-library(sp)
-library(raster)
-library(sf)
-library(stars)
-library(gstat)
-library(ggrepel)
-library(cowplot)
-library(purrr)
-library(dplyr)
-library(tidyr)
-library(patchwork)
-library(geosphere)
+cat('Loading libraries\n')
+suppressMessages({
+  # Load packages
+  library(rgeos)
+  library(sp)
+  library(raster)
+  library(sf)
+  library(stars)
+  library(gstat)
+  library(ggrepel)
+  library(ggsflabel)
+  library(cowplot)
+  library(purrr)
+  library(dplyr)
+  library(tidyr)
+  library(patchwork)
+  library(geosphere)
+})
 
 # Draw a widened box from a st_bbox object
 bbox_widen <- function(bbox, crs, borders = c('left' = 0.5, 'right' = 0.5, 'top' = 0, 'bottom' = 0)) {
@@ -32,11 +37,10 @@ bbox_widen <- function(bbox, crs, borders = c('left' = 0.5, 'right' = 0.5, 'top'
 
 # Read gmt files, wrap the dateline to avoid plotting horizontal lines on map,
 # make into tibble, add segment names, transform projection, and bind into one sf object
-read_wrap_latlong <- function(files, filenames = NULL, crs) {
+read_latlong <- function(files, filenames = NULL, crs) {
   if(is.null(filenames)) {
-    shp <- purrr::map2(files, filenames, 
+    shp <- purrr::map2(files, filenames,
                        ~ st_read(.x, crs = proj.wgs, quiet = TRUE) %>%
-                         st_wrap_dateline(options = c("WRAPDATELINE=YES","DATELINEOFFSET=180")) %>%
                          st_transform(crs) %>%
                          tibble::as_tibble() %>%
                          tibble::add_column('segment' = .y) %>%
@@ -44,9 +48,8 @@ read_wrap_latlong <- function(files, filenames = NULL, crs) {
                          st_as_sf()) %>%
       bind_rows()
   } else {
-    shp <- purrr::map2(files, filenames, 
+    shp <- purrr::map2(files, filenames,
                        ~ st_read(.x, crs = proj.wgs, quiet = TRUE) %>%
-                         st_wrap_dateline(options = c("WRAPDATELINE=YES","DATELINEOFFSET=180")) %>%
                          st_transform(crs) %>%
                          tibble::as_tibble() %>%
                          tibble::add_column('segment' = .y) %>%
@@ -58,113 +61,70 @@ read_wrap_latlong <- function(files, filenames = NULL, crs) {
   return(shp)
 }
 
-# Heat flow map plot
-plot_hf <- function(
-  grats = NULL,
-  world = NULL,
-  box = NULL,
-  box.col = 'cornflowerblue',
-  box.alpha = 0.15,
-  seg = NULL,
-  seg.contours = NULL,
-  seg.buffer = NULL,
-  seg.names = TRUE,
-  seg.label.size = 3,
-  seg.label.alpha = 0.7,
-  heatflow = NULL,
-  hf.size = 0.1,
-  viridis.pal = 'viridis',
-  volcano = NULL,
-  volc.size.range = c(1, 6),
-  volc.size = 0.5,
-  volc.alpha = 1,
-  volc.color = 'black',
-  box.labels = NULL,
-  box.limits = NULL,
-  legend.pos = 'right',
-  legend.just = 'left',
-  legend.size = unit(8, 'lines'),
-  plot.labs = NULL) {
-  if("patchwork" %in% (.packages())){
-    detach("package:patchwork", unload=TRUE) 
-  }
-  volcs <- volcano %>% bind_rows()
-  p <- ggplot()
-  if(!is.null(grats)) {p <- p + geom_sf(data = grats, size = 0.15)}
-  if(!is.null(world)) {p <- p + geom_sf(data = world, alpha = 0.8, color = NA)}
-  if(!is.null(box)) {p <- p + geom_sf(data = box, fill = 'cornflowerblue', alpha = 0.15, color = NA)}
-  if(!is.null(seg.contours)) {p <- p + geom_sf(data = seg.contours, size = 0.25, color = 'black')}
-  if(!is.null(seg)) {p <- p + geom_sf(data = seg, size = 1, color = 'black')}
-  if(!is.null(seg.buffer)) {p <- p + geom_sf(data = seg.buffer, fill = 'black', color = NA, alpha = 0.1)}
-  if(!is.null(heatflow)) {p <- p + geom_sf(data = heatflow, aes(color = Heat_Flow), size = hf.size)}
-  if(!is.null(volcano)) {p <- p + geom_sf(data = volcs, aes(size = H), shape = 2, color = volc.color, alpha = volc.alpha, stroke = volc.size)}
-  if(!is.null(seg) && seg.names) {p <- p + geom_sf_label_repel(data = seg, aes(label = segment), size = seg.label.size, alpha = seg.label.alpha, xlim = c(st_bbox(box.labels)$xmin, st_bbox(box.labels)$xmax), ylim = c(st_bbox(box.labels)$ymin, st_bbox(box.labels)$ymax))}
-  if(!is.null(box.limits)) {p <- p + coord_sf(crs = proj4.robin.pacific, xlim = c(st_bbox(box.limits)$xmin, st_bbox(box.limits)$xmax), ylim = c(st_bbox(box.limits)$ymin, st_bbox(box.limits)$ymax))}
-  p <- p + scale_color_viridis_c(option = viridis.pal) + scale_size_continuous(range = volc.size.range)
-  ifelse(!is.null(plot.labs), {p <- p + labs(title = plot.labs, caption = 'Data: Syracuse & Abers (2006); IHFC (2010)', y = '', x = '')}, {p <- p + labs(caption = 'Data: Syracuse & Abers (2006); IHFC (2010)', y = '', x = '')})
-  ifelse(legend.pos %in% c('bottom', 'top'), {p <- p + guides(color = guide_colorbar(title = bquote(mW/m^2), barwidth = legend.size, ticks = F))}, {p <- p + guides(color = guide_colorbar(title = bquote(mW/m^2), barlength = legend.size, ticks = F))})
-  p <- p + guides(size = guide_legend(override.aes = list(alpha = 1)))
-  p <- p + theme_map(font_size = 11) + 
-    theme(
-      axis.text = element_text(),
-      legend.justification = legend.just,
-      legend.position = legend.pos,
-      panel.border = element_blank(),
-      panel.grid = element_line(size = 0.25, color = rgb(0.1, 0.1, 0.1, 0.5)),
-      panel.background = element_blank(),
-      panel.ontop = TRUE,
-      plot.background = element_rect(fill = "transparent", color = NA)
-    )
-  if (legend.pos %in% c('bottom', 'top')) {p <- p + theme(legend.box.margin = margin(0, 8, 0, 0), legend.margin = margin(0, 8, 0, 8))}
-  if (any(grepl('*Andes.*', plot.labs) == TRUE)) {p <- p + theme(plot.title = element_text(hjust = 1))}
-  return(p)
-}
-
 # Kriging
-krg <- function(data, lags = 50, lag.cutoff = 5, param, krg.shp, seg, contours, crs, ngrid = 3e5, grid.method = 'hexagonal', v.mod = 'Sph', plot = TRUE){
-  d <- data
+krg <- function(data, lags = 100, lag.cutoff = 3, param, buf, seg, contours, volc, crs, ngrid = 3e5, grid.method = 'hexagonal', v.mod = 'Sph', plot = TRUE){
+  # Buffer
+  b <- buf
+  # Filter data inside buffer
+  d <- data %>% st_join(b, left = F)
   # Check for duplicate measurements and remove
   if(nrow(sp::zerodist(sf::as_Spatial(d))) != 0) {
     d <- d[-sp::zerodist(sf::as_Spatial(d))[,1],]
   }
+  # Drop simple features
+  d.t <- d %>% st_set_geometry(NULL)
+  # Variogram cutoff
   cutoff <- max(st_distance(data))/lag.cutoff
   if(cutoff <= units::as_units(0, 'm')) {
     cutoff <- units::as_units(1, 'm')
   }
-  b <- krg.shp
+  # Volcanoes
+  volc <- volc
+  # Sample within buffer for calculating kriging weights
   s <- b %>% st_sample(size = ngrid, grid.method)
+  # Experimental variogram
   v <- variogram(get(param)~1, locations = d, cutoff = as.vector(cutoff), width = as.vector(cutoff/lags))
   if(is.null(v)) {
     warning('Only one data point. Cannot calculate variogram: returning nothing')
     return(NULL)
   }
+  # Model variogram
   f <- fit.variogram(v, vgm(v.mod))
+  # Model variogram line for plotting
   v.m <- variogramLine(f, maxdist = max(v$dist))
-  k <- krige(formula = get(param)~1, locations = d, newdata = s, model = f) %>% select(-var1.var)
+  # Box to crop simple features within for plotting
+  crp <- bbox_widen(st_bbox(b), crs = crs, c('left' = 0.1, 'right' = 0.1, 'top' = 0.1, 'bottom' = 0.1))
+  # Kriging
+  k <- krige(formula = get(param)~1, locations = d, newdata = s, model = f) %>%
+    select(-var1.var) %>%
+    mutate('var1.pred' = round(var1.pred))
+  # Plotting
   if(plot == TRUE){
     p.h <- ggplot() +
-      geom_histogram(data = d, aes_string(x = param), alpha = 0.8) +
-      labs(x = bquote(Heat~Flow~~(mWm^-2)), y = 'Frequency') +
+      geom_histogram(data = d, aes_string(x = param), alpha = 0.8, bins = 30) +
+      labs(x = bquote(Heat~Flow~~mWm^-2), y = 'Frequency') +
       theme_classic(base_size = 14) +
       theme(axis.text = element_text(color = 'black'), axis.ticks = element_line(color = 'black'))
     p.v <- ggplot() +
-      geom_point(data = v, aes(x = dist/1000, y = gamma, size = np)) +
+      geom_point(data = v, aes(x = dist/1000, y = gamma), size = 1) +
       geom_path(data = v.m, aes(x = dist/1000, y = gamma)) +
-      labs(x = bquote(Lag~~(km)), y = 'Semivariance') +
+      labs(x = bquote(Lag~~km), y = 'Semivariance') +
       coord_cartesian(ylim = c(0, NA)) +
-      scale_size(range = c(0.5, 3)) +
       theme_classic(base_size = 14) +
       theme(axis.text = element_text(color = 'black'), axis.ticks = element_line(color = 'black'))
     p <- ggplot() +
       geom_sf(data = bbox_widen(st_bbox(b), crs = crs, c('left' = 0.1, 'right' = 0.1, 'top' = 0.1, 'bottom' = 0.1)), fill = 'cornflowerblue', alpha = 0.2, color = NA) +
       geom_stars(data = st_rasterize(k) %>% st_crop(b)) +
-      geom_sf(data = d, aes_string(color = param), size = 0.5, show.legend = F) +
-      geom_sf(data = contours %>% st_crop(bbox_widen(st_bbox(b), crs = crs, c('left' = 0.1, 'right' = 0.1, 'top' = 0.1, 'bottom' = 0.1))), color = 'white', alpha = 0.8, size = 0.3) +
+      geom_sf(data = b %>% st_crop(crp), fill = NA, color = 'black', size = 0.25, alpha = 0.8) +
+      geom_sf(data = contours %>% st_crop(crp), color = 'white', alpha = 0.25, size = 0.25) +
       geom_sf(data = seg, fill = NA, color = 'black', size = 1.25) +
+      geom_sf(data = volc %>% st_crop(crp), aes(shape = 'volcano'), color = 'deeppink4', alpha = 0.5) +
+      geom_sf(data = d, aes_string(color = param), size = 0.5, show.legend = F) +
       labs(x = NULL, y = NULL) +
+      scale_shape_manual(name = NULL, values = c('volcano' = 2)) +
       scale_color_viridis_c(option = 1) +
       scale_fill_viridis_c(name = bquote(mWm^-2), option = 1, na.value = 'transparent') +
-      theme_map(font_size = 11) + 
+      theme_map(font_size = 11) +
       theme(
         axis.text = element_text(),
         panel.border = element_blank(),
@@ -173,17 +133,24 @@ krg <- function(data, lags = 50, lag.cutoff = 5, param, krg.shp, seg, contours, 
         panel.ontop = TRUE,
         plot.background = element_rect(fill = "transparent", color = NA)
       )
-    return(list(variogram = v, v.model = f, krg = k, hist = p.h, k.plot = p, v.plot = p.v))
+    return(list(shp.d = d, data = d.t, variogram = v, v.model = f, krg = k, hist = p.h, k.plot = p, v.plot = p.v))
   } else {
-    return(list(variogram = v, v.model = f, krg = k))
+    return(list(shp.d = d, data = d.t, variogram = v, v.model = f, krg = k))
   }
 }
 
-splt <- function(object, cut.length = 1000000, buffer = TRUE, buffer.dist = 500000, cap.style = 'FLAT') {
+# Split segments and buffers into equidistant subsegments
+splt <- function(object, cut.prop = 4, buffer = TRUE, buffer.dist = 500000, cap.style = 'ROUND', ...) {
   # Cast to points
-  obj.pnts <- object %>% st_cast("POINT")
+  obj.pnts <- suppressWarnings(object %>% st_cast("POINT"))
   # Calculate distances between consecutive points
-  dst <- as.vector(c(units::as_units(0, 'm'), st_distance(obj.pnts[-1,], obj.pnts[-nrow(obj.pnts),], by_element = TRUE)))
+  dst <- as.vector(c(units::as_units(0, 'm'),
+                     st_distance(obj.pnts[-1,],
+                                 obj.pnts[-nrow(obj.pnts),],
+                                 by_element = TRUE)))
+  # Calculate cut length
+  cut.length <- cumsum(dst)[length(cumsum(dst))] / cut.prop
+  # If segment length is shorter than cut length
   if(cumsum(dst)[length(cumsum(dst))] < cut.length) {
     if (buffer != TRUE) {
       warning('Segment length is shorter than cut length. Returning original segment')
@@ -194,8 +161,8 @@ splt <- function(object, cut.length = 1000000, buffer = TRUE, buffer.dist = 5000
     }
   } else {
     # Find indices to split points into groups with equal distances
-    cut.ind <- rep(NA, floor(cumsum(dst)[length(cumsum(dst))]/cut.length))
-    save.ind <- 1
+    cut.ind <- c(1, rep(NA, ceiling(cut.prop)))
+    save.ind <- 2
     start.ind <- 1
     for(i in 1:length(dst)) {
       cmsm <- cumsum(dst[start.ind:i])
@@ -208,20 +175,21 @@ splt <- function(object, cut.length = 1000000, buffer = TRUE, buffer.dist = 5000
         save.ind <- save.ind + 1
       }
     }
+    # Last cut should be end of segment line
+    cut.ind[length(cut.ind)] <- length(dst)
     # Split the object using the saved cut indices, group by subsegment, and cast back into linestrings
-    if(cut.ind[length(cut.ind)] != nrow(obj.pnts)) {
-      obj.splt <- 
-        purrr::pmap_df(list(cut.ind, c(cut.ind[-1], nrow(obj.pnts)), 1:length(cut.ind)), ~{obj.pnts[..1:..2,] %>% mutate(subseg = ..3, .before = geometry)}) %>%
-        group_by(subseg) %>% summarise(do_union = F) %>% st_cast("LINESTRING")
-    } else {
-      obj.splt <-
-        purrr::pmap_df(list(cut.ind[-length(cut.ind)], c(cut.ind[-1]), 1:(length(cut.ind)-1)), ~{obj.pnts[..1:..2,] %>% mutate(subseg = ..3, .before = geometry)}) %>%
-        group_by(subseg) %>% summarise(do_union = F) %>% st_cast("LINESTRING")
-    }
+    obj.splt <- suppressWarnings(
+      purrr::pmap_df(list(cut.ind[-length(cut.ind)],
+                          c(cut.ind[-1]),
+                          1:(length(cut.ind)-1)),
+                     ~{obj.pnts[..1:..2,] %>% mutate(subseg = ..3, .before = geometry)}) %>%
+        group_by(subseg) %>% summarise(do_union = F, .groups = 'keep') %>% st_cast("LINESTRING")
+    )
+    # Return result
     if(buffer != TRUE) {
       return(obj.splt)
     } else if (buffer == TRUE) {
-      return(st_buffer(obj.splt, buffer.dist, endCapStyle = cap.style))
+      return(st_buffer(obj.splt, buffer.dist, endCapStyle = cap.style, ...))
     }
   }
 }
@@ -249,9 +217,9 @@ pts_position <- function(sf.pts, sf.line, offset.x, offset.y, direction = c('upd
     pts.left <- st_intersects(sf.pts, poly.left, sparse = F)
     # Determine position of points relative to the segment on the arc-side or outbound of the trench
     if(arc.direction == 'left'){
-      return(ifelse(pts.left, 'arc', 'outbound'))
+      return(ifelse(pts.left, 'arc-side', 'outboard') %>% as.vector())
     } else if(arc.direction == 'right'){
-      return(ifelse(pts.left, 'outbound', 'arc'))
+      return(ifelse(pts.left, 'outboard', 'arc-side') %>% as.vector())
     }
   } else if(direction == 'updown'){
     # Make polygon above segment
@@ -273,15 +241,16 @@ pts_position <- function(sf.pts, sf.line, offset.x, offset.y, direction = c('upd
     # Find points above segment
     pts.up <- st_intersects(sf.pts, poly.up, sparse = F)
     if(arc.direction == 'up'){
-      return(ifelse(pts.up, 'arc', 'outbound'))
+      return(ifelse(pts.up, 'arc-side', 'outboard') %>% as.vector())
     } else if(arc.direction == 'down'){
-      return(ifelse(pts.up, 'outbound', 'arc'))
+      return(ifelse(pts.up, 'outboard', 'arc-side') %>% as.vector())
     }
   }
 }
+
 # Calculate point distances relative to trench (positive and negative)
 trench_distance <- function(sf.pts, pos, sf.trench){
   dist <- st_distance(sf.pts, sf.trench) %>% as.vector()
-  dist[pos == 'outbound'] <- -dist[pos == 'outbound']
+  dist[pos == 'outboard'] <- -dist[pos == 'outboard']
   return(dist)
 }
