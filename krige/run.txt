@@ -12,4 +12,4 @@ Rscript sp.R
 Rscript tn.R
 Rscript vn.R
 
-open ../figs/*.png
+open ../figs/**/*comp.png

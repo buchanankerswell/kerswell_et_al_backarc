@@ -19,7 +19,24 @@ suppressMessages({
   library(tidyr)
   library(patchwork)
   library(geosphere)
+  library(metR)
 })
+
+# Rotate projection
+rotate_proj = function(obj, angle) {
+  # get bounding box as spatial points object
+  box.center <- bbox_widen(st_bbox(obj),
+                      crs = st_crs(obj),
+                      borders = c('left' = 0, 'right' = 0, 'top' = 0, 'bottom' = 0)) %>% 
+    st_centroid() %>% 
+    st_transform(crs = 4326) %>% 
+    st_coordinates()
+  # construct the proj4 string
+  paste0("+proj=omerc +lat_0=", box.center[2], " +lonc=", box.center[1], " +x_0=0 +y_0=0 +alpha=", 
+               angle, " +gamma=0 +k_0=1 +ellps=WGS84 +datum=WGS84 +units=m +no_def")
+  # return as a CRS:
+  # st_crs(prj)
+}
 
 # Draw a widened box from a st_bbox object
 bbox_widen <- function(bbox, crs, borders = c('left' = 0.5, 'right' = 0.5, 'top' = 0, 'bottom' = 0)) {
@@ -61,86 +78,103 @@ read_latlong <- function(files, filenames = NULL, crs) {
   return(shp)
 }
 
-# Kriging
-krg <- function(data, lags = 100, lag.cutoff = 3, param, buf, seg, contours, volc, crs, ngrid = 3e5, grid.method = 'hexagonal', v.mod = 'Sph', plot = TRUE){
-  # Buffer
-  b <- buf
-  # Filter data inside buffer
-  d <- data %>% st_join(b, left = F)
-  # Check for duplicate measurements and remove
-  if(nrow(sp::zerodist(sf::as_Spatial(d))) != 0) {
-    d <- d[-sp::zerodist(sf::as_Spatial(d))[,1],]
-  }
+# Variogram fitting and kriging
+model_variogram <- function(
+  data,
+  lags = 30,
+  lag.cutoff = 5,
+  param,
+  ngrid = 1000,
+  grid.method = 'regular',
+  grid.rotate = 0,
+  grid.shape = c('left' = 0.1, 'right' = 0.1, 'top' = 0.1, 'bottom' = 0.1),
+  v.mod = c('Sph', 'Nug', 'Gau', 'Mat', 'Lin', 'Cir', 'Per', 'Wav', 'Log'),
+  krige = FALSE,
+  interp.power = 2,
+  proj = st_crs(data)){
+  # Rotated projection
+  proj.rot <- rotate_proj(data, angle = grid.rotate)
+  # Data
+  d <- data %>% st_transform(proj.rot)
+  # Box
+  b <- bbox_widen(st_bbox(d),
+                  crs = st_crs(proj.rot),
+                  borders = grid.shape) %>% 
+    st_as_sf()
   # Drop simple features
   d.t <- d %>% st_set_geometry(NULL)
   # Variogram cutoff
   cutoff <- max(st_distance(data))/lag.cutoff
-  if(cutoff <= units::as_units(0, 'm')) {
-    cutoff <- units::as_units(1, 'm')
-  }
-  # Volcanoes
-  volc <- volc
-  # Sample within buffer for calculating kriging weights
-  s <- b %>% st_sample(size = ngrid, grid.method)
+  # Sample within box for calculating kriging weights
+  s <- b %>%
+    st_sample(size = ngrid, type = grid.method)
+  s.reg <- b %>% 
+    st_sample(size = ngrid, type = 'regular')
   # Experimental variogram
-  v <- variogram(get(param)~1, locations = d, cutoff = as.vector(cutoff), width = as.vector(cutoff/lags))
-  if(is.null(v)) {
-    warning('Only one data point. Cannot calculate variogram: returning nothing')
-    return(NULL)
-  }
+  v <- variogram(get(param)~1,
+                 locations = d,
+                 cutoff = as.vector(cutoff),
+                 width = as.vector(cutoff/lags))
   # Model variogram
-  f <- fit.variogram(v, vgm(v.mod))
-  # Model variogram line for plotting
-  v.m <- variogramLine(f, maxdist = max(v$dist))
-  # Box to crop simple features within for plotting
-  crp <- bbox_widen(st_bbox(b), crs = crs, c('left' = 0.1, 'right' = 0.1, 'top' = 0.1, 'bottom' = 0.1))
-  # Kriging
-  k <- krige(formula = get(param)~1, locations = d, newdata = s, model = f) %>%
-    select(-var1.var) %>%
-    mutate('var1.pred' = round(var1.pred))
-  # Plotting
-  if(plot == TRUE){
-    p.h <- ggplot() +
-      geom_histogram(data = d, aes_string(x = param), alpha = 0.8, bins = 30) +
-      labs(x = bquote(Heat~Flow~~mWm^-2), y = 'Frequency') +
-      theme_classic(base_size = 14) +
-      theme(axis.text = element_text(color = 'black'), axis.ticks = element_line(color = 'black'))
-    p.v <- ggplot() +
-      geom_point(data = v, aes(x = dist/1000, y = gamma), size = 1) +
-      geom_path(data = v.m, aes(x = dist/1000, y = gamma)) +
-      labs(x = bquote(Lag~~km), y = 'Semivariance') +
-      coord_cartesian(ylim = c(0, NA)) +
-      theme_classic(base_size = 14) +
-      theme(axis.text = element_text(color = 'black'), axis.ticks = element_line(color = 'black'))
-    p <- ggplot() +
-      geom_sf(data = bbox_widen(st_bbox(b), crs = crs, c('left' = 0.1, 'right' = 0.1, 'top' = 0.1, 'bottom' = 0.1)), fill = 'cornflowerblue', alpha = 0.2, color = NA) +
-      geom_stars(data = st_rasterize(k) %>% st_crop(b)) +
-      geom_sf(data = b %>% st_crop(crp), fill = NA, color = 'black', size = 0.25, alpha = 0.8) +
-      geom_sf(data = contours %>% st_crop(crp), color = 'white', alpha = 0.25, size = 0.25) +
-      geom_sf(data = seg, fill = NA, color = 'black', size = 1.25) +
-      geom_sf(data = volc %>% st_crop(crp), aes(shape = 'volcano'), color = 'deeppink4', alpha = 0.5) +
-      geom_sf(data = d, aes_string(color = param), size = 0.5, show.legend = F) +
-      labs(x = NULL, y = NULL) +
-      scale_shape_manual(name = NULL, values = c('volcano' = 2)) +
-      scale_color_viridis_c(option = 1) +
-      scale_fill_viridis_c(name = bquote(mWm^-2), option = 1, na.value = 'transparent') +
-      theme_map(font_size = 11) +
-      theme(
-        axis.text = element_text(),
-        panel.border = element_blank(),
-        panel.grid = element_line(size = 0.25, color = rgb(0.1, 0.1, 0.1, 0.5)),
-        panel.background = element_blank(),
-        panel.ontop = TRUE,
-        plot.background = element_rect(fill = "transparent", color = NA)
-      )
-    return(list(shp.d = d, data = d.t, variogram = v, v.model = f, krg = k, hist = p.h, k.plot = p, v.plot = p.v))
+  f <- fit.variogram(v, v.mod)
+  # Variogram plot
+  p <- ggplot() +
+    geom_path(data = variogramLine(f, maxdist = as.vector(cutoff)),
+              aes(x = dist/1000, y = gamma)) +
+    geom_point(data = v, aes(x = dist/1000, y = gamma), size = 0.6) +
+    geom_text_repel(data = v, aes(x = dist/1000, y = gamma, label = np), size = 3) +
+    labs(x = 'Lag (km)', y = 'Semivariance') +
+    theme_classic() +
+    theme(plot.background = element_rect(fill = 'transparent', color = NA),
+          panel.background = element_rect(fill = 'transparent', color = NA),
+          axis.text = element_text(color = 'black'))
+  if(krige == TRUE){
+    p
+    # Kriging
+    k <- krige(formula = get(param)~1,
+               locations = d,
+               newdata = s,
+               model = f) %>%
+      as_tibble() %>% 
+      st_as_sf() %>% 
+      mutate('var1.pred' = round(var1.pred)) %>% 
+      rename(variance := var1.var,
+             !!param := var1.pred)
+    i <- idw(formula = get(param)~1,
+             k,
+             newdata = s.reg,
+             idp = interp.power) %>% 
+      as_tibble() %>% 
+      st_as_sf() %>% 
+      select(-var1.var) %>% 
+      mutate('var1.pred' = round(var1.pred)) %>% 
+      rename(!!param := var1.pred)
+    cat('New projection:', proj.rot, sep = '\n')
+    return(list(variogram = v %>% 
+                  as_tibble() %>% 
+                  rename(semivar = gamma) %>% 
+                  select(np, dist, semivar),
+                model.variogram = f,
+                variogram.plot = p,
+                krige.results = k,
+                interp.results = i))
   } else {
-    return(list(shp.d = d, data = d.t, variogram = v, v.model = f, krg = k))
+    p
+    return(list(variogram = v %>% 
+                  as_tibble() %>% 
+                  rename(semivar = gamma) %>% 
+                  select(np, dist, semivar),
+                model.variogram = f,
+                variogram.plot = p))
   }
 }
 
 # Split segments and buffers into equidistant subsegments
-splt <- function(object, cut.prop = 4, buffer = TRUE, buffer.dist = 500000, cap.style = 'ROUND', ...) {
+splt <- function(object,
+                 cut.prop = 4,
+                 buffer = TRUE,
+                 buffer.dist = 500000,
+                 cap.style = 'ROUND', ...) {
   # Cast to points
   obj.pnts <- suppressWarnings(object %>% st_cast("POINT"))
   # Calculate distances between consecutive points
@@ -179,17 +213,22 @@ splt <- function(object, cut.prop = 4, buffer = TRUE, buffer.dist = 500000, cap.
     cut.ind[length(cut.ind)] <- length(dst)
     # Split the object using the saved cut indices, group by subsegment, and cast back into linestrings
     obj.splt <- suppressWarnings(
-      purrr::pmap_df(list(cut.ind[-length(cut.ind)],
+      purrr::pmap(list(cut.ind[-length(cut.ind)],
                           c(cut.ind[-1]),
                           1:(length(cut.ind)-1)),
-                     ~{obj.pnts[..1:..2,] %>% mutate(subseg = ..3, .before = geometry)}) %>%
-        group_by(subseg) %>% summarise(do_union = F, .groups = 'keep') %>% st_cast("LINESTRING")
+                     ~{obj.pnts[..1:..2,] %>%
+                         mutate(subseg = ..3, .before = geometry) %>% 
+                         summarise(do_union = F, .groups = 'keep') %>%
+                         st_cast("LINESTRING")})
     )
     # Return result
     if(buffer != TRUE) {
       return(obj.splt)
     } else if (buffer == TRUE) {
-      return(st_buffer(obj.splt, buffer.dist, endCapStyle = cap.style, ...))
+      return(obj.splt %>% purrr::map(~{
+        st_buffer(.x, buffer.dist, endCapStyle = cap.style)
+        })
+        )
     }
   }
 }
