@@ -6,10 +6,8 @@ Rscript kr.R
 Rscript la.R
 Rscript nb.R
 Rscript np.R
-Rscript sb.R
+Rscript sp.R
 Rscript sc.R
 Rscript sp.R
 Rscript tn.R
 Rscript vn.R
-
-open ../figs/**/*comp.png

@@ -1,29 +1,25 @@
-# Use cairo for png device
-if(!identical(getOption("bitmapType"), "cairo") && isTRUE(capabilities()[["cairo"]])){
-  options(bitmapType = "cairo")
-}
+# Load packages
 cat('Loading libraries\n')
-suppressMessages({
-  # Load packages
-  library(rgeos)
-  library(sp)
-  library(raster)
-  library(sf)
-  library(stars)
-  library(gstat)
-  library(ggrepel)
-  library(ggsflabel)
-  library(cowplot)
-  library(purrr)
-  library(dplyr)
-  library(tidyr)
-  library(patchwork)
-  library(geosphere)
-  library(metR)
-})
+
+# Quiet loading
+function(a.package){
+	suppressWarnings(
+	suppressPackageStartupMessages(
+	library(a.package, character.only=TRUE)))
+} -> sshhh
+
+# Package list
+c('magrittr', 'dplyr', 'ggplot2', 'tidyr', 'readr', 'purrr',
+	'rgeos', 'sp', 'raster', 'stars', 'gstat', 'geosphere',
+	'ggsflabel', 'metR', 'sf', "devtools", "magrittr", "dplyr",
+	"tidyr", "readr", "ggplot2", "purrr", "knitr", "ggrepel", "patchwork",
+	"cowplot") -> p.list
+
+# auto-load quietly
+sapply(p.list, sshhh)
 
 # Rotate projection
-rotate_proj = function(obj, angle) {
+rotate_proj <- function(obj, angle) {
   # get bounding box as spatial points object
   box.center <- bbox_widen(st_bbox(obj),
                       crs = st_crs(obj),
@@ -56,100 +52,198 @@ bbox_widen <- function(bbox, crs, borders = c('left' = 0.5, 'right' = 0.5, 'top'
 # make into tibble, add segment names, transform projection, and bind into one sf object
 read_latlong <- function(files, filenames = NULL, crs) {
   if(is.null(filenames)) {
-    shp <- purrr::map2(files, filenames,
-                       ~ st_read(.x, crs = proj.wgs, quiet = TRUE) %>%
-                         st_transform(crs) %>%
-                         tibble::as_tibble() %>%
-                         tibble::add_column('segment' = .y) %>%
-                         group_by(segment) %>%
-                         st_as_sf()) %>%
+      purrr::map2(files,
+                  filenames,
+                  ~ st_read(.x,
+                            crs = '+proj=longlat +lon_wrap=180 +ellps=WGS84 +datum=WGS84 +no_defs',
+                            quiet = TRUE) %>%
+                    st_transform(crs) %>%
+                    tibble::as_tibble() %>%
+                    tibble::add_column('segment' = .y) %>%
+                    dplyr::group_by(segment) %>%
+                    st_as_sf()) %>%
       bind_rows()
   } else {
-    shp <- purrr::map2(files, filenames,
-                       ~ st_read(.x, crs = proj.wgs, quiet = TRUE) %>%
-                         st_transform(crs) %>%
-                         tibble::as_tibble() %>%
-                         tibble::add_column('segment' = .y) %>%
-                         group_by(segment) %>%
-                         st_as_sf()) %>%
+      purrr::map2(files,
+                  filenames,
+                  ~ st_read(.x,
+                            crs = '+proj=longlat +lon_wrap=180 +ellps=WGS84 +datum=WGS84 +no_defs',
+                            quiet = TRUE) %>%
+                    st_transform(crs) %>%
+                    tibble::as_tibble() %>%
+                    tibble::add_column('segment' = .y) %>%
+                    dplyr::group_by(segment) %>%
+                    st_as_sf()) %>%
       purrr::set_names(nm = filenames) %>%
-      bind_rows()
+      dplyr::bind_rows()
   }
-  return(shp)
 }
 
-# Variogram fitting and kriging
-model_variogram <- function(
+# Krige optimization algorithmcross-validation used for optimizing variogram model
+f.obj <- function(
   data,
-  lags = 30,
-  lag.cutoff = 5,
+  lags = 20,
+  lag.cutoff = 3,
   param,
-  ngrid = 1000,
+  v.mod = 0,
+  v.sill = 1,
+  v.range = 1,
+	v.nub = 0,
+  maxdist = Inf,
+  fold = 10
+) {
+  # Projection
+  st_crs(data) -> proj
+  # Data
+  data -> d
+  # Drop simple features
+  d %>% st_set_geometry(NULL) -> d.t
+  # Variogram cutoff
+  max(st_distance(data))/lag.cutoff -> cutoff
+  # Experimental variogram
+  variogram(get(param)~1,
+            locations = d,
+            cutoff = as.vector(cutoff),
+            width = as.vector(cutoff/lags)) -> v
+  # Variogram model discritization formula
+  if(v.mod >= 0 && v.mod < 1) {
+    v.mod <- 'Sph'
+  } else if(v.mod >= 1 && v.mod < 2) {
+    v.mod <- 'Exp'
+  } else if(v.mod >= 2 && v.mod <= 3) {
+    v.mod <- 'Gau'
+  }
+  # Model variogram
+  fit.variogram(v, 
+		vgm(psill = v.sill, 
+		    model = v.mod, 
+		    range = v.range,
+				nugget = v.nug), 
+		fit.method = 7) -> f
+  # Kriging
+  krige.cv(formula = get(param)~1,
+           locations = d,
+           model = f,
+           maxdist = maxdist,
+           verbose = T) %>%
+    as_tibble() %>% 
+    st_as_sf() %>% 
+    st_set_crs(st_crs(d)) %>% 
+    mutate('var1.pred' = round(var1.pred, 1)) %>% 
+    rename(variance := var1.var,
+           !!param := var1.pred) %>% 
+    drop_na()-> k
+  # Calculating cost function after Li et al 2018
+  # Simultaneously minimizes misfit on variogram model and kriged interpolation errors
+  # Weights
+  wi <- 0.5 # interpolation error
+  wf <- 0.5 # variogram fit error
+  # Calculate variogram fit error
+  # Root mean weighted (Nj/hj^2) sum of squared errors * (1-wi)/v.sigma
+  sqrt((attr(f, "SSErr")^2)/nrow(v)) * ((1-wi)/sd(v$gamma)) -> v.s
+  # Calculate interpolation error
+  # RMSE * wi/i.sigma
+  sqrt(sum((k$residual^2))/nrow(k)) * wi/sd(k$hf) -> i.s
+  # Cost
+  v.s + i.s
+}
+    
+# Variogram fitting and kriging
+krige_interp <- function(
+  data,
+  lags = 20,
+  lag.cutoff = 3,
+  param,
+  grid = NULL,
+  ngrid = 1e3,
   grid.method = 'regular',
   grid.rotate = 0,
   grid.shape = c('left' = 0.1, 'right' = 0.1, 'top' = 0.1, 'bottom' = 0.1),
   v.mod = c('Sph', 'Nug', 'Gau', 'Mat', 'Lin', 'Cir', 'Per', 'Wav', 'Log'),
   krige = FALSE,
-  interp.power = 2,
-  proj = st_crs(data)){
+  plot = FALSE,
+  interp = FALSE,
+  interp.power = 2){
   # Rotated projection
-  proj.rot <- rotate_proj(data, angle = grid.rotate)
+  if(grid.rotate != 0) {
+    rotate_proj(data, angle = grid.rotate) -> proj.rot
+  } else {
+    st_crs(data) -> proj.rot
+  }
   # Data
-  d <- data %>% st_transform(proj.rot)
+  data %>% st_transform(proj.rot) -> d
   # Box
-  b <- bbox_widen(st_bbox(d),
-                  crs = st_crs(proj.rot),
-                  borders = grid.shape) %>% 
-    st_as_sf()
+  bbox_widen(st_bbox(d),
+             crs = st_crs(proj.rot),
+             borders = grid.shape) %>% 
+    st_as_sf() -> b
   # Drop simple features
-  d.t <- d %>% st_set_geometry(NULL)
+  d %>% st_set_geometry(NULL) -> d.t
   # Variogram cutoff
-  cutoff <- max(st_distance(data))/lag.cutoff
+  max(st_distance(data))/lag.cutoff -> cutoff
   # Sample within box for calculating kriging weights
-  s <- b %>%
-    st_sample(size = ngrid, type = grid.method)
-  s.reg <- b %>% 
-    st_sample(size = ngrid, type = 'regular')
+  if(is.null(grid)) {
+    b %>%
+      st_sample(size = ngrid,
+                type = grid.method) -> s
+    b %>% 
+      st_sample(size = ngrid,
+                type = 'regular') -> s.reg
+  } else {
+    grid %>%
+      st_transform(st_crs(d)) %>%
+      st_crop(b) -> s
+  }
   # Experimental variogram
-  v <- variogram(get(param)~1,
-                 locations = d,
-                 cutoff = as.vector(cutoff),
-                 width = as.vector(cutoff/lags))
+  variogram(get(param)~1,
+            locations = d,
+            cutoff = as.vector(cutoff),
+            width = as.vector(cutoff/lags)) -> v
   # Model variogram
-  f <- fit.variogram(v, v.mod)
+  fit.variogram(v, vgm(model = v.mod)) -> f
   # Variogram plot
-  p <- ggplot() +
-    geom_path(data = variogramLine(f, maxdist = as.vector(cutoff)),
-              aes(x = dist/1000, y = gamma)) +
-    geom_point(data = v, aes(x = dist/1000, y = gamma), size = 0.6) +
-    geom_text_repel(data = v, aes(x = dist/1000, y = gamma, label = np), size = 3) +
-    labs(x = 'Lag (km)', y = 'Semivariance') +
-    theme_classic() +
-    theme(plot.background = element_rect(fill = 'transparent', color = NA),
-          panel.background = element_rect(fill = 'transparent', color = NA),
-          axis.text = element_text(color = 'black'))
-  if(krige == TRUE){
+  if (plot == TRUE) {
+    ggplot() +
+      geom_path(data = variogramLine(f, maxdist = as.vector(cutoff)),
+                aes(x = dist/1000, y = gamma)) +
+      geom_point(data = v, aes(x = dist/1000, y = gamma), size = 0.6) +
+      geom_text_repel(data = v, aes(x = dist/1000, y = gamma, label = np), size = 3) +
+      labs(x = 'Lag (km)', y = 'Semivariance') +
+      theme_classic() +
+      theme(plot.background = element_rect(fill = 'transparent', color = NA),
+            panel.background = element_rect(fill = 'transparent', color = NA),
+            axis.text = element_text(color = 'black')) -> p
     p
+  } else {
+    NULL -> p
+  }
+  if(krige == TRUE){
     # Kriging
-    k <- krige(formula = get(param)~1,
-               locations = d,
-               newdata = s,
-               model = f) %>%
+    krige(formula = get(param)~1,
+          locations = d,
+          newdata = s,
+          model = f) %>%
       as_tibble() %>% 
       st_as_sf() %>% 
-      mutate('var1.pred' = round(var1.pred)) %>% 
+      mutate('var1.pred' = round(var1.pred, 1)) %>% 
       rename(variance := var1.var,
-             !!param := var1.pred)
-    i <- idw(formula = get(param)~1,
-             k,
-             newdata = s.reg,
-             idp = interp.power) %>% 
-      as_tibble() %>% 
-      st_as_sf() %>% 
-      select(-var1.var) %>% 
-      mutate('var1.pred' = round(var1.pred)) %>% 
-      rename(!!param := var1.pred)
-    cat('New projection:', proj.rot, sep = '\n')
+             !!param := var1.pred) -> k
+    if(is.null(grid)) {
+      idw(formula = get(param)~1,
+          k,
+          newdata = s.reg,
+          idp = interp.power) %>% 
+        as_tibble() %>% 
+        st_as_sf() %>% 
+        select(-var1.var) %>% 
+        mutate('var1.pred' = round(var1.pred, 1)) %>% 
+        rename(!!param := var1.pred) -> i
+    } else {
+      NULL -> i
+    }
+    if(grid.rotate != 0) {
+      cat('New projection:', proj.rot, sep = '\n')
+    }
     return(list(variogram = v %>% 
                   as_tibble() %>% 
                   rename(semivar = gamma) %>% 
@@ -159,7 +253,6 @@ model_variogram <- function(
                 krige.results = k,
                 interp.results = i))
   } else {
-    p
     return(list(variogram = v %>% 
                   as_tibble() %>% 
                   rename(semivar = gamma) %>% 
