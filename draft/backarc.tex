@@ -214,81 +214,103 @@ Kerswell}{buchanankerswell@u.boisestate.edu}
 \end{abstract}
 \section{Introduction}
 
-Heat escaping the solid Earth's surface represents a cooling, active
-planet. Databases of surface heat flow (Hasterok \& Chapman, 2008;
-Lucazeau, 2019; Pollack et al., 1993) provide a means of inferring
-lithospheric and mantle dynamics by relating the amount of heat escaping
-Earth's surface to diffusive heat loss (Fourier, 1827; Hasterok, 2013;
-Parsons \& Sclater, 1977; Pollack \& Chapman, 1977; Stein \& Stein,
-1992) and other heat-generating and heat-transferring processes Rudnick
-et al. (1998). Surface heat flow observations continue to motivate
-research, evident by more than 1,393 publications included in the most
-recent compilation (Jennings \& Hasterok, 2021), although the rate of
-publications has declined since the mid 1980's.
+Heat escaping the solid Earth's surface indicates a dynamically cooling
+planet. Surface heat flow databases (Hasterok \& Chapman, 2008;
+Lucazeau, 2019; Pollack et al., 1993) provide a way to understand
+geodynamics by relating the amount of heat escaping Earth's surface to
+heat-transferring and heat-generating subsurface processes such as
+diffusion, hydrothermal circulation, radioactive decay, fault motion,
+subduction dynamics, and mantle convection (Currie et al., 2004; Currie
+\& Hyndman, 2006; Fourier, 1827; Furlong \& Chapman, 2013; Furukawa,
+1993; Gao \& Wang, 2014; Hasterok, 2013; Kerswell et al., 2020; Parsons
+\& Sclater, 1977; Pollack \& Chapman, 1977; Rudnick et al., 1998; Stein
+\& Stein, 1992, 1994; Wada \& Wang, 2009). Surface heat flow
+observations continue to motivate research, evident by more than 1,393
+publications compiled in the most recent heat flow dataset, although the
+rate of publications using surface heat flow has declined since the mid
+1980's (Jennings \& Hasterok, 2021).
 
 Many research questions, such as calculating the global surface heat
 flux from continents and oceans, require interpolating discrete heat
 flow observations onto a continuous approximation of Earth's surface.
-Previous attempts used one or more geographic (e.g.~bathymetry or
-elevation), geologic (e.g.~proximity to active or ancient orogens),
-geochronologic (e.g.~seafloor age), or geophysical (e.g.~upper mantle
-shear wave velocities) proxies to associate and predict heat flow at
-unknown locations (Chapman \& Pollack, 1975; Davies, 2013; Goutorbe et
-al., 2011; Lee \& Uyeda, 1965; Lucazeau, 2019; Sclater \& Francheteau,
-1970; Shapiro \& Ritzwoller, 2004). The success of interpolation methods
-are typically measured by the misfit between the predicted and observed
-heat flow. However, even statistically-successful heat flow
-interpolations are difficult to interpret and show unexpected anomalies
-(Lucazeau, 2019). The fidelity of interpolations are method-dependent
-and do not necessarily increase with decreasing misfit.
+Previous attempts at interpolation use one or more geographic, geologic,
+geochronologic, or geophysical proxies to predict heat flow at unknown
+locations by association with similar observation sites (e.g.,
+bathymetry or elevation, proximity to active or ancient orogens,
+seafloor age, upper mantle shear wave velocities, Chapman \& Pollack,
+1975; Davies, 2013; Goutorbe et al., 2011; Lee \& Uyeda, 1965; Lucazeau,
+2019; Sclater \& Francheteau, 1970; Shapiro \& Ritzwoller, 2004). These
+methods are called \emph{similarity methods} (Figure~\ref{fig:lucahf}).
+The success of such interpolations are typically evaluated statistically
+by the misfit between the predicted and observed heat flow. However,
+even statistically-successful heat flow interpolations are difficult to
+interpret and show unexpected anomalies (Lucazeau, 2019). The fidelity
+and usefulness of interpolations depend on the question being asked and
+the choice of methodology.
+
+\begin{figure}[h]
+
+{\centering \includegraphics[width=1\linewidth,]{../figs/base/hf_luca} 
+
+}
+
+\caption{The NGHF dataset. (a) The complete dataset (n = 69729), and (b) interpolation by similarity method from Lucazeau (2019).}\label{fig:lucahf}
+\end{figure}
 
 Predicting surface heat flow by association with physical proxies is
-arguably the most reasonable approach to this problem. Our understanding
-of geodynamics and near-surface heat flow perturbations implies that the
-variance in global surface heat flow is not stochastic, but rather
-determined by the set of physical conditions at point in space and
-processes operating locally around that point (e.g., Goutorbe et al.,
-2011). For example, younger oceanic plates should have higher surface
-heat flow than older plates (Stein \& Stein, 1992), and surface heat
-flow may be modified from local (\(\leq\) 60 \(km\)) hydrothermal
-circulation of seawater (Hasterok et al., 2011).
+arguably the most reasonable approach to interpolation for global
+investigations. Our understanding of geodynamics and near-surface heat
+flow perturbations implies that the variance in surface heat flow is not
+uniformly stochastic, but rather, in large part, determined by the
+physical conditions and processes operating locally (e.g., Goutorbe et
+al., 2011). For example, younger oceanic plates should have higher
+surface heat flow than older plates (Stein \& Stein, 1992), subducting
+oceanic plates will lower surface heat flow near trenches (Furukawa,
+1993), and hydrothermal circulation of seawater can modify heat flow in
+oceanic crust (Hasterok et al., 2011). Interpolation by association with
+physical proxies makes reasoned predictions of heat flow based on many
+independently-tested geodynamic models. However, similarity methods are
+strongly biased towards such models and risk making determinations
+where, in fact, surprising results and idiosyncrasies may be found.
 
-There must also exist some degree of stationarity, or spatial
-continuity, in the distribution of surface heat flow. For example, a
+In contrast, there exists some degree of stationarity, spatial
+dependence, or continuity, in the distribution of surface heat flow. A
 pair of surface heat flow observations taken one meter apart will be
 strongly correlated. The correlation between pairs of observations will
-decrease with increasing distance between the pairs (Goovaerts \&
-others, 1997). In theory, in the absence of near-surface perturbations,
-one may predict surface heat flow at unknown locations by considering
-nearby observations and their covariance (Kriging, Krige, 1951). The
-predictability of Kriging scales with the spatial coverage of
-observations. The method will be limited in areas with sparse data, but
-is arguably less artificial than methods of associating physical proxies
-to unknown heat flow locations used in previous studies (similarity
-methods, e.g., Goutorbe et al., 2011; Lucazeau, 2019; Shapiro \&
-Ritzwoller, 2004).
+likely decrease with increasing distance between the pairs (Goovaerts,
+1997). The spatial (dis)continuity of surface heat flow represents the
+areal extent of geodynamic processes and their interactions. For
+example, consistent patterns of heat flow near volcanic arcs are
+interpreted to reflect common backarc lithospheric thermal structures
+and slab-mantle mechanical coupling depths in subduction zones
+(Furukawa, 1993; Kerswell et al., 2020; Wada \& Wang, 2009).
 
-The spatial continuity of surface heat flow is important because it
-allows one to asses the areal extent of potential thermal processes
-operating at depth. For example, patterns of surface heat flow sampled
-perpendicular to trenches of circum-Pacific subduction zones segments
-are relatively consistent from segment to segment (C. A. Currie \&
-Hyndman, 2006; Furukawa, 1993; Wada \& Wang, 2009). Consistency in heat
-flow patterns near arcs are interpreted to reflect common backarc
-lithospheric thermal structures and slab-mantle mechanical coupling
-depths (Furukawa, 1993; Kerswell et al., 2020; Wada \& Wang, 2009).
+In theory, one may predict surface heat flow at unknown locations by
+considering many nearby observations (i.e.~Kriging, Krige, 1951).
+However, Kriging is disadvantageous for global interpolations of surface
+heat flow because it assumes that the underlying distribution of heat
+flow is stationary (constant in space), which effectively ignores
+geodynamic complexity. One can overcome this problem by relaxing
+assumptions of stationarity, or applying Markov-Bayes techniques to
+include proxies as priors (Bárdossy, 1997). Instead, we leverage the
+properties of stationarity as a tool for comparison with
+\emph{similarity} methods of interpolation (Goutorbe et al., 2011;
+Lucazeau, 2019). So the questions are: 1) What are the differences
+between Kriging and similarity methods? 2) What are the implications of
+the differences according to the implicit assumptions in both methods?
 
-This study uses ordinary Kriging to interpolate the New Global Heat Flow
-(NGHF) database of Lucazeau (2019). Our method is optimized using a
-Genetic Algorithm to minimize an objective function that considers both
-the misfit on the variogram models and interpolation results (e.g., Li
-et al., 2018). We then compare our interpolation results to those of
-Lucazeau (2019) and consider the implications of Kriging vs.~similarity
-methods of interpolation. We restrict our comparison to areas near
-subduction zone segments defined by Syracuse \& Abers (2006) for two
-reasons: 1) to provide maps and statistics useful to subduction zone
-research, and 2) to emphasize differences and idiosyncrasies in both
-interpolation approaches in a complex tectonic and thermal setting.
+We attempt to answer these questions by using ordinary Kriging to
+interpolate the New Global Heat Flow (NGHF) dataset of Lucazeau (2019).
+Our method is optimized using a genetic algorithm to minimize an
+objective function which considers both the misfit on the variogram
+models and interpolation results (after Li et al., 2018). We then
+compare our interpolation results to those of Lucazeau (2019) and
+consider the implications of Kriging vs.~similarity methods of
+interpolation. We restrict our comparison to areas near subduction zone
+segments defined by Syracuse \& Abers (2006) for two reasons: 1) to
+provide maps and statistics useful to subduction zone research, and 2)
+to emphasize differences and idiosyncrasies in both interpolation
+approaches in a complex tectonic and thermal setting.
 
 \section{Methods}
 
@@ -296,18 +318,18 @@ interpolation approaches in a complex tectonic and thermal setting.
 
 The NGHF dataset was downloaded from the supplementary material of
 Lucazeau (2019). It contains 69729 data points, their locations in
-latitude/longitude, and metadata---including a data quality rank (code6)
-from A to D (with code6 = Z = undetermined). The reader is referred to
-Lucazeau (2019) for details on compilation, references, and historical
-perspective on the NGHF and previous compilations. We use NGFH because
-it is the most recent dataset available, has been carefully compiled,
-and is open-access.
+latitude/longitude, and metadata---including a data quality rank (Code
+6) from A to D (with Code 6 = Z = undetermined). The reader is referred
+to Lucazeau (2019) for details on compilation, references, and
+historical perspective on the NGHF and previous compilations. We use
+NGFH because it is the most recent dataset available, has been carefully
+compiled, and is open-access.
 
-Like Lucazeau (2019), we exclude 4790 poor quality observations (code6 =
-D) from our analysis. We further remove 350 data points without heat
+Like Lucazeau (2019), we exclude 4790 poor quality observations (Code 6
+= D) from our analysis. We further remove 350 data points without heat
 flow observations and two without geographic information. Multiple
 observations at the same location are parsed to avoid singular
-covariance matrices during Krigings:
+covariance matrices during Kriging:
 
 \begin{equation}\protect\hypertarget{eq:parse}{}{\begin{aligned}
     f(X_i^q, Y_i^q) &= \\
@@ -360,8 +382,8 @@ The basic assumptions used in our Kriging method are:
   \(\hat{\gamma}(h)\) is evaluated in two-dimensions and neglects
   elevation, \(Z(u) \in \mathbb{R}^2\)
 \item
-  The first and second moments of \(Z(u)\) are spatially invariant in
-  the domain \(D\):
+  The first and second moments of \(Z(u)\) have the following conditions
+  over the domain \(D\):
 
   \begin{equation}\protect\hypertarget{eq:assumptions}{}{\begin{aligned}
         &E[Z(u)] = mean = constant, &\forall u \in D \\
@@ -621,12 +643,27 @@ using the \texttt{proj} string (PROJ contributors, 2021):
 
 All geographic operations, including Kriging, are performed in the above
 CRS using the general-purpose functions in the ``R'' package \texttt{sf}
-(Pebesma, 2018). We provide the complete NGHF dataset (Lucazeau, 2019),
-filtered and parsed NGHF dataset, heat flow interpolations (from
-Lucazeau, 2019, and this study), and our code as supplementary
-information to support FAIR data policy (Wilkinson et al., 2016). These
-items can also be retrieved from the official repository at
+(Pebesma, 2018). We define the Kriging domain near individual arc
+segments in two steps: 1) 1000 \(km\) buffers are drawn around the arc
+segments as defined by Syracuse \& Abers (2006). 2) The bounding box of
+the 1000 \(km\) buffer is expanded by 10\% on all sides
+(Figure~\ref{fig:segments}). We provide the complete NGHF dataset
+(Lucazeau, 2019), filtered and parsed NGHF dataset, heat flow
+interpolations (from Lucazeau, 2019, and this study), and our code as
+supplementary information to support FAIR data policy (Wilkinson et al.,
+2016). These items can also be retrieved from the official repository at
 \url{https://doi.org/10.17605/OSF.IO/CA6ZU}.
+
+\begin{figure}[h]
+
+{\centering \includegraphics[width=1\linewidth,]{../figs/base/segs_comp} 
+
+}
+
+\caption{Subduction zone segments and interpolation domain. (a) Heat flow is interpolated around thirteen subduction zone segments by (b) drawing a 1000km buffer (lightest blue) around each segment and expanding the buffer's bounding box (medium blue) by 10\% on all sides (darkest blue). (c) The NGHF dataset is cropped within the largest rectangle. Data from Syracuse \& Abers (2006) and Lucazeau (2019).}\label{fig:segments}
+\end{figure}
+
+\clearpage
 
 \section{Results}
 
@@ -659,16 +696,16 @@ spatial uncertainty} (Vol. 497). John Wiley \& Sons.
 Cressie, N. (2015). \emph{Statistics for spatial data}. John Wiley \&
 Sons.
 
+\leavevmode\hypertarget{ref-currie2006}{}%
+Currie, C., \& Hyndman, R. D. (2006). The thermal structure of
+subduction zone back arcs. \emph{Journal of Geophysical Research: Solid
+Earth}, \emph{111}(B8).
+
 \leavevmode\hypertarget{ref-currie2004}{}%
 Currie, C., Wang, K., Hyndman, R. D., \& He, J. (2004). The thermal
 effects of steady-state slab-driven mantle flow above a subducting
 plate: The cascadia subduction zone and backarc. \emph{Earth and
 Planetary Science Letters}, \emph{223}(1-2), 35--48.
-
-\leavevmode\hypertarget{ref-currie2006}{}%
-Currie, C. A., \& Hyndman, R. D. (2006). The thermal structure of
-subduction zone back arcs. \emph{Journal of Geophysical Research: Solid
-Earth}, \emph{111}(B8).
 
 \leavevmode\hypertarget{ref-davies2013}{}%
 Davies, J. H. (2013). Global map of solid earth surface heat flow.
@@ -699,8 +736,8 @@ Goldberg, D. E. (1989). Genetic algorithms in search.
 \emph{Optimization, and MachineLearning}.
 
 \leavevmode\hypertarget{ref-goovaerts1997}{}%
-Goovaerts, P., \& others. (1997). \emph{Geostatistics for natural
-resources evaluation}. Oxford University Press on Demand.
+Goovaerts, P. (1997). \emph{Geostatistics for natural resources
+evaluation}. Oxford University Press on Demand.
 
 \leavevmode\hypertarget{ref-goutorbe2011}{}%
 Goutorbe, B., Poort, J., Lucazeau, F., \& Raillard, S. (2011). Global
