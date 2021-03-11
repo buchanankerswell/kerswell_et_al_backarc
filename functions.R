@@ -235,7 +235,7 @@ krige_interp <- function(
           idp = interp.power) %>% 
         as_tibble() %>% 
         st_as_sf() %>% 
-        select(-var1.var) %>% 
+        dplyr::select(-var1.var) %>% 
         mutate('var1.pred' = round(var1.pred, 1)) %>% 
         rename(!!param := var1.pred) -> i
     } else {
@@ -247,7 +247,7 @@ krige_interp <- function(
     return(list(variogram = v %>% 
                   as_tibble() %>% 
                   rename(semivar = gamma) %>% 
-                  select(np, dist, semivar),
+                  dplyr::select(np, dist, semivar),
                 model.variogram = f,
                 variogram.plot = p,
                 krige.results = k,
@@ -256,7 +256,7 @@ krige_interp <- function(
     return(list(variogram = v %>% 
                   as_tibble() %>% 
                   rename(semivar = gamma) %>% 
-                  select(np, dist, semivar),
+                  dplyr::select(np, dist, semivar),
                 model.variogram = f,
                 variogram.plot = p))
   }

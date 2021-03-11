@@ -63,7 +63,7 @@ cat('\nKriging with',
     v.mod,
     '\n')
 k <-
-  model_variogram(
+  krige_interp(
   data = shp.hf.an %>% rename(hf = `heat-flow (mW/m2)`),
   lags = lags,
   lag.cutoff = lag.cutoff,

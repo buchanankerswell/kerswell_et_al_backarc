@@ -55,14 +55,53 @@ knitr::opts_chunk$set(
   fig.align = 'center',
   out.width = '100%'
 )
+
+# Load data and libraries
+source('../functions.R')
+load('../data/hf.Rdata')
+
+# Load additional libraries for rmd
 suppressMessages({
-  library(dplyr)
-  library(purrr)
   library(knitr)
   library(kableExtra)
   library(scales)
   library(pander)
 })
+
+# Draw bounding boxes and crop heat flow for each segment
+shp.hf.crop <- purrr::map_df(shp.sa.segs.robin.pacific$segment,
+						~ {box <- shp.sa.segs.robin.pacific.buffer %>%
+										filter(segment == .x) %>%
+										st_bbox() %>%
+										bbox_widen(proj4.robin.pacific,
+															 borders = c('top' = 0.1,
+																					 'bottom' = 0.1,
+																					 'left' = 0.1,
+																					 'right' = 0.1))
+							shp.hf %>%
+											st_crop(box) %>%
+											mutate('segment' = .x, .before = country)})
+
+# Read krige results
+load_data <- function(x){
+#loads an RData file, and returns it
+    load(x)
+		l <- ls()[!ls() %in% x] %>%
+			purrr::map(~get(.x))
+		l[1:length(l)-1]
+}
+
+# Define paths and names
+fname <- c('Alaska Aleutians', 'Andes', 'Central America', 'Kamchatka Marianas',
+					 'Kyushu Ryukyu', 'Lesser Antilles', 'New Britain Solomon', 'N. Philippines',
+					 'Sumatra Banda Sea', 'Scotia', 'S. Philippines', 'Tonga New Zealand', 'Vanuatu')
+fpath <- list.files('../process/', pattern = '.RData', full.names = T)
+
+# Read data
+d <- purrr::map2(fpath, fname, ~{
+	d <- .x %>% load_data()
+	d %>% set_names(c('k', 'shp.hf.pred'))
+	}) %>% set_names(fname)
 ```
 
 # Introduction
@@ -247,6 +286,65 @@ knitr::include_graphics('../figs/base/segs_comp.png')
 \clearpage
 
 # Results
+## Heat Flow Near Subduction Zone Segments
+
+Summary statistics for surface heat flow observations by subduction zone segment are given in @tbl:hf.summary.table and @fig:hf.summary.plot.
+
+```{r hf.summary.table, results = 'asis'}
+# Summarize data
+shp.hf.crop %>%
+	st_set_geometry(NULL) %>%
+	group_by(segment) %>%
+	rename(hf = `heat-flow (mW/m2)`,
+				 Segment = segment) %>%
+	summarise(n = n(),
+						Min = round(min(hf)),
+						Max = round(max(hf)),
+						Median =round(median(hf)),
+						IQR = round(IQR(hf)),
+						Mean = round(mean(hf)),
+						Sigma = round(sd(hf))) %>%
+	knitr::kable(caption = 'Summary of heat flow ($mWm^{-2}$) observations by subduction zone segment {#tbl:hf.summary.table}',
+							 format = 'pandoc')
+```
+
+```{r hf.summary.plot, out.width='80%', fig.cap="Distribution of heat flow observations by subduction zone segment. Heat flow near most segments are centered around $50~mWm^{-2}$ and highly skewed right. The skeweness likely represents sampling near hydrothermal systems, volcanic arcs, or spreading centers."}
+knitr::include_graphics('../figs/summary/hf_summary.png')
+```
+
+The optimal variogram models and associated errors $C_F(\Theta)$ and $C_I(\Theta)$ are given in @tbl:variogram.summary.table and @fig:variogram.summary.plot.
+
+```{r variogram.summary.table}
+purrr::map_df(d, ~.x$k$model.variogram, .id = 'segment') %>%
+	as_tibble() %>%
+	dplyr::select(segment, model, psill, range) %>%
+	rename(Segment = segment, Model = model,
+				 Sill = psill, Range = range) %>%
+		knitr::kable(caption = 'Summary of optimal varigram models by subduction zone segment {#tbl:variogram.summary.table}',
+								 format = 'pandoc')
+```
+
+```{r variogram.summary.plot, out.width='80%', fig.cap="optimal variogram models by subduction zone segment. the y-axis is semivariance $(mwm^{-2})^2$. about half of the experimental variograms (dots) deviate, often periodically, from the variogram models. deviations often occur between 500 to 1000 km."}
+knitr::include_graphics('../figs/summary/variogram_summary.png')
+```
+
+Summary statistics for the interpolation differences are given in @tbl:diff.summary.table.
+
+```{r diff.summary.table}
+purrr::map_df(d,
+							~.x$shp.hf.pred %>%
+							st_set_geometry(NULL) %>%
+							summarise(Min = round(min(HF_diff)),
+												Max = round(max(HF_diff)),
+												Median = round(median(HF_diff)),
+												IQR = round(IQR(HF_diff)),
+												Mean = round(mean(HF_diff)),
+												Sigma = round(sd(HF_diff))),
+							.id = 'Segment') %>%
+		knitr::kable(caption = 'Summary of predicted heat flow differences by subduction zone segment {#tbl:diff.summary.table}',
+								 format = 'pandoc')
+```
+
 
 # Discussion
 

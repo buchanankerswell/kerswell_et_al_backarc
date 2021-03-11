@@ -46,11 +46,8 @@ shp.hf.sb <-
 # Kriging options
 lags <- 15
 lag.cutoff <- 3
-rotate.sbgle <- 0
+rotate.angle <- 0
 v.mod <- c('Sph', 'Exp', 'Gau')
-
-# # Rotated projection
-# proj.rot <- rotate_proj(shp.hf.sb, rotate.sbgle)
 
 # Krige entire segment
 cat('\nKriging with',
@@ -64,15 +61,16 @@ cat('\nKriging with',
     '\n')
 
 k <-
-  model_variogram(
+  krige_interp(
   data = shp.hf.sb %>% rename(hf = `heat-flow (mW/m2)`),
   lags = lags,
   lag.cutoff = lag.cutoff,
   param = 'hf',
   grid = shp.grid %>% st_crop(shp.box.sb),
-  grid.rotate = rotate.sbgle,
+  grid.rotate = rotate.angle,
   v.mod = v.mod,
-  krige = T
+  krige = T,
+	plot = T
 )
 
 # Variogram

@@ -212,6 +212,10 @@ Kerswell}{buchanankerswell@u.boisestate.edu}
 \begin{abstract}
 
 \end{abstract}
+\begin{verbatim}
+## Loading libraries
+\end{verbatim}
+
 \section{Introduction}
 
 Heat escaping the solid Earth's surface indicates a dynamically cooling
@@ -666,6 +670,121 @@ supplementary information to support FAIR data policy (Wilkinson et al.,
 \clearpage
 
 \section{Results}
+
+\subsection{Heat Flow Near Subduction Zone Segments}
+
+Summary statistics for surface heat flow observations by subduction zone
+segment are given in Table~\ref{tbl:hf.summary.table} and
+Figure~\ref{fig:hf.summary.plot}.
+
+\hypertarget{tbl:hf.summary.table}{}
+\begin{longtable}[]{@{}lrrrrrrr@{}}
+\caption{\label{tbl:hf.summary.table}Summary of heat flow (\(mWm^{-2}\))
+observations by subduction zone segment}\tabularnewline
+\toprule
+Segment & n & Min & Max & Median & IQR & Mean & Sigma \\
+\midrule
+\endfirsthead
+\toprule
+Segment & n & Min & Max & Median & IQR & Mean & Sigma \\
+\midrule
+\endhead
+Alaska Aleutians & 2792 & 4 & 7765 & 184 & 206 & 233 & 344 \\
+Andes & 5226 & 7 & 911 & 45 & 50 & 87 & 88 \\
+Central America & 5038 & 8 & 911 & 45 & 48 & 88 & 91 \\
+Kamchatka Marianas & 3956 & 1 & 31000 & 71 & 48 & 121 & 658 \\
+Kyushu Ryukyu & 3246 & 1 & 31000 & 72 & 44 & 130 & 726 \\
+Lesser Antilles & 3534 & 13 & 1150 & 41 & 12 & 52 & 50 \\
+N. Philippines & 1001 & 3 & 31000 & 72 & 35 & 206 & 1276 \\
+New Britain Solomon & 181 & 3 & 174 & 65 & 42 & 69 & 30 \\
+S. Philippines & 1442 & 1 & 31000 & 71 & 43 & 167 & 1063 \\
+Scotia & 72 & 13 & 145 & 76 & 23 & 74 & 28 \\
+Sumatra Banda Sea & 3037 & 1 & 5600 & 65 & 47 & 77 & 120 \\
+Tonga New Zealand & 507 & 1 & 416 & 54 & 40 & 64 & 45 \\
+Vanuatu & 349 & 1 & 283 & 54 & 40 & 64 & 44 \\
+\bottomrule
+\end{longtable}
+
+\begin{figure}[h]
+
+{\centering \includegraphics[width=0.8\linewidth,]{../figs/summary/hf_summary} 
+
+}
+
+\caption{Distribution of heat flow observations by subduction zone segment. Heat flow near most segments are centered around $50~mWm^{-2}$ and highly skewed right. The skeweness likely represents sampling near hydrothermal systems, volcanic arcs, or spreading centers.}\label{fig:hf.summary.plot}
+\end{figure}
+
+The optimal variogram models and associated errors \(C_F(\Theta)\) and
+\(C_I(\Theta)\) are given in Table~\ref{tbl:variogram.summary.table} and
+Figure~\ref{fig:variogram.summary.plot}.
+
+\hypertarget{tbl:variogram.summary.table}{}
+\begin{longtable}[]{@{}llrr@{}}
+\caption{\label{tbl:variogram.summary.table}Summary of optimal varigram
+models by subduction zone segment}\tabularnewline
+\toprule
+Segment & Model & Sill & Range \\
+\midrule
+\endfirsthead
+\toprule
+Segment & Model & Sill & Range \\
+\midrule
+\endhead
+Alaska Aleutians & Exp & 3524.0857 & 117396.66 \\
+Andes & Exp & 3095.2423 & 286688.01 \\
+Central America & Sph & 1747.9487 & 256703.99 \\
+Kamchatka Marianas & Sph & 1701.1806 & 223685.45 \\
+Kyushu Ryukyu & Exp & 1626.2318 & 43751.86 \\
+Lesser Antilles & Sph & 519.1377 & 89079.02 \\
+New Britain Solomon & Exp & 816.7801 & 87822.61 \\
+N. Philippines & Sph & 1633.3002 & 31816.29 \\
+Sumatra Banda Sea & Exp & 1593.4728 & 140627.05 \\
+Scotia & Sph & 109.6181 & 27569.55 \\
+S. Philippines & Exp & 1705.4852 & 22516.53 \\
+Tonga New Zealand & Exp & 1274.7961 & 82583.96 \\
+Vanuatu & Sph & 1342.4631 & 42045.93 \\
+\bottomrule
+\end{longtable}
+
+\begin{figure}[h]
+
+{\centering \includegraphics[width=0.8\linewidth,]{../figs/summary/variogram_summary} 
+
+}
+
+\caption{optimal variogram models by subduction zone segment. the y-axis is semivariance $(mwm^{-2})^2$. about half of the experimental variograms (dots) deviate, often periodically, from the variogram models. deviations often occur between 500 to 1000 km.}\label{fig:variogram.summary.plot}
+\end{figure}
+
+Summary statistics for the interpolation differences are given in
+Table~\ref{tbl:diff.summary.table}.
+
+\hypertarget{tbl:diff.summary.table}{}
+\begin{longtable}[]{@{}lrrrrrr@{}}
+\caption{\label{tbl:diff.summary.table}Summary of predicted heat flow
+differences by subduction zone segment}\tabularnewline
+\toprule
+Segment & Min & Max & Median & IQR & Mean & Sigma \\
+\midrule
+\endfirsthead
+\toprule
+Segment & Min & Max & Median & IQR & Mean & Sigma \\
+\midrule
+\endhead
+Alaska Aleutians & -169 & 2784 & 2 & 18 & 7 & 72 \\
+Andes & -122 & 2313 & 3 & 33 & 13 & 70 \\
+Central America & -119 & 2777 & 8 & 66 & 49 & 149 \\
+Kamchatka Marianas & -136 & 305 & -1 & 17 & 2 & 17 \\
+Kyushu Ryukyu & -101 & 174 & 1 & 21 & 4 & 20 \\
+Lesser Antilles & -53 & 666 & 2 & 16 & 12 & 39 \\
+New Britain Solomon & -81 & 236 & 2 & 21 & 5 & 20 \\
+N. Philippines & -66 & 296 & 4 & 19 & 7 & 21 \\
+Sumatra Banda Sea & -129 & 372 & 2 & 18 & 5 & 19 \\
+Scotia & -59 & 1004 & -1 & 26 & 8 & 33 \\
+S. Philippines & -79 & 384 & 3 & 24 & 6 & 22 \\
+Tonga New Zealand & -122 & 1672 & -6 & 21 & 1 & 29 \\
+Vanuatu & -88 & 1701 & 3 & 29 & 7 & 39 \\
+\bottomrule
+\end{longtable}
 
 \section{Discussion}
 
