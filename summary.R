@@ -7,15 +7,6 @@ fname <- c('Alaska Aleutians', 'Andes', 'Central America', 'Kamchatka Marianas',
 					 'Sumatra Banda Sea', 'Scotia', 'S. Philippines', 'Tonga New Zealand', 'Vanuatu')
 fpath <- list.files('process/', pattern = '.RData', full.names = T)
 
-# Function to read RData
-load_data <- function(x){
-#loads an RData file, and returns it
-    load(x)
-		l <- ls()[!ls() %in% x] %>%
-			purrr::map(~get(.x))
-		l[1:length(l)-1]
-}
-
 # Read data
 d <- purrr::map2(fpath, fname, ~{
 	d <- .x %>% load_data()
@@ -59,7 +50,7 @@ p <- shp.hf.crop %>%
 				geom_histogram(aes(x = `heat-flow (mW/m2)`), binwidth = 5) +
 				labs(x = bquote('Heat Flow'~mWm^-2), y = 'Frequency') +
 				scale_x_continuous(limits = c(0, 250)) +
-				facet_wrap(~segment, scales = 'free_y', ncol = 2) +
+				facet_wrap(~segment, scales = 'free_y', ncol = 3) +
 				theme_classic() +
 				theme(
 					strip.background = element_blank())

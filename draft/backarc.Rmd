@@ -312,6 +312,8 @@ shp.hf.crop %>%
 knitr::include_graphics('../figs/summary/hf_summary.png')
 ```
 
+\clearpage
+
 The optimal variogram models and associated errors $C_F(\Theta)$ and $C_I(\Theta)$ are given in @tbl:variogram.summary.table and @fig:variogram.summary.plot.
 
 ```{r variogram.summary.table}
@@ -327,6 +329,8 @@ purrr::map_df(d, ~.x$k$model.variogram, .id = 'segment') %>%
 ```{r variogram.summary.plot, out.width='80%', fig.cap="optimal variogram models by subduction zone segment. the y-axis is semivariance $(mwm^{-2})^2$. about half of the experimental variograms (dots) deviate, often periodically, from the variogram models. deviations often occur between 500 to 1000 km."}
 knitr::include_graphics('../figs/summary/variogram_summary.png')
 ```
+
+\clearpage
 
 Summary statistics for the interpolation differences are given in @tbl:diff.summary.table.
 
