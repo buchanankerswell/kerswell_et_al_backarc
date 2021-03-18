@@ -35,6 +35,7 @@ tblPrefix:
 - Table
 - Tables
 header-includes:
+- \usepackage{booktabs}
 - \usepackage{soulutf8}
 - \usepackage{setspace}
 - \usepackage{caption}
@@ -43,6 +44,7 @@ header-includes:
 - \usepackage{amsmath}
 - \usepackage{amsfonts}
 - \usepackage{float}
+- \usepackage{longtable}
 ---
 
 ```{r echo=FALSE}
@@ -56,52 +58,73 @@ knitr::opts_chunk$set(
   out.width = '100%'
 )
 
-# Load data and libraries
+# Load functions and libraries
 source('../functions.R')
 load('../data/hf.Rdata')
 
-# Load additional libraries for rmd
-suppressMessages({
-  library(knitr)
-  library(kableExtra)
-  library(scales)
-  library(pander)
-})
-
-# Draw bounding boxes and crop heat flow for each segment
-shp.hf.crop <- purrr::map_df(shp.sa.segs.robin.pacific$segment,
-						~ {box <- shp.sa.segs.robin.pacific.buffer %>%
-										filter(segment == .x) %>%
-										st_bbox() %>%
-										bbox_widen(proj4.robin.pacific,
-															 borders = c('top' = 0.1,
-																					 'bottom' = 0.1,
-																					 'left' = 0.1,
-																					 'right' = 0.1))
-							shp.hf %>%
-											st_crop(box) %>%
-											mutate('segment' = .x, .before = country)})
-
-# Read krige results
-load_data <- function(x){
-#loads an RData file, and returns it
-    load(x)
-		l <- ls()[!ls() %in% x] %>%
-			purrr::map(~get(.x))
-		l[1:length(l)-1]
-}
-
 # Define paths and names
-fname <- c('Alaska Aleutians', 'Andes', 'Central America', 'Kamchatka Marianas',
-					 'Kyushu Ryukyu', 'Lesser Antilles', 'New Britain Solomon', 'N. Philippines',
-					 'Sumatra Banda Sea', 'Scotia', 'S. Philippines', 'Tonga New Zealand', 'Vanuatu')
-fpath <- list.files('../process/', pattern = '.RData', full.names = T)
+fpath <- list.files('../data/diff', pattern = '.RData', full.names = T)
+fname <- purrr::map_chr(list.files('../data/diff', pattern = '.RData'),
+												 ~.x %>%
+												 stringr::str_replace('_diff.RData', ''))
 
-# Read data
-d <- purrr::map2(fpath, fname, ~{
-	d <- .x %>% load_data()
-	d %>% set_names(c('k', 'shp.hf.pred'))
-	}) %>% set_names(fname)
+# Load data
+for (i in fpath) load(i)
+
+# Bounding Boxes
+purrr::map(seg.names,
+					 ~shp.sa.segs.robin.pacific.buffer %>%
+					 filter(segment == .x) %>%
+					 st_bbox() %>%
+					 bbox_widen(crs = proj4.robin.pacific,
+											borders = c('top' = 0.1,
+																	'bottom' = 0.1,
+																	'left' = 0.1,
+																	'right' = 0.1))) %>%
+purrr::set_names(nm = seg.names) -> shp.box
+
+# Crop data
+purrr::map2_df(shp.box, seg.names,
+							 ~shp.hf %>%
+							 rename(hf = `heat-flow (mW/m2)`) %>%
+							 st_crop(.x) %>%
+							 mutate(segment = .y, .before = country)) -> shp.hf.crop
+
+# Summarize heat flow data
+shp.hf.crop %>%
+st_set_geometry(NULL) %>%
+group_by(segment) %>%
+rename(Segment = segment) %>%
+summarise(n = n(),
+					Min = round(min(hf)),
+					Max = round(max(hf)),
+					Median =round(median(hf)),
+					IQR = round(IQR(hf)),
+					Mean = round(mean(hf)),
+					Sigma = round(sd(hf))) -> hf.summary
+
+# Summarise variogram models (add rmse's from f.obj)
+purrr::map_df(fname, ~get(.x)$v.mod, .id = 'segment') %>%
+							as_tibble() %>%
+							mutate('segment' = fname %>% stringr::str_replace('_', ' ')) %>%
+							dplyr::select(segment, model, psill, range) %>%
+							mutate('psill' = round(sqrt(psill)), 'range' = round(range/1000)) %>%
+							rename(Segment = segment, Model = model,
+										 `Sill $[mWm^-{2}]$` = psill, `Range $[km]$` = range) -> variogram.summary
+
+# Interpolation difference
+purrr::map(fname, ~get(.x)$diff %>% st_set_geometry(NULL)) %>%
+purrr::set_names(nm = fname %>% stringr::str_replace('_', ' ')) -> hf.diff
+
+hf.diff %>%
+bind_rows(.id = 'Segment') %>%
+group_by(Segment) %>%
+summarise(Min = round(min(hf.diff)),
+					Max = round(max(hf.diff)),
+					Median = round(median(hf.diff)),
+					IQR = round(IQR(hf.diff)),
+					Mean = round(mean(hf.diff)),
+					Sigma = round(sd(hf.diff))) -> hf.diff.summary
 ```
 
 # Introduction
@@ -168,23 +191,22 @@ The following are two illustrative cases where @eq:assumptions is likely valid:
 
 In contrast, @eq:assumptions is likely invalid in regions that transition among two or more tectonic regimes. For example, the expected heat flow $E[Z(u)] = mean$ will change when moving from a spreading center to a subduction zone. $E[Z(u)] = mean \neq constant$ over the region of interest. Proceeding with @eq:assumptions in this case has the effect of masking the geodynamic complexity. In other words, the spatial dependence is considered in the Kriging method in this case, but the geodynamic structure is *invisible*. We will see that this has important implications when comparing our Kriging method to @lucazeau2019's interpolation method, which is exactly opposite of this formalism---it only considers the similarities among physical proxies and not spatial dependence.
 
-The second step is to fit the experimental variogram with a variogram model, $\gamma(h)$. In this study we fit three popular variogram models to the experimental variogram. We use models with sills, which implies the spatial dependence between pairs of points has a finite range. The spherical, exponential, and Guassian variogram models are defined as [@chiles2009; @cressie2015]:
+The second step is to fit the experimental variogram with a variogram model, $\gamma(h)$. In this study we fit two popular variogram models to the experimental variogram. We use models with sills, which implies the spatial dependence between pairs of points has a finite range. The spherical and exponential variogram models used in this study are defined as [@chiles2009; @cressie2015]:
 
 $$
 \begin{aligned}
 	sph &\leftarrow \gamma(h) =
 		\begin{cases}
-			n + s \left(\frac{3h}{2a} - \frac{1}{2}\left(\frac{h}{a}\right)^3\right), & \quad\text{if } 0 \leq h \leq a \\
-			n + s, & \quad\text{if } h > a
+			n + s \left(\frac{3h}{2a} - \frac{1}{2}\left(\frac{h}{a}\right)^3\right), & \text{if } 0 \leq h \leq a \\
+			n + s, & \text{if } h > a
 		\end{cases} \\
 	exp &\leftarrow \gamma(h) = n + s \left(1 - exp\left(\frac{-h}{a}\right)\right), ~\quad\text{if } h \geq 0 \\
-	Gau &\leftarrow \gamma(h) = n + s \left(1 - exp\left(\frac{-h^2}{a^2}\right)\right), \quad\text{if } h \geq 0
 \end{aligned}
 $$ {#eq:varmodels}
 
-where $n$ is the nugget, $s$ is the sill, and $a$ is the effective range. For spherical, exponential, and Gaussian models, the effective range is related to the range, $r$, by $a = r$, $a = r/3$, and $a=1/r\sqrt{3}$, respectively [@graler2016; @pebesma2004]. The function `fit.variogram` in `gstat` allows one to try many variogram models and the best will be selected by the minimum misfit by weighted least square [WLS, @pebesma2004].
+where $n$ is the nugget, $s$ is the sill, and $a$ is the effective range. The effective range, $a$, is related to the range, $r$, by $a = r$ and $a = r/3$ for spherical and exponential models, respectively [@graler2016; @pebesma2004]. We use the function `fit.variogram` in `gstat` to try both variogram models. The best model is selected by the minimum misfit by weighted least square [WLS, @pebesma2004].
 
-We use ordinary Kriging for our interpolation step, which predicts the value of a random function, $\hat{Z}(u)$ at unknown locations as a linear combination of all known locations in the domain, $D$ [@bardossy1997]:
+We use ordinary Kriging for our interpolation step, which predicts the value of a random function, $\hat{Z}(u)$, at unknown locations as a linear combination of all known locations in the domain, $D$ [@bardossy1997]:
 
 $$ \hat{Z}(u) = \sum_{i=1}^n \lambda_i Z(u_i), \quad \forall u \in D $$ {#eq:linestimate}
 
@@ -216,11 +238,11 @@ Solving for the weights in @eq:linestimate with respect to the unbiased conditio
 
 Achieving a useful Kriging results depends on one's choice of many Kriging parameters ($\Theta$). In this study, we investigate a set of parameters, $\Theta$:
 
-$$ \Theta = \{m, s, a, n, S\} $$ {#eq:params}
+$$ \Theta = \{c, w, m, s, a, n, S\} $$ {#eq:params}
 
-where $m$ is the model type (sph, exp, or Gau), $s$ is the sill, $a$ is the effective range, $n$ is the nugget, and $S$ is the maximum distance for local Kriging. Only points within $S$ from the prediction location are used for Kriging. Our goal is to find $\Theta$ such that our interpolation, $f(x_i; \Theta)$, gives the most useful outcome---defined by minimizing a cost function, $C(\Theta)$, that represents the error between the set of real observations, $Z(u_i)$ and predictions, $\hat{Z}(u)$.
+where $c$ is the lag cutoff proportion, $w$ is the lag window, $m$ is the model type (sph or exp), $s$ is the sill, $a$ is the effective range, $n$ is the nugget, and $S$ is the maximum distance for local Kriging. Only points within $S$ from the prediction location are used for Kriging. The lag cutoff is the maximum separation distance between pairs of points used in the experimental variogram (i.e. the x-axis maximum limit) calculated as a fraction of the overall maximum separation distance for all observations, $Z(u)$, in the domain, $D$. The lag window, $w$, shifts the lags where the variogram is evaluated by removing the first $n$ lags and adding $n$ lags to the right side of the variogram. This is necessary to avoid negative ranges, $a$, when fitting experimental variograms with anomalously high variances at small lag distances.
 
-We define a cost function that simultaneously considers the misfit between the experimental and modelled variogram and between the Kriging predictions and observed heat flow [after @li2018]:
+Our goal is to find $\Theta$ such that our interpolation, $f(x_i; \Theta)$, gives the most useful outcome---defined by minimizing a cost function, $C(\Theta)$, that represents the error between the set of real observations, $Z(u_i)$ and predictions, $\hat{Z}(u)$. We define a cost function that simultaneously considers the misfit between the experimental and modelled variogram and between the Kriging predictions and observed heat flow [after @li2018]:
 
 $$ C(\Theta) = (1-w)C_F(\Theta) + wC_I(\Theta) $$ {#eq:cost}
 
@@ -260,11 +282,13 @@ We use the general-purpose functions in the "R" package `GA` [@scrucca2013; @scr
 
 |      Parameter      |                 Search Domain               |          Units          |
 |---------------------|:-------------------------------------------:|------------------------:|
-|      Model (m)      |     [Spherical, Exponential, Guassian]      |            NA           |
-|       Sill (s)      |              [1, $5\times 10^3$]            | $\left(mW/m^2\right)^2$ |
-| Effective Range (a) |              [1, $1\times 10^6$]            |          meters         |
-|      Nugget (n)     |              [1, $1\times 10^3$]            |          meters         |
-|   Local Search (S)  |              [1, $1\times 10^6$]            |          meters         |
+|    Lag Cutoff (c)   |                [$1/3$, $1/15$]              |            NA           |
+|    Lag Window (w)   |                     [1, 5]                  |            NA           |
+|      Model (m)      |            [Spherical, Exponential]         |            NA           |
+|       Sill (s)      |              [1, $1000\sqrt{2}$]            |         $mWm^-2$        |
+| Effective Range (a) |              [1, $1\times 10^3$]            |            km           |
+|      Nugget (n)     |              [1, $1000\sqrt{2}$]            |         $mWm^-2$        |
+|   Local Search (S)  |              [1, $1\times 10^3$]            |            km           |
 
 : Parameters and ranges used in the optimization algorithm {#tbl:search}
 
@@ -288,67 +312,38 @@ knitr::include_graphics('../figs/base/segs_comp.png')
 # Results
 ## Heat Flow Near Subduction Zone Segments
 
-Summary statistics for surface heat flow observations by subduction zone segment are given in @tbl:hf.summary.table and @fig:hf.summary.plot.
+Summary statistics for surface heat flow observations by subduction zone segment are given in @tbl:hf.summary.table and @fig:hf.summary.plot. Surface heat flow is centered around 45-70 $mWm^{-2}$ (medians) and narrowly distributed with inter-quartile ranges (IQR) from 12 to 50 $mWm^{-2}$ for most subduction zone segments, excluding outliers. Alaska Aleutians is the exception with a broad (IQR = $250~mW^{-2}$) range of heat flow with a median of 184 $mWm^{-2}$. The whole distribution, including outliers, for all segments are strongly right-skewed with maximum heat flow values of several thousand of $mWm^{-2}$ or more. Heat flow values above 250 $mWm^{-2}$ are considered geothermal areas by @lucazeau2019, which we adopt as a relevant empirical limit for anomalously high heat flow.
 
 ```{r hf.summary.table, results = 'asis'}
 # Summarize data
-shp.hf.crop %>%
-	st_set_geometry(NULL) %>%
-	group_by(segment) %>%
-	rename(hf = `heat-flow (mW/m2)`,
-				 Segment = segment) %>%
-	summarise(n = n(),
-						Min = round(min(hf)),
-						Max = round(max(hf)),
-						Median =round(median(hf)),
-						IQR = round(IQR(hf)),
-						Mean = round(mean(hf)),
-						Sigma = round(sd(hf))) %>%
-	knitr::kable(caption = 'Summary of heat flow ($mWm^{-2}$) observations by subduction zone segment {#tbl:hf.summary.table}',
-							 format = 'pandoc')
+hf.summary %>%
+knitr::kable(caption = 'Heat flow ($mWm^{-2}$) observations by subduction zone segment {#tbl:hf.summary.table}',
+						 format = 'pandoc')
 ```
 
-```{r hf.summary.plot, out.width='80%', fig.cap="Distribution of heat flow observations by subduction zone segment. Heat flow near most segments are centered around $50~mWm^{-2}$ and highly skewed right. The skeweness likely represents sampling near hydrothermal systems, volcanic arcs, or spreading centers."}
-knitr::include_graphics('../figs/summary/hf_summary.png')
+```{r hf.summary.plot, out.width='80%', fig.cap="Distribution of heat flow observations by subduction zone segment. Heat flow near most segments are centered around $50~mWm^{-2}$ and highly skewed right. The skeweness likely represents sampling near hydrothermal systems, volcanic arcs, or spreading centers. Data from Lucazeau (2019)"}
+knitr::include_graphics('../figs/hf_summary.png')
 ```
 
 \clearpage
 
-The optimal variogram models and associated errors $C_F(\Theta)$ and $C_I(\Theta)$ are given in @tbl:variogram.summary.table and @fig:variogram.summary.plot.
+The optimal variogram models and associated errors $C_F(\Theta)$ and $C_I(\Theta)$ are given in @tbl:variogram.summary.table.
 
 ```{r variogram.summary.table}
-purrr::map_df(d, ~.x$k$model.variogram, .id = 'segment') %>%
-	as_tibble() %>%
-	dplyr::select(segment, model, psill, range) %>%
-	rename(Segment = segment, Model = model,
-				 Sill = psill, Range = range) %>%
-		knitr::kable(caption = 'Summary of optimal varigram models by subduction zone segment {#tbl:variogram.summary.table}',
-								 format = 'pandoc')
-```
-
-```{r variogram.summary.plot, out.width='80%', fig.cap="optimal variogram models by subduction zone segment. the y-axis is semivariance $(mwm^{-2})^2$. about half of the experimental variograms (dots) deviate, often periodically, from the variogram models. deviations often occur between 500 to 1000 km."}
-knitr::include_graphics('../figs/summary/variogram_summary.png')
+variogram.summary %>%
+knitr::kable(caption = 'Optimal varigram models by subduction zone segment {#tbl:variogram.summary.table}',
+						 format = 'pandoc')
 ```
 
 \clearpage
 
-Summary statistics for the interpolation differences are given in @tbl:diff.summary.table.
+Summary statistics for the interpolation differences are given in @tbl:diff.summary.table and @fig:diff.summary.plot.
 
 ```{r diff.summary.table}
-purrr::map_df(d,
-							~.x$shp.hf.pred %>%
-							st_set_geometry(NULL) %>%
-							summarise(Min = round(min(HF_diff)),
-												Max = round(max(HF_diff)),
-												Median = round(median(HF_diff)),
-												IQR = round(IQR(HF_diff)),
-												Mean = round(mean(HF_diff)),
-												Sigma = round(sd(HF_diff))),
-							.id = 'Segment') %>%
-		knitr::kable(caption = 'Summary of predicted heat flow differences by subduction zone segment {#tbl:diff.summary.table}',
-								 format = 'pandoc')
+hf.diff.summary %>%
+knitr::kable(caption = 'Predicted heat flow ($mWm^{-2}$) differences by subduction zone segment {#tbl:diff.summary.table}',
+						 format = 'pandoc')
 ```
-
 
 # Discussion
 

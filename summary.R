@@ -1,40 +1,41 @@
+# Load functions and libraries
 source('functions.R')
 load('data/hf.Rdata')
 
 # Define paths and names
-fname <- c('Alaska Aleutians', 'Andes', 'Central America', 'Kamchatka Marianas',
-					 'Kyushu Ryukyu', 'Lesser Antilles', 'New Britain Solomon', 'N. Philippines',
-					 'Sumatra Banda Sea', 'Scotia', 'S. Philippines', 'Tonga New Zealand', 'Vanuatu')
-fpath <- list.files('process/', pattern = '.RData', full.names = T)
+fpath <- list.files('data/diff', pattern = '.RData', full.names = T)
+fname <- purrr::map_chr(list.files('data/diff', pattern = '.RData'),
+					 ~.x %>%
+					 stringr::str_replace('_diff.RData', ''))
 
-# Read data
-d <- purrr::map2(fpath, fname, ~{
-	d <- .x %>% load_data()
-	d %>% set_names(c('k', 'shp.hf.pred'))
-	}) %>% set_names(fname)
+# Load data
+for (i in fpath) load(i)
 
-# Draw bounding boxes and crop heat flow for each segment
-shp.hf.crop <-
-	purrr::map_df(shp.sa.segs.robin.pacific$segment,
-		~ {box <- shp.sa.segs.robin.pacific.buffer %>%
-				filter(segment == .x) %>%
-				st_bbox() %>%
-				bbox_widen(proj4.robin.pacific,
-									 borders = c('top' = 0.1,
-															'bottom' = 0.1,
-															'left' = 0.1,
-															'right' = 0.1))
-				shp.hf %>%
-				st_crop(box) %>%
-				mutate('segment' = .x, .before = country)})
+# Bounding Boxes
+purrr::map(seg.names,
+					 ~shp.sa.segs.robin.pacific.buffer %>%
+					 filter(segment == .x) %>%
+					 st_bbox() %>%
+					 bbox_widen(crs = proj4.robin.pacific,
+											borders = c('top' = 0.1,
+																	'bottom' = 0.1,
+																	'left' = 0.1,
+																	'right' = 0.1))) %>%
+purrr::set_names(nm = seg.names) -> shp.box
+
+# Crop data
+purrr::map2_df(shp.box, seg.names,
+					 ~shp.hf %>%
+					 rename(hf = `heat-flow (mW/m2)`) %>%
+					 st_crop(.x) %>%
+					 mutate(segment = .y, .before = country)) -> shp.hf.crop
 
 # Summarize heat flow data
 hf.summary <-
 				shp.hf.crop %>%
 				st_set_geometry(NULL) %>%
 				group_by(segment) %>%
-				rename(hf = `heat-flow (mW/m2)`,
-							 Segment = segment) %>%
+				rename(Segment = segment) %>%
 				summarise(n = n(),
 									Min = round(min(hf)),
 									Max = round(max(hf)),
@@ -43,74 +44,88 @@ hf.summary <-
 									Mean = round(mean(hf)),
 									Sigma = round(sd(hf)))
 
+cat('Heat flow summary:\n')
+print(hf.summary)
+
 # Visualize
 p <- shp.hf.crop %>%
 				group_by(segment) %>%
 				ggplot() +
-				geom_histogram(aes(x = `heat-flow (mW/m2)`), binwidth = 5) +
-				labs(x = bquote('Heat Flow'~mWm^-2), y = 'Frequency') +
+				geom_boxplot(aes(x = hf, y = segment, group = segment),
+										 width = 0.5,
+										 outlier.size = 0.2,
+										 outlier.color = rgb(0.5, 0.5, 0.5, 0.1)) +
+				labs(x = bquote(~mWm^-2),
+						 y = NULL,
+						 title = 'Heat flow observations by segment',
+						 caption = 'data from Lucazeau (2019)') +
 				scale_x_continuous(limits = c(0, 250)) +
-				facet_wrap(~segment, scales = 'free_y', ncol = 3) +
-				theme_classic() +
-				theme(
-					strip.background = element_blank())
+				scale_y_discrete(limits = rev(levels(as.factor(seg.names)))) +
+				theme_classic(base_size = 14) +
+				theme(strip.background = element_blank())
 
 # Save plot
-ggsave(file = 'figs/summary/hf_summary.png',
+cat('Saving heat flow summary plot to:\nfigs/hf_summary.png\n')
+
+ggsave(file = 'figs/hf_summary.png',
 			 plot = p,
 			 device = 'png',
 			 type = 'cairo',
-			 width = 6,
-			 height = 11)
+			 width = 7,
+			 height = 7)
 
 # Summarise variogram models (add rmse's from f.obj)
-variogram.summary <-
-				purrr::map_df(d, ~.x$k$model.variogram, .id = 'segment') %>%
-				as_tibble() %>%
-				dplyr::select(segment, model, psill, range) %>%
-				rename(Segment = segment, Model = model,
-							 Sill = psill, Range = range)
+purrr::map_df(fname, ~get(.x)$v.mod, .id = 'segment') %>%
+	as_tibble() %>%
+	mutate('segment' = fname %>% stringr::str_replace('_', ' ')) %>%
+	dplyr::select(segment, model, psill, range) %>%
+	rename(Segment = segment, Model = model,
+				 Sill = psill, Range = range) %>%
+	mutate('Sill' = round(sqrt(Sill)), 'Range' = round(Range/1000, 1)) -> variogram.summary
+
+cat('Variogram summary:\n')
+print(variogram.summary)
+
+# Interpolation difference
+purrr::map(fname, ~get(.x)$diff %>% st_set_geometry(NULL)) %>%
+purrr::set_names(nm = fname %>% stringr::str_replace('_', ' ')) -> hf.diff
+
+hf.diff %>%
+		bind_rows(.id = 'Segment') %>%
+		group_by(Segment) %>%
+		summarise(Min = round(min(hf.diff)),
+		Max = round(max(hf.diff)),
+		Median = round(median(hf.diff)),
+		IQR = round(IQR(hf.diff)),
+		Mean = round(mean(hf.diff)),
+		Sigma = round(sd(hf.diff))) -> hf.diff.summary
+
+cat('Heat flow difference summary:\n')
+print(hf.diff.summary)
 
 # Visualize
-p <- purrr::map2(d, names(d),
-					 ~{
-		cutoff <- .x$k$variogram$dist %>% max()
-		v.line <- .x$k$model.variogram %>% variogramLine(cutoff)
-		v <- .x$k$variogram
-    p <- ggplot() +
-      geom_path(data = v.line, aes(x = dist/1000, y = gamma)) +
-      geom_point(data = v, aes(x = dist/1000, y = semivar), size = 0.6) +
-      labs(x = NULL, y = 'Semivariance', title = .y) +
-      theme_classic() +
-      theme(axis.text = element_text(color = 'black'),
-						axis.text.y = element_blank(),
-						axis.title.y = element_blank(),
-						axis.ticks.y = element_blank(),
-						axis.line.y = element_blank(),
-						plot.title = element_text(hjust = 0.5, size = 9))
-			if(.y %in% c('Vanuatu', 'Tonga New Zealand')) {
-			p <- p + labs(x = 'Lag (km)')}
-			p
-					 }) %>%
-wrap_plots(ncol = 2)
+p <- hf.diff %>%
+				bind_rows(.id = 'segment') %>%
+				group_by(segment) %>%
+				ggplot() +
+				geom_boxplot(aes(x = hf.diff, y = segment, group = segment),
+										 width = 0.5,
+										 outlier.size = 0.2,
+										 outlier.color = rgb(0.5, 0.5, 0.5, 0.1)) +
+				labs(x = bquote(mWm^-2),
+						 y = NULL,
+						 title = 'Similarity vs. Kriging difference by segment') +
+				scale_x_continuous(limits = c(-2*max(hf.diff.summary$IQR), 2*max(hf.diff.summary$IQR))) +
+				scale_y_discrete(limits = rev(levels(as.factor(seg.names)))) +
+				theme_classic(base_size = 14) +
+				theme(strip.background = element_blank())
 
 # Save plot
-ggsave(file = 'figs/summary/variogram_summary.png',
+cat('Saving heat flow difference summary plot to:\nfigs/hf_diff_summary.png')
+
+ggsave(file = 'figs/hf_diff_summary.png',
 			 plot = p,
 			 device = 'png',
 			 type = 'cairo',
-			 width = 6,
-			 height = 11)
-
-# Interpolation difference
-hf.diff.summary <-
-				purrr::map_df(d,
-											~.x$shp.hf.pred %>%
-											st_set_geometry(NULL) %>%
-											summarise(Min = round(min(HF_diff)),
-																Max = round(max(HF_diff)),
-																Median = round(median(HF_diff)),
-																IQR = round(IQR(HF_diff)),
-																Mean = round(mean(HF_diff)),
-																Sigma = round(sd(HF_diff))),
-											.id = 'Segment')
+			 width = 7,
+			 height = 7)

@@ -91,6 +91,7 @@
 \newcommand{\CSLRightInline}[1]{\parbox[t]{\linewidth - \csllabelwidth}{#1}}
 \newcommand{\CSLIndent}[1]{\hspace{\cslhangindent}#1}
 
+\usepackage{booktabs}
 \usepackage{soulutf8}
 \usepackage{setspace}
 \usepackage{caption}
@@ -99,20 +100,7 @@
 \usepackage{amsmath}
 \usepackage{amsfonts}
 \usepackage{float}
-\usepackage{booktabs}
 \usepackage{longtable}
-\usepackage{array}
-\usepackage{multirow}
-\usepackage{wrapfig}
-\usepackage{float}
-\usepackage{colortbl}
-\usepackage{pdflscape}
-\usepackage{tabu}
-\usepackage{threeparttable}
-\usepackage{threeparttablex}
-\usepackage[normalem]{ulem}
-\usepackage{makecell}
-\usepackage{xcolor}
 
 \begin{document}
 
@@ -213,7 +201,20 @@ Kerswell}{buchanankerswell@u.boisestate.edu}
 
 \end{abstract}
 \begin{verbatim}
-## Loading libraries
+## Loading libraries:
+## magrittr
+## ggplot2
+## tidyr
+## readr
+## purrr
+## gstat
+## ggsflabel
+## sf
+## ggrepel
+## patchwork
+## cowplot
+## dplyr
+## Loading functions
 \end{verbatim}
 
 \section{Introduction}
@@ -453,34 +454,33 @@ only considers the similarities among physical proxies and not spatial
 dependence.
 
 The second step is to fit the experimental variogram with a variogram
-model, \(\gamma(h)\). In this study we fit three popular variogram
-models to the experimental variogram. We use models with sills, which
-implies the spatial dependence between pairs of points has a finite
-range. The spherical, exponential, and Guassian variogram models are
+model, \(\gamma(h)\). In this study we fit two popular variogram models
+to the experimental variogram. We use models with sills, which implies
+the spatial dependence between pairs of points has a finite range. The
+spherical and exponential variogram models used in this study are
 defined as (Chiles \& Delfiner, 2009; Cressie, 2015):
 
 \begin{equation}\protect\hypertarget{eq:varmodels}{}{
 \begin{aligned}
     sph &\leftarrow \gamma(h) =
         \begin{cases}
-            n + s \left(\frac{3h}{2a} - \frac{1}{2}\left(\frac{h}{a}\right)^3\right), & \quad\text{if } 0 \leq h \leq a \\
-            n + s, & \quad\text{if } h > a
+            n + s \left(\frac{3h}{2a} - \frac{1}{2}\left(\frac{h}{a}\right)^3\right), & \text{if } 0 \leq h \leq a \\
+            n + s, & \text{if } h > a
         \end{cases} \\
     exp &\leftarrow \gamma(h) = n + s \left(1 - exp\left(\frac{-h}{a}\right)\right), ~\quad\text{if } h \geq 0 \\
-    Gau &\leftarrow \gamma(h) = n + s \left(1 - exp\left(\frac{-h^2}{a^2}\right)\right), \quad\text{if } h \geq 0
 \end{aligned}
 }\label{eq:varmodels}\end{equation}
 
 where \(n\) is the nugget, \(s\) is the sill, and \(a\) is the effective
-range. For spherical, exponential, and Gaussian models, the effective
-range is related to the range, \(r\), by \(a = r\), \(a = r/3\), and
-\(a=1/r\sqrt{3}\), respectively (Gräler et al., 2016; Pebesma, 2004).
-The function \texttt{fit.variogram} in \texttt{gstat} allows one to try
-many variogram models and the best will be selected by the minimum
-misfit by weighted least square (WLS, Pebesma, 2004).
+range. The effective range, \(a\), is related to the range, \(r\), by
+\(a = r\) and \(a = r/3\) for spherical and exponential models,
+respectively (Gräler et al., 2016; Pebesma, 2004). We use the function
+\texttt{fit.variogram} in \texttt{gstat} to try both variogram models.
+The best model is selected by the minimum misfit by weighted least
+square (WLS, Pebesma, 2004).
 
 We use ordinary Kriging for our interpolation step, which predicts the
-value of a random function, \(\hat{Z}(u)\) at unknown locations as a
+value of a random function, \(\hat{Z}(u)\), at unknown locations as a
 linear combination of all known locations in the domain, \(D\)
 (Bárdossy, 1997):
 
@@ -527,20 +527,29 @@ Achieving a useful Kriging results depends on one's choice of many
 Kriging parameters (\(\Theta\)). In this study, we investigate a set of
 parameters, \(\Theta\):
 
-\begin{equation}\protect\hypertarget{eq:params}{}{ \Theta = \{m, s, a, n, S\} }\label{eq:params}\end{equation}
+\begin{equation}\protect\hypertarget{eq:params}{}{ \Theta = \{c, w, m, s, a, n, S\} }\label{eq:params}\end{equation}
 
-where \(m\) is the model type (sph, exp, or Gau), \(s\) is the sill,
-\(a\) is the effective range, \(n\) is the nugget, and \(S\) is the
-maximum distance for local Kriging. Only points within \(S\) from the
-prediction location are used for Kriging. Our goal is to find \(\Theta\)
-such that our interpolation, \(f(x_i; \Theta)\), gives the most useful
-outcome---defined by minimizing a cost function, \(C(\Theta)\), that
-represents the error between the set of real observations, \(Z(u_i)\)
-and predictions, \(\hat{Z}(u)\).
+where \(c\) is the lag cutoff proportion, \(w\) is the lag window, \(m\)
+is the model type (sph or exp), \(s\) is the sill, \(a\) is the
+effective range, \(n\) is the nugget, and \(S\) is the maximum distance
+for local Kriging. Only points within \(S\) from the prediction location
+are used for Kriging. The lag cutoff is the maximum separation distance
+between pairs of points used in the experimental variogram (i.e.~the
+x-axis maximum limit) calculated as a fraction of the overall maximum
+separation distance for all observations, \(Z(u)\), in the domain,
+\(D\). The lag window, \(w\), shifts the lags where the variogram is
+evaluated by removing the first \(n\) lags and adding \(n\) lags to the
+right side of the variogram. This is necessary to avoid negative ranges,
+\(a\), when fitting experimental variograms with anomalously high
+variances at small lag distances.
 
-We define a cost function that simultaneously considers the misfit
-between the experimental and modelled variogram and between the Kriging
-predictions and observed heat flow (after Li et al., 2018):
+Our goal is to find \(\Theta\) such that our interpolation,
+\(f(x_i; \Theta)\), gives the most useful outcome---defined by
+minimizing a cost function, \(C(\Theta)\), that represents the error
+between the set of real observations, \(Z(u_i)\) and predictions,
+\(\hat{Z}(u)\). We define a cost function that simultaneously considers
+the misfit between the experimental and modelled variogram and between
+the Kriging predictions and observed heat flow (after Li et al., 2018):
 
 \begin{equation}\protect\hypertarget{eq:cost}{}{ C(\Theta) = (1-w)C_F(\Theta) + wC_I(\Theta) }\label{eq:cost}\end{equation}
 
@@ -623,11 +632,13 @@ Parameter & Search Domain & Units \\
 Parameter & Search Domain & Units \\
 \midrule
 \endhead
-Model (m) & {[}Spherical, Exponential, Guassian{]} & NA \\
-Sill (s) & {[}1, \(5\times 10^3\){]} & \(\left(mW/m^2\right)^2\) \\
-Effective Range (a) & {[}1, \(1\times 10^6\){]} & meters \\
-Nugget (n) & {[}1, \(1\times 10^3\){]} & meters \\
-Local Search (S) & {[}1, \(1\times 10^6\){]} & meters \\
+Lag Cutoff (c) & {[}\(1/3\), \(1/15\){]} & NA \\
+Lag Window (w) & {[}1, 5{]} & NA \\
+Model (m) & {[}Spherical, Exponential{]} & NA \\
+Sill (s) & {[}1, \(1000\sqrt{2}\){]} & \(mWm^-2\) \\
+Effective Range (a) & {[}1, \(1\times 10^3\){]} & km \\
+Nugget (n) & {[}1, \(1000\sqrt{2}\){]} & \(mWm^-2\) \\
+Local Search (S) & {[}1, \(1\times 10^3\){]} & km \\
 \bottomrule
 \end{longtable}
 
@@ -675,11 +686,20 @@ supplementary information to support FAIR data policy (Wilkinson et al.,
 
 Summary statistics for surface heat flow observations by subduction zone
 segment are given in Table~\ref{tbl:hf.summary.table} and
-Figure~\ref{fig:hf.summary.plot}.
+Figure~\ref{fig:hf.summary.plot}. Surface heat flow is centered around
+45-70 \(mWm^{-2}\) (medians) and narrowly distributed with
+inter-quartile ranges (IQR) from 12 to 50 \(mWm^{-2}\) for most
+subduction zone segments, excluding outliers. Alaska Aleutians is the
+exception with a broad (IQR = \(250~mW^{-2}\)) range of heat flow with a
+median of 184 \(mWm^{-2}\). The whole distribution, including outliers,
+for all segments are strongly right-skewed with maximum heat flow values
+of several thousand of \(mWm^{-2}\) or more. Heat flow values above 250
+\(mWm^{-2}\) are considered geothermal areas by Lucazeau (2019), which
+we adopt as a relevant empirical limit for anomalously high heat flow.
 
 \hypertarget{tbl:hf.summary.table}{}
 \begin{longtable}[]{@{}lrrrrrrr@{}}
-\caption{\label{tbl:hf.summary.table}Summary of heat flow (\(mWm^{-2}\))
+\caption{\label{tbl:hf.summary.table}Heat flow (\(mWm^{-2}\))
 observations by subduction zone segment}\tabularnewline
 \toprule
 Segment & n & Min & Max & Median & IQR & Mean & Sigma \\
@@ -707,65 +727,56 @@ Vanuatu & 349 & 1 & 283 & 54 & 40 & 64 & 44 \\
 
 \begin{figure}[h]
 
-{\centering \includegraphics[width=0.8\linewidth,]{../figs/summary/hf_summary} 
+{\centering \includegraphics[width=0.8\linewidth,]{../figs/hf_summary} 
 
 }
 
-\caption{Distribution of heat flow observations by subduction zone segment. Heat flow near most segments are centered around $50~mWm^{-2}$ and highly skewed right. The skeweness likely represents sampling near hydrothermal systems, volcanic arcs, or spreading centers.}\label{fig:hf.summary.plot}
+\caption{Distribution of heat flow observations by subduction zone segment. Heat flow near most segments are centered around $50~mWm^{-2}$ and highly skewed right. The skeweness likely represents sampling near hydrothermal systems, volcanic arcs, or spreading centers. Data from Lucazeau (2019)}\label{fig:hf.summary.plot}
 \end{figure}
 
 \clearpage
 
 The optimal variogram models and associated errors \(C_F(\Theta)\) and
-\(C_I(\Theta)\) are given in Table~\ref{tbl:variogram.summary.table} and
-Figure~\ref{fig:variogram.summary.plot}.
+\(C_I(\Theta)\) are given in Table~\ref{tbl:variogram.summary.table}.
 
 \hypertarget{tbl:variogram.summary.table}{}
 \begin{longtable}[]{@{}llrr@{}}
-\caption{\label{tbl:variogram.summary.table}Summary of optimal varigram
-models by subduction zone segment}\tabularnewline
+\caption{\label{tbl:variogram.summary.table}Optimal varigram models by
+subduction zone segment}\tabularnewline
 \toprule
-Segment & Model & Sill & Range \\
+Segment & Model & Sill \([mWm^-{2}]\) & Range \([km]\) \\
 \midrule
 \endfirsthead
 \toprule
-Segment & Model & Sill & Range \\
+Segment & Model & Sill \([mWm^-{2}]\) & Range \([km]\) \\
 \midrule
 \endhead
-Alaska Aleutians & Exp & 3524.0857 & 117396.66 \\
-Andes & Exp & 3095.2423 & 286688.01 \\
-Central America & Sph & 1747.9487 & 256703.99 \\
-Kamchatka Marianas & Sph & 1701.1806 & 223685.45 \\
-Kyushu Ryukyu & Exp & 1626.2318 & 43751.86 \\
-Lesser Antilles & Sph & 519.1377 & 89079.02 \\
-New Britain Solomon & Exp & 816.7801 & 87822.61 \\
-N. Philippines & Sph & 1633.3002 & 31816.29 \\
-Sumatra Banda Sea & Exp & 1593.4728 & 140627.05 \\
-Scotia & Sph & 109.6181 & 27569.55 \\
-S. Philippines & Exp & 1705.4852 & 22516.53 \\
-Tonga New Zealand & Exp & 1274.7961 & 82583.96 \\
-Vanuatu & Sph & 1342.4631 & 42045.93 \\
+Alaska Aleutians & Sph & 284 & 219 \\
+Andes & Sph & 87 & 344 \\
+Central America & Sph & 86 & 342 \\
+Kamchatka Marianas & Exp & 692 & 274 \\
+Kyushu Ryukyu & Sph & 911 & 1676 \\
+Lesser Antilles & Exp & 37 & 98 \\
+N. Philippines & Sph & 1358 & 243 \\
+New Britain Solomon & Exp & 28 & 76 \\
+S. Philippines & Sph & 1163 & 421 \\
+Scotia & Exp & 9 & 4 \\
+Sumatra Banda Sea & Exp & 113 & 32 \\
+Tonga New Zealand & Sph & 47 & 131 \\
+Vanuatu & Sph & 48 & 574 \\
 \bottomrule
 \end{longtable}
-
-\begin{figure}[h]
-
-{\centering \includegraphics[width=0.8\linewidth,]{../figs/summary/variogram_summary} 
-
-}
-
-\caption{optimal variogram models by subduction zone segment. the y-axis is semivariance $(mwm^{-2})^2$. about half of the experimental variograms (dots) deviate, often periodically, from the variogram models. deviations often occur between 500 to 1000 km.}\label{fig:variogram.summary.plot}
-\end{figure}
 
 \clearpage
 
 Summary statistics for the interpolation differences are given in
-Table~\ref{tbl:diff.summary.table}.
+Table~\ref{tbl:diff.summary.table} and
+Figure~\ref{fig:diff.summary.plot}.
 
 \hypertarget{tbl:diff.summary.table}{}
 \begin{longtable}[]{@{}lrrrrrr@{}}
-\caption{\label{tbl:diff.summary.table}Summary of predicted heat flow
-differences by subduction zone segment}\tabularnewline
+\caption{\label{tbl:diff.summary.table}Predicted heat flow
+(\(mWm^{-2}\)) differences by subduction zone segment}\tabularnewline
 \toprule
 Segment & Min & Max & Median & IQR & Mean & Sigma \\
 \midrule
@@ -774,19 +785,19 @@ Segment & Min & Max & Median & IQR & Mean & Sigma \\
 Segment & Min & Max & Median & IQR & Mean & Sigma \\
 \midrule
 \endhead
-Alaska Aleutians & -169 & 2784 & 2 & 18 & 7 & 72 \\
-Andes & -122 & 2313 & 3 & 33 & 13 & 70 \\
-Central America & -119 & 2777 & 8 & 66 & 49 & 149 \\
-Kamchatka Marianas & -136 & 305 & -1 & 17 & 2 & 17 \\
-Kyushu Ryukyu & -101 & 174 & 1 & 21 & 4 & 20 \\
-Lesser Antilles & -53 & 666 & 2 & 16 & 12 & 39 \\
-New Britain Solomon & -81 & 236 & 2 & 21 & 5 & 20 \\
-N. Philippines & -66 & 296 & 4 & 19 & 7 & 21 \\
-Sumatra Banda Sea & -129 & 372 & 2 & 18 & 5 & 19 \\
-Scotia & -59 & 1004 & -1 & 26 & 8 & 33 \\
-S. Philippines & -79 & 384 & 3 & 24 & 6 & 22 \\
-Tonga New Zealand & -122 & 1672 & -6 & 21 & 1 & 29 \\
-Vanuatu & -88 & 1701 & 3 & 29 & 7 & 39 \\
+Alaska Aleutians & -550 & 2690 & -2 & 20 & 3 & 71 \\
+Andes & -188 & 2336 & 2 & 35 & 13 & 72 \\
+Central America & -189 & 2731 & 8 & 62 & 44 & 146 \\
+Kamchatka Marianas & -2777 & 297 & 4 & 15 & 4 & 45 \\
+Kyushu Ryukyu & -2781 & 168 & 5 & 24 & 2 & 85 \\
+Lesser Antilles & -103 & 572 & 0 & 16 & 6 & 31 \\
+N. Philippines & -2800 & 278 & 0 & 26 & -5 & 94 \\
+New Britain Solomon & -81 & 240 & 1 & 22 & 5 & 20 \\
+S. Philippines & -274 & 375 & 5 & 26 & 7 & 29 \\
+Scotia & -62 & 1001 & -4 & 24 & 5 & 33 \\
+Sumatra Banda Sea & -243 & 385 & -2 & 20 & 1 & 19 \\
+Tonga New Zealand & -113 & 1695 & -9 & 23 & -2 & 30 \\
+Vanuatu & -166 & 1657 & 7 & 27 & 8 & 40 \\
 \bottomrule
 \end{longtable}
 

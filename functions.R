@@ -10,7 +10,7 @@ c('magrittr', 'ggplot2', 'tidyr', 'readr', 'purrr',
 	'gstat', 'ggsflabel', 'sf', 'ggrepel', 'patchwork',
 	'cowplot', 'dplyr') -> p.list
 
-cat('Loading libraries', p.list, sep = '\n')
+cat('Loading libraries:', p.list, sep = '\n')
 
 # auto-load quietly
 sapply(p.list, sshhh)
@@ -70,8 +70,8 @@ read_latlong <- function(files, filenames = NULL, crs) {
 f.obj <- function(
   data,
   param,
-  lags = 15,
-  lag.cutoff = 3,
+	cutoff = 3,
+	lag.start = 1,
   v.mod = 0,
   v.sill = NA,
   v.range = NA,
@@ -79,13 +79,6 @@ f.obj <- function(
   maxdist = Inf,
   fold = 10
 ) {
-  # Variogram cutoff
-  max(st_distance(data))/lag.cutoff -> cutoff
-  # Experimental variogram
-  variogram(get(param)~1,
-            locations = data,
-            cutoff = as.vector(cutoff),
-            width = as.vector(cutoff/lags)) -> v
   # Variogram model discritization formula
   if(v.mod >= 0 && v.mod < 1) {
     v.mod <- 'Sph'
@@ -94,8 +87,18 @@ f.obj <- function(
   } else if(v.mod >= 2 && v.mod <= 3) {
     v.mod <- 'Gau'
   }
+	# Experimental variogram
+	cutoff <- max(st_distance(data))/cutoff
+	lags <- 15
+	width <- as.vector(cutoff)/lags
+	shift.cutoff <- width*(lags + lag.start)
+	v <- variogram(get(param)~1,
+						locations = data,
+						cutoff = shift.cutoff,
+						width = width)
+	v.grm <- v[lag.start:nrow(v),]
   # Model variogram
-  fit.variogram(v, 
+  fit.variogram(v.grm, 
 		vgm(psill = v.sill, 
 		    model = v.mod, 
 		    range = v.range,
@@ -140,41 +143,53 @@ Krige <- function(data,
 # Optimize krige results
 Krige_opt <- function(seg.name,
 											data,
-											domain,
 											param,
 											n.init = 50,
 											maxitr = 200,
 											run = 50){
 				# Cost function (to minimize)
+				cat('Ten-fold cross-validation over',
+						nrow(data), 'grid points\n')
 				cat('Defining cost function\n')
 				v.opt <- function(x){
 				  f.obj(data = data,
-				            param = param,
-				            v.mod = x[1],
-				            v.sill = x[2],
-				            v.range = x[3],
-				            maxdist = x[4])}
+				        param = param,
+								cutoff = x[1],
+								lag.start = x[2],
+				        v.mod = x[3],
+				        v.sill = x[4],
+				        v.range = x[5],
+								v.nug = x[6],
+				        maxdist = x[7])}
 				# Suggested chromosomes for initial population
 				cat('Initializing', n.init, 'chromosomes\n')
 				tibble(
+					cutoff = runif(n.init, 3, 15),
+					lag.start = runif(n.init, 1, 5),
 				  v.mod = runif(n.init, 0, 3),
-				  v.sill = runif(n.init, 1, 5000),
+				  v.sill = runif(n.init, 1, 2000000),
 				  v.range = runif(n.init, 1, 1000000),
-					v.nug = runif(n.init, 0, 5000),
-				  maxdist = runif(n.init, 1, 1000000)
+					v.nug = runif(n.init, 0, 2000000),
+				  maxdist = runif(n.init, 1, 10000000)
 				) %>%
  				as.matrix() -> suggestions
 				# Genetic algorithm (GA) optimization
 				cat('Optimizing using genetic algorithm with:\n',
 						'Population:', n.init, '\n',
-						'Max iterations:', maxitr, '\n',
+						'Max generations:', maxitr, '\n',
 						'Run cutoff:', run, '\n')
 				opt <- try(
 					GA::ga(type = "real-valued", 
 				         fitness = function(x) -v.opt(x),
-				         lower = c(1, 1, 1, 0, 1),
-				         upper = c(3, 8000, 1000000, 8000, 1000000),
-				         names = c('v.mod', 'v.sill', 'v.range', 'v.nug', 'maxdist'),
+				         lower = c(3, 1, 0, 1, 1, 0, 1),
+				         upper = c(15, 5, 3, 2000000, 1000000, 2000000, 10000000),
+				         names = c('cutoff',
+													 'lag.start',
+													 'v.mod',
+													 'v.sill',
+													 'v.range',
+													 'v.nug',
+													 'maxdist'),
 				         suggestions = suggestions,
 				         popSize = n.init,
 				         maxiter = maxitr,
@@ -192,29 +207,42 @@ Krige_opt <- function(seg.name,
 # Krige, take difference, and visualize
 Krige_diff <- function(seg.name,
 											 data,
+											 v.grm,
 											 v.mod,
-											 param,
 											 grid,
-											 domain,
+											 param,
 											 data.compare){
-				k <-
-				  Krige(data = data,
-								v.mod = v.mod,
-								param = param,
-								grid = grid)
+				v <- fit.variogram(v.grm, model = v.mod)
+				k <- Krige(data, v, param, grid)
 				# Difference
 				shp.hf.pred <-
 				  data.compare %>%
 					rename(hf.pred.luca = HF_pred,
 								 sigma.luca = sHF_pred,
 								 hf.obs.luca = Hf_obs) %>%
-				  st_crop(k$krige.results) %>%
-				  mutate(hf.pred.krige = k$krige.results$hf,
-								 sigma.krige = round(sqrt(k$krige.results$variance)),
-				         hf.diff = hf.pred.luca - hf.pred.krige,
+				  st_crop(k) %>%
+				  mutate(hf.pred.krige = round(k$var1.pred, 1),
+								 sigma.krige = round(sqrt(k$var1.var), 1),
+				         hf.diff = round(hf.pred.luca - hf.pred.krige, 1),
 				         .before = geometry)
 			# Save
 				fname <- seg.name %>% stringr::str_replace(' ', '_')
-				assign(fname, list('k' = k, 'diff' = shp.hf.pred))
+				assign(fname, list('k' = k, 'v.grm' = v.grm, 'v.mod' = v, 'diff' = shp.hf.pred))
 				save(list = fname, file = paste0('data/diff/', fname, '_diff.RData'))
+}
+
+# Plot variogram
+plot_vgrm <- function(v.grm, v.mod, seg.name){
+				 ggplot() +
+					 geom_line(data = variogramLine(v.mod, maxdist = max(v.grm$dist)),
+										 aes(x = dist/1000, y = gamma)) +
+					 geom_point(data = v.grm, aes(x = dist/1000, y = gamma), size = 0.6) +
+					 labs(x = NULL, y = 'Semivariance', title = seg.name) +
+					 theme_classic() +
+					 theme(axis.text = element_text(color = 'black'),
+								 plot.title = element_text(hjust = 0.5),
+								 axis.text.y = element_blank(),
+								 axis.title.y = element_blank(),
+								 axis.ticks.y = element_blank(),
+								 axis.line.y = element_blank())
 }
