@@ -53,9 +53,9 @@ p <- shp.hf.crop %>%
 				ggplot() +
 				geom_boxplot(aes(x = hf, y = segment, group = segment),
 										 width = 0.5,
-										 outlier.size = 0.2,
+										 outlier.size = 0.5,
 										 outlier.color = rgb(0.5, 0.5, 0.5, 0.1)) +
-				labs(x = bquote(~mWm^-2),
+				labs(x = bquote('Surface heat flow'~(mWm^-2)),
 						 y = NULL,
 						 title = 'Heat flow observations by segment',
 						 caption = 'data from Lucazeau (2019)') +
@@ -82,9 +82,60 @@ purrr::map_df(fname, ~get(.x)$v.mod, .id = 'segment') %>%
 	rename(Segment = segment, Model = model,
 				 Sill = psill, Range = range) %>%
 	mutate('Sill' = round(sqrt(Sill)), 'Range' = round(Range/1000, 1)) -> variogram.summary
-
 cat('Variogram summary:\n')
 print(variogram.summary)
+
+# Visualize
+p1 <- variogram.summary %>%
+		ggplot() +
+		geom_bar(aes(x = Range, y = Segment), stat = 'identity') +
+		labs(x = 'Range (km)', y = NULL) +
+		scale_y_discrete(limits = rev(levels(as.factor(seg.names)))) +
+		theme_classic(base_size = 14)
+
+p2 <- variogram.summary %>%
+		mutate(seg.length = shp.sa.segs.robin.pacific %>%
+					 							st_length() %>%
+												as.vector()) %>%
+		ggplot() +
+		geom_point(aes(x = Range, y = seg.length/1000)) +
+		geom_text_repel(aes(x = Range, y = seg.length/1000, label = Segment), size = 3) +
+		labs(x = 'Range (km)', y = 'Segment Length (km)') +
+		theme_classic(base_size = 14)
+
+p3 <- variogram.summary %>%
+		mutate(n = hf.summary$n) %>%
+		ggplot() +
+		geom_point(aes(x = Range, y = n)) +
+		geom_text_repel(aes(x = Range, y = n, label = Segment), size = 3) +
+		labs(x = 'Range (km)', y = 'Number of observations') +
+		theme_classic(base_size = 14)
+
+purrr::map_df(shp.box, st_bbox) %>%
+		mutate(area = (xmax-xmin)*(ymax-ymin)) -> shp.area
+
+p4 <- variogram.summary %>%
+		mutate(area = as.vector(shp.area$area)) %>%
+		ggplot() +
+		geom_point(aes(x = Range, y = area/10^6)) +
+		geom_text_repel(aes(x = Range, y = area/10^6, label = Segment), size = 3) +
+		labs(x = 'Range (km)', y = bquote('Domain area'~(km^2))) +
+		theme_classic(base_size = 14)
+
+# Composition
+p <- p1 + p2 + p4 + p3 +
+		plot_annotation(tag_levels = 'a',
+										title = 'Variogram model range summary and correlations')
+
+# Save plot
+cat('Saving variogram model summary plot to:\nfigs/variogram_summary.png\n')
+
+ggsave(file = 'figs/variogram_summary.png',
+			 plot = p,
+			 device = 'png',
+			 type = 'cairo',
+			 width = 10,
+			 height = 10)
 
 # Interpolation difference
 purrr::map(fname, ~get(.x)$diff %>% st_set_geometry(NULL)) %>%
@@ -110,9 +161,9 @@ p <- hf.diff %>%
 				ggplot() +
 				geom_boxplot(aes(x = hf.diff, y = segment, group = segment),
 										 width = 0.5,
-										 outlier.size = 0.2,
+										 outlier.size = 0.5,
 										 outlier.color = rgb(0.5, 0.5, 0.5, 0.1)) +
-				labs(x = bquote(mWm^-2),
+				labs(x = bquote('Heat flow difference'~(mWm^-2)),
 						 y = NULL,
 						 title = 'Similarity vs. Kriging difference by segment') +
 				scale_x_continuous(limits = c(-2*max(hf.diff.summary$IQR), 2*max(hf.diff.summary$IQR))) +

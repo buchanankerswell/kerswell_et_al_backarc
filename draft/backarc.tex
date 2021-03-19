@@ -255,7 +255,7 @@ the choice of methodology.
 
 \begin{figure}[h]
 
-{\centering \includegraphics[width=1\linewidth,]{../figs/base/hf_luca} 
+{\centering \includegraphics[width=0.9\linewidth,]{../figs/base/hf_luca} 
 
 }
 
@@ -635,10 +635,10 @@ Parameter & Search Domain & Units \\
 Lag Cutoff (c) & {[}\(1/3\), \(1/15\){]} & NA \\
 Lag Window (w) & {[}1, 5{]} & NA \\
 Model (m) & {[}Spherical, Exponential{]} & NA \\
-Sill (s) & {[}1, \(1000\sqrt{2}\){]} & \(mWm^-2\) \\
-Effective Range (a) & {[}1, \(1\times 10^3\){]} & km \\
-Nugget (n) & {[}1, \(1000\sqrt{2}\){]} & \(mWm^-2\) \\
-Local Search (S) & {[}1, \(1\times 10^3\){]} & km \\
+Sill (s) & {[}1, \(1000\sqrt{2}\){]} & \(mWm^{-2}\) \\
+Effective Range (a) & {[}1, 1000{]} & km \\
+Nugget (n) & {[}1, \(1000\sqrt{2}\){]} & \(mWm^{-2}\) \\
+Local Search (S) & {[}1, 1000{]} & km \\
 \bottomrule
 \end{longtable}
 
@@ -656,22 +656,27 @@ using the \texttt{proj} string (PROJ contributors, 2021):
 +ellps=WGS84 +datum=WGS84 +units=m +no_defs
 \end{verbatim}
 
-All geographic operations, including Kriging, are performed in the above
+All geographic operations, including Kriging and taking the difference
+with Lucazeau (2019)'s heat flow predictions, are performed in the above
 CRS using the general-purpose functions in the ``R'' package \texttt{sf}
 (Pebesma, 2018). We define the Kriging domain near individual arc
 segments in two steps: 1) 1000 \(km\) buffers are drawn around the arc
 segments as defined by Syracuse \& Abers (2006). 2) The bounding box of
 the 1000 \(km\) buffer is expanded by 10\% on all sides
-(Figure~\ref{fig:segments}). We provide the complete NGHF dataset
-(Lucazeau, 2019), filtered and parsed NGHF dataset, heat flow
-interpolations (from Lucazeau, 2019, and this study), and our code as
-supplementary information to support FAIR data policy (Wilkinson et al.,
-2016). These items can also be retrieved from the official repository at
+(Figure~\ref{fig:segments}). We use Lucazeau (2019)'s grid for Kriging
+predictions so differences can be taken point-by-point at the exact same
+locations.
+
+We provide the complete NGHF dataset (Lucazeau, 2019), filtered and
+parsed NGHF dataset, heat flow interpolations (from Lucazeau, 2019, and
+this study), and our code as supplementary information to support FAIR
+data policy (Wilkinson et al., 2016). These materials can also be
+retrieved from the official repository at
 \url{https://doi.org/10.17605/OSF.IO/CA6ZU}.
 
 \begin{figure}[h]
 
-{\centering \includegraphics[width=1\linewidth,]{../figs/base/segs_comp} 
+{\centering \includegraphics[width=0.9\linewidth,]{../figs/base/segs_comp} 
 
 }
 
@@ -686,21 +691,21 @@ supplementary information to support FAIR data policy (Wilkinson et al.,
 
 Summary statistics for surface heat flow observations by subduction zone
 segment are given in Table~\ref{tbl:hf.summary.table} and
-Figure~\ref{fig:hf.summary.plot}. Surface heat flow is centered around
-45-70 \(mWm^{-2}\) (medians) and narrowly distributed with
-inter-quartile ranges (IQR) from 12 to 50 \(mWm^{-2}\) for most
-subduction zone segments, excluding outliers. Alaska Aleutians is the
-exception with a broad (IQR = \(250~mW^{-2}\)) range of heat flow with a
-median of 184 \(mWm^{-2}\). The whole distribution, including outliers,
-for all segments are strongly right-skewed with maximum heat flow values
-of several thousand of \(mWm^{-2}\) or more. Heat flow values above 250
+Figure~\ref{fig:hf.summary.plot}. Surface heat flow is median-centered
+around 45-70 \(mWm^{-2}\) and narrowly distributed (excluding outliers)
+with inter-quartile ranges (IQR) from 12 to 50 \(mWm^{-2}\) for most
+subduction zone segments. Alaska Aleutians is the exception with a
+higher median of 184 \(mWm^{-2}\) and broader range (IQR =
+\(250~mW^{-2}\)). The whole distributions (including outliers) for all
+segments are strongly right-skewed with maximum heat flow values of
+several thousand of \(mWm^{-2}\) or more. Heat flow values above 250
 \(mWm^{-2}\) are considered geothermal areas by Lucazeau (2019), which
 we adopt as a relevant empirical limit for anomalously high heat flow.
 
 \hypertarget{tbl:hf.summary.table}{}
 \begin{longtable}[]{@{}lrrrrrrr@{}}
 \caption{\label{tbl:hf.summary.table}Heat flow (\(mWm^{-2}\))
-observations by subduction zone segment}\tabularnewline
+observations}\tabularnewline
 \toprule
 Segment & n & Min & Max & Median & IQR & Mean & Sigma \\
 \midrule
@@ -727,28 +732,42 @@ Vanuatu & 349 & 1 & 283 & 54 & 40 & 64 & 44 \\
 
 \begin{figure}[h]
 
-{\centering \includegraphics[width=0.8\linewidth,]{../figs/hf_summary} 
+{\centering \includegraphics[width=0.9\linewidth,]{../figs/hf_summary} 
 
 }
 
-\caption{Distribution of heat flow observations by subduction zone segment. Heat flow near most segments are centered around $50~mWm^{-2}$ and highly skewed right. The skeweness likely represents sampling near hydrothermal systems, volcanic arcs, or spreading centers. Data from Lucazeau (2019)}\label{fig:hf.summary.plot}
+\caption{Distribution of heat flow observations. Heat flow near most segments is centered around $50~mWm^{-2}$ and highly skewed right (shadowy dot outliers). The skeweness likely represents sampling near geothermal systems, volcanic arcs, or spreading centers. Data from Lucazeau (2019).}\label{fig:hf.summary.plot}
 \end{figure}
 
 \clearpage
 
+\subsection{Variogram Models}
+
 The optimal variogram models and associated errors \(C_F(\Theta)\) and
 \(C_I(\Theta)\) are given in Table~\ref{tbl:variogram.summary.table}.
+Almost twice as many experimental variograms are fit with spherical
+models (8) compared to exponential models (5). Variogram model sills
+vary substantially among the subduction zone segments between 9 and 1538
+\(mWm^{-2}\). Variogram model ranges also vary substantially among
+segments from 4 to 1676 \(km\).
+
+No apparent correlation exists between variogram model range and
+subduction zone segment length, number of heat flow observations, nor
+domain area (Figure~\ref{fig:variogram.summary.plot}). Most subduction
+zone segments show spatial dependence between 9 and \(\leq\) 500 \(km\),
+except for Kyushu Ryukyu and Vanuatu, irrespective of the amount of
+observations or segment size.
 
 \hypertarget{tbl:variogram.summary.table}{}
 \begin{longtable}[]{@{}llrr@{}}
-\caption{\label{tbl:variogram.summary.table}Optimal varigram models by
-subduction zone segment}\tabularnewline
+\caption{\label{tbl:variogram.summary.table}Optimal varigram
+models}\tabularnewline
 \toprule
-Segment & Model & Sill \([mWm^-{2}]\) & Range \([km]\) \\
+Segment & Model & Sill \([mWm^{-2}]\) & Range \([km]\) \\
 \midrule
 \endfirsthead
 \toprule
-Segment & Model & Sill \([mWm^-{2}]\) & Range \([km]\) \\
+Segment & Model & Sill \([mWm^{-2}]\) & Range \([km]\) \\
 \midrule
 \endhead
 Alaska Aleutians & Sph & 284 & 219 \\
@@ -767,7 +786,18 @@ Vanuatu & Sph & 48 & 574 \\
 \bottomrule
 \end{longtable}
 
+\begin{figure}[h]
+
+{\centering \includegraphics[width=0.9\linewidth,]{../figs/variogram_summary} 
+
+}
+
+\caption{Summary of variogram model ranges and correlations with other features. (a) Variogram model ranges are variable, but generally below 500 km. Variogram model ranges show no correlation with segment length (b), number of heat flow observations (c), nor domain area (d). The spatial dependenc of heat flow is apparently independent of these parameters.}\label{fig:variogram.summary.plot}
+\end{figure}
+
 \clearpage
+
+\subsection{Interpolation Comparison}
 
 Summary statistics for the interpolation differences are given in
 Table~\ref{tbl:diff.summary.table} and
@@ -776,7 +806,7 @@ Figure~\ref{fig:diff.summary.plot}.
 \hypertarget{tbl:diff.summary.table}{}
 \begin{longtable}[]{@{}lrrrrrr@{}}
 \caption{\label{tbl:diff.summary.table}Predicted heat flow
-(\(mWm^{-2}\)) differences by subduction zone segment}\tabularnewline
+(\(mWm^{-2}\)) differences}\tabularnewline
 \toprule
 Segment & Min & Max & Median & IQR & Mean & Sigma \\
 \midrule
@@ -801,9 +831,21 @@ Vanuatu & -166 & 1657 & 7 & 27 & 8 & 40 \\
 \bottomrule
 \end{longtable}
 
+\begin{figure}[h]
+
+{\centering \includegraphics[width=0.9\linewidth,]{../figs/hf_diff_summary} 
+
+}
+
+\caption{Point-by-point differences of predicted heat flow between similarity and Kriging interpolations. The differences for most subduction zone segments are median-centered at or near-zero with IQRs from 16 to 62. Outliers (shadowy dots) extend to extreme positive and negative differences.}\label{fig:diff.summary.plot}
+\end{figure}
+
 \section{Discussion}
 
-\section{Conclusions}
+Variogram model ranges characterize the maximum separation distance at
+which pairs of points are spatially dependent (Matheron, 1963).
+Therefore, the range is the most important parameter to evaluate when
+considering spatial continuity of heat flow. \# Conclusions
 
 \acknowledgments
 

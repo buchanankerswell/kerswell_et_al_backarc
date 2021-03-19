@@ -1,4 +1,4 @@
-This is pdfTeX, Version 3.14159265-2.6-1.40.21 (TeX Live 2020) (preloaded format=pdflatex 2020.4.7)  18 MAR 2021 11:26
+This is pdfTeX, Version 3.14159265-2.6-1.40.21 (TeX Live 2020) (preloaded format=pdflatex 2020.4.7)  18 MAR 2021 15:28
 entering extended mode
  restricted \write18 enabled.
  %&-line parsing enabled.
@@ -651,7 +651,7 @@ Underfull \vbox (badness 10000) has occurred while \output is active []
 File: ../figs/base/hf_luca.png Graphic file (type png)
 <use ../figs/base/hf_luca.png>
 Package pdftex.def Info: ../figs/base/hf_luca.png  used on input line 258.
-(pdftex.def)             Requested size: 397.48499pt x 397.19066pt.
+(pdftex.def)             Requested size: 357.73405pt x 357.4656pt.
 
 Underfull \hbox (badness 10000) in paragraph at lines 262--262
 [] \OT1/cmr/m/n/8 Fig-ure  1: |The NGHF dataset. (a) The com-plete dataset (n =
@@ -1572,85 +1572,90 @@ Overfull \hbox (1.15448pt too wide) in paragraph at lines 647--653
  []
 
 [11]
-Overfull \hbox (8.71014pt too wide) in paragraph at lines 659--671
-[]\OT1/cmr/m/n/10 All ge-o-graphic op-er-a-tions, in-clud-ing Krig-ing, are per
--formed in the above CRS us- 
+Overfull \hbox (23.5991pt too wide) in paragraph at lines 659--669
+[]\OT1/cmr/m/n/10 All ge-o-graphic op-er-a-tions, in-clud-ing Krig-ing and tak-
+ing the dif-fer-ence with Lu-cazeau 
  []
 
 
-Overfull \hbox (15.8489pt too wide) in paragraph at lines 659--671
-\OT1/cmr/m/n/10 ing the general-purpose func-tions in the ``R'' pack-age \OT1/c
-mtt/m/n/10 sf \OT1/cmr/m/n/10 (Pebesma, 2018). We de-fine the 
+Overfull \hbox (18.71014pt too wide) in paragraph at lines 659--669
+\OT1/cmr/m/n/10 (2019)'s heat flow pre-dic-tions, are per-formed in the above C
+RS us-ing the general-purpose 
  []
 
 
-Overfull \hbox (15.70555pt too wide) in paragraph at lines 659--671
-\OT1/cmr/m/n/10 Krig-ing do-main near in-di-vid-ual arc seg-ments in two steps:
- 1) 1000 $\OML/cmm/m/it/10 km$ \OT1/cmr/m/n/10 buffers are drawn 
+Overfull \hbox (3.84894pt too wide) in paragraph at lines 659--669
+\OT1/cmr/m/n/10 func-tions in the ``R'' pack-age \OT1/cmtt/m/n/10 sf \OT1/cmr/m
+/n/10 (Pebesma, 2018). We de-fine the Krig-ing do-main near 
  []
 
 
-Overfull \hbox (6.9046pt too wide) in paragraph at lines 659--671
-\OT1/cmr/m/n/10 around the arc seg-ments as de-fined by Syra-cuse & Abers (2006
-). 2) The bound-ing box 
+Overfull \hbox (9.6499pt too wide) in paragraph at lines 659--669
+\OT1/cmr/m/n/10 in-di-vid-ual arc seg-ments in two steps: 1) 1000 $\OML/cmm/m/i
+t/10 km$ \OT1/cmr/m/n/10 buffers are drawn around the arc seg- 
  []
 
 
-Overfull \hbox (9.53886pt too wide) in paragraph at lines 659--671
-\OT1/cmr/m/n/10 of the 1000 $\OML/cmm/m/it/10 km$ \OT1/cmr/m/n/10 buffer is ex-
-panded by 10% on all sides (Fig-ure 2). We pro-vide the com- 
+Overfull \hbox (23.90005pt too wide) in paragraph at lines 659--669
+\OT1/cmr/m/n/10 ments as de-fined by Syra-cuse & Abers (2006). 2) The bound-ing
+ box of the 1000 $\OML/cmm/m/it/10 km$ \OT1/cmr/m/n/10 buffer 
  []
 
 
-Overfull \hbox (9.79346pt too wide) in paragraph at lines 659--671
-\OT1/cmr/m/n/10 plete NGHF dataset (Lu-cazeau, 2019), fil-tered and parsed NGHF
- dataset, heat flow in- 
+Overfull \hbox (5.23793pt too wide) in paragraph at lines 659--669
+\OT1/cmr/m/n/10 is ex-panded by 10% on all sides (Fig-ure 2). We use Lu-cazeau 
+(2019)'s grid for Krig-ing 
  []
 
 
-Overfull \hbox (7.04356pt too wide) in paragraph at lines 659--671
-\OT1/cmr/m/n/10 ter-po-la-tions (from Lu-cazeau, 2019, and this study), and our
- code as sup-ple-men-tary in- 
+Overfull \hbox (25.71011pt too wide) in paragraph at lines 670--676
+[]\OT1/cmr/m/n/10 We pro-vide the com-plete NGHF dataset (Lu-cazeau, 2019), fil
+-tered and parsed NGHF 
  []
 
 
-Overfull \hbox (2.40465pt too wide) in paragraph at lines 659--671
-\OT1/cmr/m/n/10 for-ma-tion to sup-port FAIR data pol-icy (Wilkin-son et al., 2
-016). These items can also 
+Overfull \hbox (1.40466pt too wide) in paragraph at lines 670--676
+\OT1/cmr/m/n/10 dataset, heat flow in-ter-po-la-tions (from Lu-cazeau, 2019, an
+d this study), and our code 
  []
 
 
-Overfull \hbox (10.95811pt too wide) in paragraph at lines 659--671
-\OT1/cmr/m/n/10 be re-trieved from the of-fi-cial repos-i-tory at $\OT1/cmtt/m/
-n/10 https :// doi [] .org / 10 [] .17605 / OSF [] .IO / CA6ZU$\OT1/cmr/m/n/10 
-.  
+Overfull \hbox (25.21028pt too wide) in paragraph at lines 670--676
+\OT1/cmr/m/n/10 as sup-ple-men-tary in-for-ma-tion to sup-port FAIR data pol-ic
+y (Wilkin-son et al., 2016). These 
+ []
+
+
+Overfull \hbox (26.98657pt too wide) in paragraph at lines 670--676
+\OT1/cmr/m/n/10 ma-te-ri-als can also be re-trieved from the of-fi-cial repos-i
+-tory at $\OT1/cmtt/m/n/10 https :// doi [] .org / 10 [] .17605 / 
  []
 
 <../figs/base/segs_comp.png, id=57, 883.6212pt x 1057.7919pt>
 File: ../figs/base/segs_comp.png Graphic file (type png)
 <use ../figs/base/segs_comp.png>
-Package pdftex.def Info: ../figs/base/segs_comp.png  used on input line 674.
-(pdftex.def)             Requested size: 397.48499pt x 475.84055pt.
+Package pdftex.def Info: ../figs/base/segs_comp.png  used on input line 679.
+(pdftex.def)             Requested size: 357.73405pt x 428.25812pt.
 
-Underfull \hbox (badness 10000) in paragraph at lines 678--678
+Underfull \hbox (badness 10000) in paragraph at lines 683--683
 [] \OT1/cmr/m/n/8 Fig-ure  2: |Sub-duc-tion zone seg-ments and in-ter-po-la-tio
 n do-main. (a) Heat flow is in-ter-po-lated around
  []
 
 
-Underfull \hbox (badness 10000) in paragraph at lines 678--678
+Underfull \hbox (badness 10000) in paragraph at lines 683--683
 \OT1/cmr/m/n/8 thir-teen sub-duc-tion zone seg-ments by (b) draw-ing a 1000km b
 uffer (light-est blue) around each seg-ment
  []
 
 
-Underfull \hbox (badness 10000) in paragraph at lines 678--678
+Underfull \hbox (badness 10000) in paragraph at lines 683--683
 \OT1/cmr/m/n/8 and ex-pand-ing the buffer's bound-ing box (medium blue) by 10% 
 on all sides (dark-est blue). (c) The
  []
 
 
-Underfull \hbox (badness 10000) in paragraph at lines 678--678
+Underfull \hbox (badness 10000) in paragraph at lines 683--683
 \OT1/cmr/m/n/8 NGHF dataset is cropped within the largest rect-an-gle. Data fro
 m Syra-cuse & Abers (2006) and Lu-cazeau
  []
@@ -1659,69 +1664,69 @@ m Syra-cuse & Abers (2006) and Lu-cazeau
 LaTeX Warning: `h' float specifier changed to `ht'.
 
 [12] [13 <../figs/base/segs_comp.png (PNG copy)>]
-Overfull \hbox (10.2379pt too wide) in paragraph at lines 687--699
+Overfull \hbox (10.2379pt too wide) in paragraph at lines 692--704
 []\OT1/cmr/m/n/10 Summary statis-tics for sur-face heat flow ob-ser-va-tions by
  sub-duc-tion zone seg-ment 
  []
 
 
-Overfull \hbox (7.9231pt too wide) in paragraph at lines 687--699
-\OT1/cmr/m/n/10 are given in Ta-ble 2 and Fig-ure 3. Sur-face heat flow is cen-
-tered around 45-70 $\OML/cmm/m/it/10 mWm[]$ 
+Overfull \hbox (0.46008pt too wide) in paragraph at lines 692--704
+\OT1/cmr/m/n/10 are given in Ta-ble 2 and Fig-ure 3. Sur-face heat flow is medi
+an-centered around 45-70 
  []
 
 
-Overfull \hbox (31.70102pt too wide) in paragraph at lines 687--699
-\OT1/cmr/m/n/10 (me-di-ans) and nar-rowly dis-tributed with inter-quartile rang
-es (IQR) from 12 to 50 $\OML/cmm/m/it/10 mWm[]$ 
+Overfull \hbox (10.58986pt too wide) in paragraph at lines 692--704
+\OML/cmm/m/it/10 mWm[]$ \OT1/cmr/m/n/10 and nar-rowly dis-tributed (ex-clud-ing
+ out-liers) with inter-quartile ranges (IQR) 
  []
 
 
-Overfull \hbox (2.01567pt too wide) in paragraph at lines 687--699
-\OT1/cmr/m/n/10 for most sub-duc-tion zone seg-ments, ex-clud-ing out-liers. Al
-aska Aleu-tians is the ex-cep- 
+Overfull \hbox (9.42316pt too wide) in paragraph at lines 692--704
+\OT1/cmr/m/n/10 from 12 to 50 $\OML/cmm/m/it/10 mWm[]$ \OT1/cmr/m/n/10 for most
+ sub-duc-tion zone seg-ments. Alaska Aleu-tians is the ex- 
  []
 
 
-Overfull \hbox (18.96722pt too wide) in paragraph at lines 687--699
-\OT1/cmr/m/n/10 tion with a broad (IQR = $250 []\OML/cmm/m/it/10 mW[]$\OT1/cmr/
-m/n/10 ) range of heat flow with a me-dian of 184 $\OML/cmm/m/it/10 mWm[]$\OT1/
-cmr/m/n/10 . 
+Overfull \hbox (6.24498pt too wide) in paragraph at lines 692--704
+\OT1/cmr/m/n/10 cep-tion with a higher me-dian of 184 $\OML/cmm/m/it/10 mWm[]$ 
+\OT1/cmr/m/n/10 and broader range (IQR = $250 []\OML/cmm/m/it/10 mW[]$\OT1/cmr/
+m/n/10 ). 
  []
 
 
-Overfull \hbox (18.96014pt too wide) in paragraph at lines 687--699
-\OT1/cmr/m/n/10 The whole dis-tri-bu-tion, in-clud-ing out-liers, for all seg-m
-ents are strongly right-skewed with 
+Overfull \hbox (2.349pt too wide) in paragraph at lines 692--704
+\OT1/cmr/m/n/10 The whole dis-tri-bu-tions (in-clud-ing out-liers) for all seg-
+ments are strongly right-skewed 
  []
 
 
-Overfull \hbox (0.11761pt too wide) in paragraph at lines 687--699
-\OT1/cmr/m/n/10 max-i-mum heat flow val-ues of sev-eral thou-sand of $\OML/cmm/
-m/it/10 mWm[]$ \OT1/cmr/m/n/10 or more. Heat flow val-ues 
+Overfull \hbox (12.2843pt too wide) in paragraph at lines 692--704
+\OT1/cmr/m/n/10 with max-i-mum heat flow val-ues of sev-eral thou-sand of $\OML
+/cmm/m/it/10 mWm[]$ \OT1/cmr/m/n/10 or more. Heat flow val- 
  []
 
 
-Overfull \hbox (18.78426pt too wide) in paragraph at lines 687--699
-\OT1/cmr/m/n/10 above 250 $\OML/cmm/m/it/10 mWm[]$ \OT1/cmr/m/n/10 are con-sid-
-ered geother-mal ar-eas by Lu-cazeau (2019), which we adopt 
+Overfull \hbox (7.72864pt too wide) in paragraph at lines 692--704
+\OT1/cmr/m/n/10 ues above 250 $\OML/cmm/m/it/10 mWm[]$ \OT1/cmr/m/n/10 are con-
+sid-ered geother-mal ar-eas by Lu-cazeau (2019), which we 
  []
 
 <../figs/hf_summary.png, id=65, 505.89pt x 505.89pt>
 File: ../figs/hf_summary.png Graphic file (type png)
 <use ../figs/hf_summary.png>
-Package pdftex.def Info: ../figs/hf_summary.png  used on input line 730.
-(pdftex.def)             Requested size: 317.9892pt x 317.99448pt.
+Package pdftex.def Info: ../figs/hf_summary.png  used on input line 735.
+(pdftex.def)             Requested size: 357.73405pt x 357.7409pt.
 
-Underfull \hbox (badness 10000) in paragraph at lines 734--734
-[] \OT1/cmr/m/n/8 Fig-ure  3: |Dis-tri-bu-tion of heat flow ob-ser-va-tions by 
-sub-duc-tion zone seg-ment. Heat flow near most seg-
+Underfull \hbox (badness 10000) in paragraph at lines 739--739
+[] \OT1/cmr/m/n/8 Fig-ure  3: |Dis-tri-bu-tion of heat flow ob-ser-va-tions. He
+at flow near most seg-ments is cen-tered around
  []
 
 
-Underfull \hbox (badness 10000) in paragraph at lines 734--734
-\OT1/cmr/m/n/8 ments are cen-tered around $50 []\OML/cmm/m/it/8 mWm[]$ \OT1/cmr
-/m/n/8 and highly skewed right. The skewe-ness likely rep-re-sents sam-pling
+Underfull \hbox (badness 10000) in paragraph at lines 739--739
+\OT1/cmr/m/n/8 50 []\OML/cmm/m/it/8 mWm[]$ \OT1/cmr/m/n/8 and highly skewed rig
+ht (shad-owy dot out-liers). The skewe-ness likely rep-re-sents sam-pling
  []
 
 
@@ -1730,120 +1735,217 @@ LaTeX Warning: `h' float specifier changed to `ht'.
 [14
 
 ] [15 <../figs/hf_summary.png>]
-Overfull \hbox (6.15736pt too wide) in paragraph at lines 739--741
+Overfull \hbox (6.15736pt too wide) in paragraph at lines 746--753
 []\OT1/cmr/m/n/10 The op-ti-mal var-i-ogram mod-els and as-so-ci-ated er-rors $
 \OML/cmm/m/it/10 C[]\OT1/cmr/m/n/10 (^^B)$ and $\OML/cmm/m/it/10 C[]\OT1/cmr/m/
 n/10 (^^B)$ are given 
  []
 
+
+Overfull \hbox (5.21013pt too wide) in paragraph at lines 746--753
+\OT1/cmr/m/n/10 in Ta-ble 3. Al-most twice as many ex-per-i-men-tal var-i-ogram
+s are fit with spher-i-cal mod- 
+ []
+
+
+Overfull \hbox (30.57143pt too wide) in paragraph at lines 746--753
+\OT1/cmr/m/n/10 els (8) com-pared to ex-po-nen-tial mod-els (5). Var-i-ogram mo
+del sills vary sub-stan-tially among 
+ []
+
+
+Overfull \hbox (3.17314pt too wide) in paragraph at lines 746--753
+\OT1/cmr/m/n/10 the sub-duc-tion zone seg-ments be-tween 9 and 1538 $\OML/cmm/m
+/it/10 mWm[]$\OT1/cmr/m/n/10 . Var-i-ogram model ranges 
+ []
+
+
+Overfull \hbox (18.9046pt too wide) in paragraph at lines 754--760
+[]\OT1/cmr/m/n/10 No ap-par-ent cor-re-la-tion ex-ists be-tween var-i-ogram mod
+el range and sub-duc-tion zone 
+ []
+
+
+Overfull \hbox (19.5713pt too wide) in paragraph at lines 754--760
+\OT1/cmr/m/n/10 seg-ment length, num-ber of heat flow ob-ser-va-tions, nor do-m
+ain area (Fig-ure 4). Most sub- 
+ []
+
+
+Overfull \hbox (35.01108pt too wide) in paragraph at lines 754--760
+\OT1/cmr/m/n/10 duc-tion zone seg-ments show spa-tial de-pen-dence be-tween 9 a
+nd $\OMS/cmsy/m/n/10 ^^T$ \OT1/cmr/m/n/10 500 $\OML/cmm/m/it/10 km$\OT1/cmr/m/n
+/10 , ex-cept for Kyushu 
+ []
+
+<../figs/variogram_summary.png, id=75, 722.7pt x 722.7pt>
+File: ../figs/variogram_summary.png Graphic file (type png)
+<use ../figs/variogram_summary.png>
+Package pdftex.def Info: ../figs/variogram_summary.png  used on input line 791.
+
+(pdftex.def)             Requested size: 357.73405pt x 357.73209pt.
+
+Underfull \hbox (badness 10000) in paragraph at lines 795--795
+[] \OT1/cmr/m/n/8 Fig-ure  4: |Sum-mary of var-i-ogram model ranges and cor-re-
+la-tions with other fea-tures. (a) Var-i-ogram
+ []
+
+
+Underfull \hbox (badness 10000) in paragraph at lines 795--795
+\OT1/cmr/m/n/8 model ranges are vari-able, but gen-er-ally be-low 500 km. Var-i
+-ogram model ranges show no cor-re-la-tion with
+ []
+
+
+Underfull \hbox (badness 10000) in paragraph at lines 795--795
+\OT1/cmr/m/n/8 seg-ment length (b), num-ber of heat flow ob-ser-va-tions (c), n
+or do-main area (d). The spa-tial de-pen-denc of
+ []
+
+
+LaTeX Warning: `h' float specifier changed to `ht'.
+
 [16
 
-]
-
-LaTeX Warning: Reference `fig:diff.summary.plot' on page 17 undefined on input 
-line 774.
-
-
-Overfull \hbox (5.73788pt too wide) in paragraph at lines 772--775
+] [17 <../figs/variogram_summary.png>]
+Overfull \hbox (5.73788pt too wide) in paragraph at lines 802--805
 []\OT1/cmr/m/n/10 Summary statis-tics for the in-ter-po-la-tion dif-fer-ences a
 re given in Ta-ble 4 and Fig- 
  []
 
-[17
+<../figs/hf_diff_summary.png, id=83, 505.89pt x 505.89pt>
+File: ../figs/hf_diff_summary.png Graphic file (type png)
+<use ../figs/hf_diff_summary.png>
+Package pdftex.def Info: ../figs/hf_diff_summary.png  used on input line 836.
+(pdftex.def)             Requested size: 357.73405pt x 357.7409pt.
 
-]
-Overfull \hbox (2.83661pt too wide) in paragraph at lines 818--820
+Underfull \hbox (badness 10000) in paragraph at lines 840--840
+[] \OT1/cmr/m/n/8 Fig-ure  5: |Point-by-point dif-fer-ences of pre-dicted heat 
+flow be-tween sim-i-lar-ity and Krig-ing in-ter-po-la-tions.
+ []
+
+
+Underfull \hbox (badness 10000) in paragraph at lines 840--840
+\OT1/cmr/m/n/8 The dif-fer-ences for most sub-duc-tion zone seg-ments are media
+n-centered at or near-zero with IQRs from 16
+ []
+
+
+LaTeX Warning: `h' float specifier changed to `ht'.
+
+
+Overfull \hbox (4.4601pt too wide) in paragraph at lines 845--849
+[]\OT1/cmr/m/n/10 Variogram model ranges char-ac-ter-ize the max-i-mum sep-a-ra
+-tion dis-tance at which 
+ []
+
+
+Overfull \hbox (22.51575pt too wide) in paragraph at lines 845--849
+\OT1/cmr/m/n/10 pairs of points are spa-tially de-pen-dent (Math-eron, 1963). T
+here-fore, the range is the most 
+ []
+
+
+Overfull \hbox (22.01578pt too wide) in paragraph at lines 845--849
+\OT1/cmr/m/n/10 im-por-tant pa-ram-e-ter to eval-u-ate when con-sid-er-ing spa-
+tial con-ti-nu-ity of heat flow. # Con- 
+ []
+
+[18
+
+] [19 <../figs/hf_diff_summary.png>]
+Overfull \hbox (2.83661pt too wide) in paragraph at lines 860--862
 []\OT1/cmr/m/n/10 B^^Sardossy, A. (1997). In-tro-duc-tion to geo-statis-tics. \
 OT1/cmr/m/it/10 In-sti-tute of Hy-draulic En-gi-neer-ing, 
  []
 
 
-Overfull \hbox (21.39018pt too wide) in paragraph at lines 821--824
+Overfull \hbox (21.39018pt too wide) in paragraph at lines 863--866
 []\OT1/cmr/m/n/10 Chapman, D. S., & Pol-lack, H. N. (1975). Global heat flow: A
  new look. \OT1/cmr/m/it/10 Earth and Plan- 
  []
 
 
-Overfull \hbox (21.54599pt too wide) in paragraph at lines 825--828
+Overfull \hbox (21.54599pt too wide) in paragraph at lines 867--870
 []\OT1/cmr/m/n/10 Chiles, J.-P., & Delfiner, P. (2009). \OT1/cmr/m/it/10 Geo-st
 atis-tics: Mod-el-ing spa-tial un-cer-tainty \OT1/cmr/m/n/10 (Vol. 497). 
  []
 
 
-Overfull \hbox (5.09904pt too wide) in paragraph at lines 833--837
+Overfull \hbox (5.09904pt too wide) in paragraph at lines 875--879
 []\OT1/cmr/m/n/10 Currie, C., & Hyn-d-man, R. D. (2006). The ther-mal struc-tur
 e of sub-duc-tion zone back 
  []
 
 
-Overfull \hbox (9.6268pt too wide) in paragraph at lines 838--843
+Overfull \hbox (9.6268pt too wide) in paragraph at lines 880--885
 []\OT1/cmr/m/n/10 Currie, C., Wang, K., Hyn-d-man, R. D., & He, J. (2004). The 
 ther-mal ef-fects of steady- 
  []
 
 
-Overfull \hbox (19.04349pt too wide) in paragraph at lines 838--843
+Overfull \hbox (19.04349pt too wide) in paragraph at lines 880--885
 \OT1/cmr/m/n/10 state slab-driven man-tle flow above a sub-duct-ing plate: The 
 cas-ca-dia sub-duc-tion zone 
  []
 
 
-Overfull \hbox (2.98434pt too wide) in paragraph at lines 844--847
+Overfull \hbox (2.98434pt too wide) in paragraph at lines 886--889
 []\OT1/cmr/m/n/10 Davies, J. H. (2013). Global map of solid earth sur-face heat
  flow. \OT1/cmr/m/it/10 Geo-chem-istry, Geo- 
  []
 
 
-Overfull \hbox (38.62672pt too wide) in paragraph at lines 848--852
+Overfull \hbox (38.62672pt too wide) in paragraph at lines 890--894
 []\OT1/cmr/m/n/10 Fourier, J. (1827). M^^Semoire sur les temp^^Seratures du glo
 be ter-restre et des es-paces plan^^Setaires. 
  []
 
 
-Overfull \hbox (7.01578pt too wide) in paragraph at lines 853--857
+Overfull \hbox (7.01578pt too wide) in paragraph at lines 895--899
 []\OT1/cmr/m/n/10 Furlong, K. P., & Chap-man, D. S. (2013). Heat flow, heat gen
 -er-a-tion, and the ther-mal 
  []
 
 
-Overfull \hbox (2.40265pt too wide) in paragraph at lines 853--857
+Overfull \hbox (2.40265pt too wide) in paragraph at lines 895--899
 \OT1/cmr/m/n/10 state of the litho-sphere. \OT1/cmr/m/it/10 An-nual Re-view of 
 Earth and Plan-e-tary Sci-ences\OT1/cmr/m/n/10 , \OT1/cmr/m/it/10 41\OT1/cmr/m/
 n/10 , 385-- 
  []
 
 
-Overfull \hbox (11.98796pt too wide) in paragraph at lines 858--862
+Overfull \hbox (11.98796pt too wide) in paragraph at lines 900--904
 []\OT1/cmr/m/n/10 Furukawa, Y. (1993). Depth of the de-cou-pling plate in-ter-f
 ace and ther-mal struc-ture un- 
  []
 
 
-Overfull \hbox (16.113pt too wide) in paragraph at lines 863--867
+Overfull \hbox (16.113pt too wide) in paragraph at lines 905--909
 []\OT1/cmr/m/n/10 Gao, X., & Wang, K. (2014). Strength of stick-slip and creep-
 ing sub-duc-tion megath-rusts 
  []
 
 
-Overfull \hbox (15.10335pt too wide) in paragraph at lines 868--871
+Overfull \hbox (15.10335pt too wide) in paragraph at lines 910--913
 []\OT1/cmr/m/n/10 Goldberg, D. E. (1989). Ge-netic al-go-rithms in search. \OT1
 /cmr/m/it/10 Op-ti-miza-tion, and Ma-chine-Learn- 
  []
 
 
-Overfull \hbox (5.75287pt too wide) in paragraph at lines 872--875
+Overfull \hbox (5.75287pt too wide) in paragraph at lines 914--917
 []\OT1/cmr/m/n/10 Goovaerts, P. (1997). \OT1/cmr/m/it/10 Geo-statis-tics for na
 t-u-ral re-sources eval-u-a-tion\OT1/cmr/m/n/10 . Ox-ford Uni-ver-sity 
  []
 
 
-Overfull \hbox (13.79352pt too wide) in paragraph at lines 876--881
+Overfull \hbox (13.79352pt too wide) in paragraph at lines 918--923
 []\OT1/cmr/m/n/10 Goutorbe, B., Poort, J., Lu-cazeau, F., & Rail-lard, S. (2011
 ). Global heat flow trends re- 
  []
 
 
-Overfull \hbox (6.57858pt too wide) in paragraph at lines 876--881
+Overfull \hbox (6.57858pt too wide) in paragraph at lines 918--923
 \OT1/cmr/m/n/10 solved from mul-ti-ple ge-o-log-i-cal and geo-phys-i-cal prox-i
 es. \OT1/cmr/m/it/10 Geo-phys-i-cal Jour-nal In-ter- 
  []
@@ -1851,110 +1953,110 @@ es. \OT1/cmr/m/it/10 Geo-phys-i-cal Jour-nal In-ter-
 
 Underfull \vbox (badness 10000) has occurred while \output is active []
 
-[18
+[20
 
 ]
-Overfull \hbox (2.29358pt too wide) in paragraph at lines 882--887
+Overfull \hbox (2.29358pt too wide) in paragraph at lines 924--929
 []\OT1/cmr/m/n/10 Gr^^?aler, B., Pebesma, E., & Heuvelink, G. (2016). Spatio-te
 mporal in-ter-po-la-tion us-ing 
  []
 
 
-Overfull \hbox (20.86903pt too wide) in paragraph at lines 882--887
+Overfull \hbox (20.86903pt too wide) in paragraph at lines 924--929
 \OT1/cmr/m/n/10 gstat. \OT1/cmr/m/it/10 The R Jour-nal\OT1/cmr/m/n/10 , \OT1/cm
 r/m/it/10 8\OT1/cmr/m/n/10 , 204--218. Re-trieved from $\OT1/cmtt/m/n/10 https 
 :// journal [] .r [] -project [] .org / 
  []
 
 
-Overfull \hbox (23.07071pt too wide) in paragraph at lines 888--891
+Overfull \hbox (23.07071pt too wide) in paragraph at lines 930--933
 []\OT1/cmr/m/n/10 Hasterok, D. (2013). A heat flow based cool-ing model for tec
 -tonic plates. \OT1/cmr/m/it/10 Earth and Plan- 
  []
 
 
-Overfull \hbox (10.89072pt too wide) in paragraph at lines 892--896
+Overfull \hbox (10.89072pt too wide) in paragraph at lines 934--938
 []\OT1/cmr/m/n/10 Hasterok, D., & Chap-man, D. (2008). Global heat flow: A new 
 database and a new ap- 
  []
 
 
-Overfull \hbox (25.62692pt too wide) in paragraph at lines 897--901
+Overfull \hbox (25.62692pt too wide) in paragraph at lines 939--943
 []\OT1/cmr/m/n/10 Hasterok, D., Chap-man, D., & Davis, E. (2011). Oceanic heat 
 flow: Im-pli-ca-tions for global 
  []
 
 
-Overfull \hbox (22.8371pt too wide) in paragraph at lines 902--905
+Overfull \hbox (22.8371pt too wide) in paragraph at lines 944--947
 []\OT1/cmr/m/n/10 Jennings, S., & Has-terok, D. (2021). Heat-Flow.org. \OT1/cmr
 /m/it/10 Heat-flow.org\OT1/cmr/m/n/10 . Re-trieved from $\OT1/cmtt/m/n/10 http 
 :// 
  []
 
 
-Overfull \hbox (14.27957pt too wide) in paragraph at lines 906--911
+Overfull \hbox (14.27957pt too wide) in paragraph at lines 948--953
 []\OT1/cmr/m/n/10 Kerswell, B. C., Kohn, M. J., & Gerya, T. V. (2020). Backarc 
 litho-spheric thick-ness and 
  []
 
 
-Overfull \hbox (6.17105pt too wide) in paragraph at lines 906--911
+Overfull \hbox (6.17105pt too wide) in paragraph at lines 948--953
 \OT1/cmr/m/n/10 ser-pen-tine sta-bil-ity con-trol slab-mantle cou-pling depths 
 in sub-duc-tion zones. \OT1/cmr/m/it/10 Earth 
  []
 
 
-Overfull \hbox (11.32332pt too wide) in paragraph at lines 906--911
+Overfull \hbox (11.32332pt too wide) in paragraph at lines 948--953
 \OT1/cmr/m/it/10 and Space Sci-ence Open Archive\OT1/cmr/m/n/10 , 34. $\OT1/cmt
 t/m/n/10 https :// doi [] .org / 10 [] .1002 / essoar [] .10503710 [] 
  []
 
 
-Overfull \hbox (2.64073pt too wide) in paragraph at lines 912--916
+Overfull \hbox (2.64073pt too wide) in paragraph at lines 954--958
 []\OT1/cmr/m/n/10 Krige, D. G. (1951). A sta-tis-ti-cal ap-proach to some ba-si
 c mine val-u-a-tion prob-lems on 
  []
 
 
-Overfull \hbox (5.62436pt too wide) in paragraph at lines 912--916
+Overfull \hbox (5.62436pt too wide) in paragraph at lines 954--958
 \OT1/cmr/m/n/10 the wit-wa-ter-srand. \OT1/cmr/m/it/10 Jour-nal of the South-er
 n African In-sti-tute of Min-ing and Met-al- 
  []
 
 
-Overfull \hbox (14.05922pt too wide) in paragraph at lines 917--920
+Overfull \hbox (14.05922pt too wide) in paragraph at lines 959--962
 []\OT1/cmr/m/n/10 Lee, W. H., & Uyeda, S. (1965). Re-view of heat flow data. \O
 T1/cmr/m/it/10 Ter-res-trial Heat Flow\OT1/cmr/m/n/10 , \OT1/cmr/m/it/10 8\OT1/
 cmr/m/n/10 , 87-- 
  []
 
 
-Overfull \hbox (24.02968pt too wide) in paragraph at lines 921--925
+Overfull \hbox (24.02968pt too wide) in paragraph at lines 963--967
 []\OT1/cmr/m/n/10 Li, Z., Zhang, X., Clarke, K. C., Liu, G., & Zhu, R. (2018). 
 An au-to-matic var-i-ogram mod- 
  []
 
 
-Overfull \hbox (6.26193pt too wide) in paragraph at lines 921--925
+Overfull \hbox (6.26193pt too wide) in paragraph at lines 963--967
 \OT1/cmr/m/n/10 el-ing method with high re-li-a-bil-ity fit-ness and es-ti-mate
 s. \OT1/cmr/m/it/10 Com-put-ers & Geo-sciences\OT1/cmr/m/n/10 , 
  []
 
 
-Overfull \hbox (13.21024pt too wide) in paragraph at lines 926--930
+Overfull \hbox (13.21024pt too wide) in paragraph at lines 968--972
 []\OT1/cmr/m/n/10 Lucazeau, F. (2019). Anal-y-sis and map-ping of an up-dated t
 er-res-trial heat flow data set. 
  []
 
 
-Overfull \hbox (6.04277pt too wide) in paragraph at lines 931--934
+Overfull \hbox (6.04277pt too wide) in paragraph at lines 973--976
 []\OT1/cmr/m/n/10 Matheron, G. (1963). Prin-ci-ples of geo-statis-tics. \OT1/cm
 r/m/it/10 Eco-nomic Ge-ol-ogy\OT1/cmr/m/n/10 , \OT1/cmr/m/it/10 58\OT1/cmr/m/n/
 10 (8), 1246--1266.  
  []
 
 
-Overfull \hbox (0.12791pt too wide) in paragraph at lines 935--938
+Overfull \hbox (0.12791pt too wide) in paragraph at lines 977--980
 []\OT1/cmr/m/n/10 Matheron, G. (2019). \OT1/cmr/m/it/10 Math-eron's the-ory of 
 re-gion-al-ized vari-ables\OT1/cmr/m/n/10 . In-ter-na-tional As-so- 
  []
@@ -1962,105 +2064,105 @@ re-gion-al-ized vari-ables\OT1/cmr/m/n/10 . In-ter-na-tional As-so-
 
 Underfull \vbox (badness 10000) has occurred while \output is active []
 
-[19]
-Overfull \hbox (27.91862pt too wide) in paragraph at lines 939--943
+[21]
+Overfull \hbox (27.91862pt too wide) in paragraph at lines 981--985
 []\OT1/cmr/m/n/10 Parsons, B., & Sclater, J. G. (1977). An anal-y-sis of the va
 ri-a-tion of ocean floor bathymetry 
  []
 
 
-Overfull \hbox (5.49301pt too wide) in paragraph at lines 944--947
+Overfull \hbox (5.49301pt too wide) in paragraph at lines 986--989
 []\OT1/cmr/m/n/10 Pebesma, E. (2004). Mul-ti-vari-able geo-statis-tics in S: Th
 e gstat pack-age. \OT1/cmr/m/it/10 Com-put-ers & 
  []
 
 
-Overfull \hbox (25.26581pt too wide) in paragraph at lines 948--952
+Overfull \hbox (25.26581pt too wide) in paragraph at lines 990--994
 []\OT1/cmr/m/n/10 Pebesma, E. (2018). Sim-ple Fea-tures for R: Stan-dard-ized S
 up-port for Spa-tial Vec-tor Data. 
  []
 
 
-Overfull \hbox (32.21028pt too wide) in paragraph at lines 953--957
+Overfull \hbox (32.21028pt too wide) in paragraph at lines 995--999
 []\OT1/cmr/m/n/10 Pollack, H. N., & Chap-man, D. S. (1977). On the re-gional va
 ri-a-tion of heat flow, geotherms, 
  []
 
 
-Overfull \hbox (6.32123pt too wide) in paragraph at lines 958--962
+Overfull \hbox (6.32123pt too wide) in paragraph at lines 1000--1004
 []\OT1/cmr/m/n/10 Pollack, H. N., Hurter, S. J., & John-son, J. R. (1993). Heat
  flow from the earth's in-te- 
  []
 
 
-Overfull \hbox (28.9305pt too wide) in paragraph at lines 963--967
+Overfull \hbox (28.9305pt too wide) in paragraph at lines 1005--1009
 []\OT1/cmr/m/n/10 PROJ con-trib-u-tors. (2021). \OT1/cmr/m/it/10 PROJ co-or-di-
 nate trans-for-ma-tion soft-ware li-brary\OT1/cmr/m/n/10 . Open Source 
  []
 
 
-Overfull \hbox (20.40463pt too wide) in paragraph at lines 968--972
+Overfull \hbox (20.40463pt too wide) in paragraph at lines 1010--1014
 []\OT1/cmr/m/n/10 Rudnick, R. L., Mc-Donough, W. F., & O'Connell, R. J. (1998).
  Ther-mal struc-ture, thick- 
  []
 
 
-Overfull \hbox (3.22325pt too wide) in paragraph at lines 968--972
+Overfull \hbox (3.22325pt too wide) in paragraph at lines 1010--1014
 \OT1/cmr/m/n/10 ness and com-po-si-tion of con-ti-nen-tal litho-sphere. \OT1/cm
 r/m/it/10 Chem-i-cal Ge-ol-ogy\OT1/cmr/m/n/10 , \OT1/cmr/m/it/10 145\OT1/cmr/m/
 n/10 (3-4), 395-- 
  []
 
 
-Overfull \hbox (10.94621pt too wide) in paragraph at lines 973--978
+Overfull \hbox (10.94621pt too wide) in paragraph at lines 1015--1020
 []\OT1/cmr/m/n/10 Sclater, J. G., & Francheteau, J. (1970). The im-pli-ca-tions
  of ter-res-trial heat flow ob-ser- 
  []
 
 
-Overfull \hbox (2.34901pt too wide) in paragraph at lines 973--978
+Overfull \hbox (2.34901pt too wide) in paragraph at lines 1015--1020
 \OT1/cmr/m/n/10 va-tions on cur-rent tec-tonic and geo-chem-i-cal mod-els of th
 e crust and up-per man-tle 
  []
 
 
-Overfull \hbox (19.91193pt too wide) in paragraph at lines 979--982
+Overfull \hbox (19.91193pt too wide) in paragraph at lines 1021--1024
 []\OT1/cmr/m/n/10 Scrucca, L. (2013). GA: A pack-age for ge-netic al-go-rithms 
 in r. \OT1/cmr/m/it/10 Jour-nal of Sta-tis-ti-cal Soft- 
  []
 
 
-Overfull \hbox (8.14076pt too wide) in paragraph at lines 983--987
+Overfull \hbox (8.14076pt too wide) in paragraph at lines 1025--1029
 []\OT1/cmr/m/n/10 Scrucca, L. (2016). On some ex-ten-sions to GA pack-age: Hy-b
 rid op-ti-mi-sa-tion, par-al-leli- 
  []
 
 
-Overfull \hbox (27.2658pt too wide) in paragraph at lines 988--993
+Overfull \hbox (27.2658pt too wide) in paragraph at lines 1030--1035
 []\OT1/cmr/m/n/10 Shapiro, N. M., & Ritz-woller, M. H. (2004). In-fer-ring sur-
 face heat flux dis-tri-bu-tions guided 
  []
 
 
-Overfull \hbox (12.40387pt too wide) in paragraph at lines 988--993
+Overfull \hbox (12.40387pt too wide) in paragraph at lines 1030--1035
 \OT1/cmr/m/n/10 by a global seis-mic model: Par-tic-u-lar ap-pli-ca-tion to ant
 arc-tica. \OT1/cmr/m/it/10 Earth and Plan-e-tary 
  []
 
 
-Overfull \hbox (6.57135pt too wide) in paragraph at lines 994--998
+Overfull \hbox (6.57135pt too wide) in paragraph at lines 1036--1040
 []\OT1/cmr/m/n/10 Stein, C. A., & Stein, S. (1992). A model for the global vari
 -a-tion in oceanic depth and 
  []
 
 
-Overfull \hbox (29.51582pt too wide) in paragraph at lines 999--1003
+Overfull \hbox (29.51582pt too wide) in paragraph at lines 1041--1045
 []\OT1/cmr/m/n/10 Stein, C. A., & Stein, S. (1994). Con-straints on hy-drother-
 mal heat flux through the oceanic 
  []
 
 
-Overfull \hbox (31.47784pt too wide) in paragraph at lines 999--1003
+Overfull \hbox (31.47784pt too wide) in paragraph at lines 1041--1045
 \OT1/cmr/m/n/10 litho-sphere from global heat flow. \OT1/cmr/m/it/10 Jour-nal o
 f Geo-phys-i-cal Re-search: Solid Earth\OT1/cmr/m/n/10 , \OT1/cmr/m/it/10 99\OT
 1/cmr/m/n/10 (B2), 
@@ -2069,64 +2171,61 @@ f Geo-phys-i-cal Re-search: Solid Earth\OT1/cmr/m/n/10 , \OT1/cmr/m/it/10 99\OT
 
 Underfull \vbox (badness 10000) has occurred while \output is active []
 
-[20]
-Overfull \hbox (8.488pt too wide) in paragraph at lines 1004--1008
+[22]
+Overfull \hbox (8.488pt too wide) in paragraph at lines 1046--1050
 []\OT1/cmr/m/n/10 Syracuse, E. M., & Abers, G. A. (2006). Global com-pi-la-tion
  of vari-a-tions in slab depth 
  []
 
 
-Overfull \hbox (18.44478pt too wide) in paragraph at lines 1004--1008
+Overfull \hbox (18.44478pt too wide) in paragraph at lines 1046--1050
 \OT1/cmr/m/n/10 be-neath arc vol-ca-noes and im-pli-ca-tions. \OT1/cmr/m/it/10 
 Geo-chem-istry, Geo-physics, Geosys-tems\OT1/cmr/m/n/10 , \OT1/cmr/m/it/10 7\OT
 1/cmr/m/n/10 (5).  
  []
 
 
-Overfull \hbox (1.43245pt too wide) in paragraph at lines 1009--1013
+Overfull \hbox (1.43245pt too wide) in paragraph at lines 1051--1055
 []\OT1/cmr/m/n/10 Wada, I., & Wang, K. (2009). Com-mon depth of slab-mantle de-
 cou-pling: Rec-on-cil-ing 
  []
 
 
-Overfull \hbox (16.78372pt too wide) in paragraph at lines 1009--1013
+Overfull \hbox (16.78372pt too wide) in paragraph at lines 1051--1055
 \OT1/cmr/m/n/10 di-ver-sity and uni-for-mity of sub-duc-tion zones. \OT1/cmr/m/
 it/10 Geo-chem-istry, Geo-physics, Geosys-tems\OT1/cmr/m/n/10 , 
  []
 
 
-Overfull \hbox (5.6686pt too wide) in paragraph at lines 1014--1019
+Overfull \hbox (5.6686pt too wide) in paragraph at lines 1056--1061
 []\OT1/cmr/m/n/10 Wilkinson, M. D., Du-mon-tier, M., Aal-bers-berg, Ij. J., Ap-
 ple-ton, G., Ax-ton, M., Baak, 
  []
 
 
-Overfull \hbox (1.68236pt too wide) in paragraph at lines 1014--1019
+Overfull \hbox (1.68236pt too wide) in paragraph at lines 1056--1061
 \OT1/cmr/m/n/10 A., et al. (2016). The FAIR guid-ing prin-ci-ples for sci-en-ti
 fic data man-age-ment and 
  []
 
 No file backarc.bbl.
-Package atveryend Info: Empty hook `BeforeClearDocument' on input line 1025.
-[21]
-Package atveryend Info: Empty hook `AfterLastShipout' on input line 1025.
+Package atveryend Info: Empty hook `BeforeClearDocument' on input line 1067.
+[23]
+Package atveryend Info: Empty hook `AfterLastShipout' on input line 1067.
 (./backarc.aux)
-Package atveryend Info: Executing hook `AtVeryEndDocument' on input line 1025.
-Package atveryend Info: Empty hook `AtEndAfterFileList' on input line 1025.
+Package atveryend Info: Executing hook `AtVeryEndDocument' on input line 1067.
+Package atveryend Info: Empty hook `AtEndAfterFileList' on input line 1067.
 
 LaTeX Font Warning: Size substitutions with differences
 (Font)              up to 0.45pt have occurred.
 
-
-LaTeX Warning: There were undefined references.
-
-Package atveryend Info: Empty hook `AtVeryVeryEnd' on input line 1025.
+Package atveryend Info: Empty hook `AtVeryVeryEnd' on input line 1067.
  ) 
 Here is how much of TeX's memory you used:
- 9353 strings out of 480608
- 140852 string characters out of 5903631
- 423001 words of memory out of 5000000
- 25049 multiletter control sequences out of 15000+600000
+ 9370 strings out of 480608
+ 141342 string characters out of 5903631
+ 423653 words of memory out of 5000000
+ 25064 multiletter control sequences out of 15000+600000
  540702 words of font info for 57 fonts, out of 8000000 for 9000
  1147 hyphenation exceptions out of 8191
  46i,16n,49p,559b,412s stack positions out of 5000i,500n,10000p,200000b,80000s
@@ -2151,10 +2250,10 @@ f-dist/fonts/type1/public/amsfonts/cm/cmti10.pfb></usr/local/texlive/2020/texmf
 ist/fonts/type1/public/amsfonts/cm/cmtt10.pfb></usr/local/texlive/2020/texmf-di
 st/fonts/type1/public/amsfonts/cm/cmtt9.pfb></usr/local/texlive/2020/texmf-dist
 /fonts/type1/public/amsfonts/symbols/msbm10.pfb>
-Output written on backarc.pdf (21 pages, 8176601 bytes).
+Output written on backarc.pdf (23 pages, 8499180 bytes).
 PDF statistics:
- 161 PDF objects out of 1000 (max. 8388607)
- 111 compressed objects within 2 object streams
+ 171 PDF objects out of 1000 (max. 8388607)
+ 115 compressed objects within 2 object streams
  0 named destinations out of 1000 (max. 500000)
- 16 words of extra memory for PDF output out of 10000 (max. 10000000)
+ 26 words of extra memory for PDF output out of 10000 (max. 10000000)
 

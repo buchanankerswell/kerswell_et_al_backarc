@@ -51,11 +51,11 @@ header-includes:
 # Some recommended settings
 knitr::opts_chunk$set(
   echo = FALSE,
-  message = F,
+  message = FALSE,
   fig.pos = 'h',
   out.extra = "",
   fig.align = 'center',
-  out.width = '100%'
+  out.width = '90%'
 )
 
 # Load functions and libraries
@@ -110,7 +110,7 @@ purrr::map_df(fname, ~get(.x)$v.mod, .id = 'segment') %>%
 							dplyr::select(segment, model, psill, range) %>%
 							mutate('psill' = round(sqrt(psill)), 'range' = round(range/1000)) %>%
 							rename(Segment = segment, Model = model,
-										 `Sill $[mWm^-{2}]$` = psill, `Range $[km]$` = range) -> variogram.summary
+										 `Sill $[mWm^{-2}]$` = psill, `Range $[km]$` = range) -> variogram.summary
 
 # Interpolation difference
 purrr::map(fname, ~get(.x)$diff %>% st_set_geometry(NULL)) %>%
@@ -285,10 +285,10 @@ We use the general-purpose functions in the "R" package `GA` [@scrucca2013; @scr
 |    Lag Cutoff (c)   |                [$1/3$, $1/15$]              |            NA           |
 |    Lag Window (w)   |                     [1, 5]                  |            NA           |
 |      Model (m)      |            [Spherical, Exponential]         |            NA           |
-|       Sill (s)      |              [1, $1000\sqrt{2}$]            |         $mWm^-2$        |
-| Effective Range (a) |              [1, $1\times 10^3$]            |            km           |
-|      Nugget (n)     |              [1, $1000\sqrt{2}$]            |         $mWm^-2$        |
-|   Local Search (S)  |              [1, $1\times 10^3$]            |            km           |
+|       Sill (s)      |              [1, $1000\sqrt{2}$]            |         $mWm^{-2}$      |
+| Effective Range (a) |                   [1, 1000]                 |            km           |
+|      Nugget (n)     |              [1, $1000\sqrt{2}$]            |         $mWm^{-2}$      |
+|   Local Search (S)  |                   [1, 1000]                 |            km           |
 
 : Parameters and ranges used in the optimization algorithm {#tbl:search}
 
@@ -301,7 +301,9 @@ We interpolate onto the same 0.5$^{\circ}$C x 0.5$^{\circ}$C grid as @lucazeau20
 +ellps=WGS84 +datum=WGS84 +units=m +no_defs
 ~~~
 
-All geographic operations, including Kriging, are performed in the above CRS using the general-purpose functions in the "R" package `sf` [@pebesma2018]. We define the Kriging domain near individual arc segments in two steps: 1) 1000 $km$ buffers are drawn around the arc segments as defined by @syracuse2006. 2) The bounding box of the 1000 $km$ buffer is expanded by 10% on all sides (@fig:segments). We provide the complete NGHF dataset [@lucazeau2019], filtered and parsed NGHF dataset, heat flow interpolations [from @lucazeau2019, and this study], and our code as supplementary information to support FAIR data policy [@wilkinson2016]. These items can also be retrieved from the official repository at [https://doi.org/10.17605/OSF.IO/CA6ZU](https://doi.org/10.17605/OSF.IO/CA6ZU).
+All geographic operations, including Kriging and taking the difference with @lucazeau2019's heat flow predictions, are performed in the above CRS using the general-purpose functions in the "R" package `sf` [@pebesma2018]. We define the Kriging domain near individual arc segments in two steps: 1) 1000 $km$ buffers are drawn around the arc segments as defined by @syracuse2006. 2) The bounding box of the 1000 $km$ buffer is expanded by 10% on all sides (@fig:segments). We use @lucazeau2019's grid for Kriging predictions so differences can be taken point-by-point at the exact same locations.
+
+We provide the complete NGHF dataset [@lucazeau2019], filtered and parsed NGHF dataset, heat flow interpolations [from @lucazeau2019, and this study], and our code as supplementary information to support FAIR data policy [@wilkinson2016]. These materials can also be retrieved from the official repository at [https://doi.org/10.17605/OSF.IO/CA6ZU](https://doi.org/10.17605/OSF.IO/CA6ZU).
 
 ```{r segments, fig.cap="Subduction zone segments and interpolation domain. (a) Heat flow is interpolated around thirteen subduction zone segments by (b) drawing a 1000km buffer (lightest blue) around each segment and expanding the buffer's bounding box (medium blue) by 10\\% on all sides (darkest blue). (c) The NGHF dataset is cropped within the largest rectangle. Data from Syracuse \\& Abers (2006) and Lucazeau (2019)."}
 knitr::include_graphics('../figs/base/segs_comp.png')
@@ -312,41 +314,56 @@ knitr::include_graphics('../figs/base/segs_comp.png')
 # Results
 ## Heat Flow Near Subduction Zone Segments
 
-Summary statistics for surface heat flow observations by subduction zone segment are given in @tbl:hf.summary.table and @fig:hf.summary.plot. Surface heat flow is centered around 45-70 $mWm^{-2}$ (medians) and narrowly distributed with inter-quartile ranges (IQR) from 12 to 50 $mWm^{-2}$ for most subduction zone segments, excluding outliers. Alaska Aleutians is the exception with a broad (IQR = $250~mW^{-2}$) range of heat flow with a median of 184 $mWm^{-2}$. The whole distribution, including outliers, for all segments are strongly right-skewed with maximum heat flow values of several thousand of $mWm^{-2}$ or more. Heat flow values above 250 $mWm^{-2}$ are considered geothermal areas by @lucazeau2019, which we adopt as a relevant empirical limit for anomalously high heat flow.
+Summary statistics for surface heat flow observations by subduction zone segment are given in @tbl:hf.summary.table and @fig:hf.summary.plot. Surface heat flow is median-centered around 45-70 $mWm^{-2}$ and narrowly distributed (excluding outliers) with inter-quartile ranges (IQR) from 12 to 50 $mWm^{-2}$ for most subduction zone segments. Alaska Aleutians is the exception with a higher median of 184 $mWm^{-2}$ and broader range (IQR = $250~mW^{-2}$). The whole distributions (including outliers) for all segments are strongly right-skewed with maximum heat flow values of several thousand of $mWm^{-2}$ or more. Heat flow values above 250 $mWm^{-2}$ are considered geothermal areas by @lucazeau2019, which we adopt as a relevant empirical limit for anomalously high heat flow.
 
 ```{r hf.summary.table, results = 'asis'}
 # Summarize data
 hf.summary %>%
-knitr::kable(caption = 'Heat flow ($mWm^{-2}$) observations by subduction zone segment {#tbl:hf.summary.table}',
+knitr::kable(caption = 'Heat flow ($mWm^{-2}$) observations {#tbl:hf.summary.table}',
 						 format = 'pandoc')
 ```
 
-```{r hf.summary.plot, out.width='80%', fig.cap="Distribution of heat flow observations by subduction zone segment. Heat flow near most segments are centered around $50~mWm^{-2}$ and highly skewed right. The skeweness likely represents sampling near hydrothermal systems, volcanic arcs, or spreading centers. Data from Lucazeau (2019)"}
+```{r hf.summary.plot, fig.cap="Distribution of heat flow observations. Heat flow near most segments is centered around $50~mWm^{-2}$ and highly skewed right (shadowy dot outliers). The skeweness likely represents sampling near geothermal systems, volcanic arcs, or spreading centers. Data from Lucazeau (2019)."}
 knitr::include_graphics('../figs/hf_summary.png')
 ```
 
 \clearpage
 
-The optimal variogram models and associated errors $C_F(\Theta)$ and $C_I(\Theta)$ are given in @tbl:variogram.summary.table.
+## Variogram Models
+
+The optimal variogram models and associated errors $C_F(\Theta)$ and $C_I(\Theta)$ are given in @tbl:variogram.summary.table. Almost twice as many experimental variograms are fit with spherical models (8) compared to exponential models (5). Variogram model sills vary substantially among the subduction zone segments between 9 and 1538 $mWm^{-2}$. Variogram model ranges also vary substantially among segments from 4 to 1676 $km$.
+
+No apparent correlation exists between variogram model range and subduction zone segment length, number of heat flow observations, nor domain area (@fig:variogram.summary.plot). Most subduction zone segments show spatial dependence between 9 and $\leq$ 500 $km$, except for Kyushu Ryukyu and Vanuatu, irrespective of the amount of observations or segment size.
 
 ```{r variogram.summary.table}
 variogram.summary %>%
-knitr::kable(caption = 'Optimal varigram models by subduction zone segment {#tbl:variogram.summary.table}',
+knitr::kable(caption = 'Optimal varigram models {#tbl:variogram.summary.table}',
 						 format = 'pandoc')
 ```
 
+```{r variogram.summary.plot, fig.cap="Summary of variogram model ranges and correlations with other features. (a) Variogram model ranges are variable, but generally below 500 km. Variogram model ranges show no correlation with segment length (b), number of heat flow observations (c), nor domain area (d). The spatial dependenc of heat flow is apparently independent of these parameters."}
+knitr::include_graphics('../figs/variogram_summary.png')
+```
+
 \clearpage
+
+## Interpolation Comparison
 
 Summary statistics for the interpolation differences are given in @tbl:diff.summary.table and @fig:diff.summary.plot.
 
 ```{r diff.summary.table}
 hf.diff.summary %>%
-knitr::kable(caption = 'Predicted heat flow ($mWm^{-2}$) differences by subduction zone segment {#tbl:diff.summary.table}',
+knitr::kable(caption = 'Predicted heat flow ($mWm^{-2}$) differences {#tbl:diff.summary.table}',
 						 format = 'pandoc')
+```
+
+```{r diff.summary.plot, fig.cap="Point-by-point differences of predicted heat flow between similarity and Kriging interpolations. The differences for most subduction zone segments are median-centered at or near-zero with IQRs from 16 to 62. Outliers (shadowy dots) extend to extreme positive and negative differences."}
+knitr::include_graphics('../figs/hf_diff_summary.png')
 ```
 
 # Discussion
 
+Variogram model ranges characterize the maximum separation distance at which pairs of points are spatially dependent [@matheron1963]. Therefore, the range is the most important parameter to evaluate when considering spatial continuity of heat flow. 
 # Conclusions
 
 \acknowledgments
