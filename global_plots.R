@@ -14,7 +14,7 @@ shp.segs.box <-
 											'left' = 0.1,
 											'right' = 0.1)))
 
-cat('\nPlotting ...', 'Saving figures to figs/base/')
+cat('\nPlotting ...\n', 'Saving figures to figs/base/')
 cat('\nPlotting world map with segments ...')
 
 # Color scale
@@ -25,7 +25,7 @@ viridis.scale.grey <- scale_color_viridis_c(option = 'magma', limits = c(0, 250)
 p <- ggplot() +
   geom_sf(data = shp.world.robin.pacific, color = NA) +
   geom_sf(data = shp.sa.segs.robin.pacific, size = 1.1) +
-  geom_sf(data = shp.sa.countours.robin.pacific, size = 0.1) +
+  geom_sf(data = shp.sa.contours.robin.pacific, size = 0.1) +
   geom_sf_label_repel(data = shp.sa.segs.robin.pacific,
                       aes(label = segment),
                       size = 3,
@@ -62,7 +62,7 @@ p.nghf <- ggplot() +
 					aes(color = `heat-flow (mW/m2)`), size = 0.1) +
 	viridis.scale.grey +
   labs(title = 'New Global Heat Flow',
-			 caption = 'from Lucazeau (2019)',
+			 #caption = 'data from Lucazeau (2019)',
 			 color = bquote(mWm^-2)) +
   guides(color = guide_colorbar(title.vjust = 1,
 																barwidth = unit(abs(st_bbox(shp.world.robin.pacific)$xmax/2.5e6 -
@@ -100,7 +100,7 @@ p.pred <- shp.hf.pred %>%
 					fill = NA,
 					size = 0.2) +
   labs(title = 'Predicted Heat Flow',
-			 caption = 'from Lucazeau (2019)',
+			 #caption = 'from Lucazeau (2019)',
 			 subtitle = 'similarity method',
 			 color = bquote(mWm^-2)) +
 	viridis.scale.white +
@@ -167,20 +167,17 @@ shp.segs.box.large <-
 # Plot and save large segments
 purrr::walk2(shp.segs.box.large, shp.segs.large$segment, ~{
   cat('\nPlotting', .y, ' ...')
-
   hf <- shp.hf %>% st_crop(.x)
-
   p <- ggplot() +
     geom_sf(data = shp.world.robin.pacific, color = NA) +
     geom_sf(data = shp.sa.segs.robin.pacific %>% filter(segment == .y), size = 1.1) +
-    geom_sf(data = shp.sa.countours.robin.pacific %>% filter(segment == .y), size = 0.1) +
+    geom_sf(data = shp.sa.contours.robin.pacific %>% filter(segment == .y), size = 0.1) +
     geom_sf(data = hf,
             aes(color = `heat-flow (mW/m2)`),
             size = 1) +
     labs(color = bquote(mWm^-2),
 				 title = .y,
-				 subtitle = bquote(n==.(nrow(hf))),
-				 caption = 'from Lucazeau (2019)') +
+				 subtitle = bquote(n==.(nrow(hf)))) +
 		viridis.scale.grey +
     guides(color = guide_colorbar(title.vjust = 1,
 																	barwidth = unit(abs(st_bbox(.x)$xmax/1e6 - st_bbox(.x)$xmin/1e6)/1.5, 'in'))) +
@@ -197,7 +194,6 @@ purrr::walk2(shp.segs.box.large, shp.segs.large$segment, ~{
 					plot.margin = margin(-12, 0, 0, 0),
           panel.grid = element_line(size = 0.1, color = rgb(0,0,0,0.2)),
           panel.ontop = T)
-
 	# Save plot
   ggsave(filename = paste0('figs/base/', .y, '.png'),
          plot = p,
@@ -205,28 +201,23 @@ purrr::walk2(shp.segs.box.large, shp.segs.large$segment, ~{
          type = 'cairo',
          width = abs(st_bbox(.x)$xmax/5e5 - st_bbox(.x)$xmin/5e5),
          height = abs(st_bbox(.x)$ymax/5e5 - st_bbox(.x)$ymin/5e5))
-
 })
 
 # Plot and save small segments
 purrr::walk2(shp.segs.box.small, shp.segs.small$segment, ~{
   cat('\nPlotting', .y, ' ...')
-
   hf <- shp.hf %>% st_crop(.x)
-
 	viridis.scale.grey <- scale_color_viridis_c(option = 'magma', limits = c(0, 250))
-
   p <- ggplot() +
     geom_sf(data = shp.world.robin.pacific, color = NA) +
     geom_sf(data = shp.sa.segs.robin.pacific %>% filter(segment == .y), size = 1.1) +
-    geom_sf(data = shp.sa.countours.robin.pacific %>% filter(segment == .y), size = 0.1) +
+    geom_sf(data = shp.sa.contours.robin.pacific %>% filter(segment == .y), size = 0.1) +
     geom_sf(data = hf,
             aes(color = `heat-flow (mW/m2)`),
             size = 1) +
     labs(color = bquote(mWm^-2),
 				 title = .y,
-				 subtitle = bquote(n==.(nrow(hf))),
-				 caption = 'from Lucazeau (2019)') +
+				 subtitle = bquote(n==.(nrow(hf)))) +
 		viridis.scale.grey +
     guides(color = guide_colorbar(title.vjust = 1,
 																	barwidth = unit(abs(st_bbox(.x)$xmax/1e6 -
@@ -244,7 +235,6 @@ purrr::walk2(shp.segs.box.small, shp.segs.small$segment, ~{
 					plot.margin = margin(-12, 0, 0, 0),
           panel.grid = element_line(size = 0.1, color = rgb(0,0,0,0.2)),
           panel.ontop = T)
-
 	# Save plot
   ggsave(filename = paste0('figs/base/', .y, '.png'),
          plot = p,
@@ -252,7 +242,6 @@ purrr::walk2(shp.segs.box.small, shp.segs.small$segment, ~{
          type = 'cairo',
          width = abs(st_bbox(.x)$xmax/5e5 - st_bbox(.x)$xmin/5e5),
          height = abs(st_bbox(.x)$ymax/5e5 - st_bbox(.x)$ymin/5e5))
-
 })
 
 # Segments comp
@@ -261,7 +250,7 @@ cat('\nPlotting segments composition ...')
 p.segs <- ggplot() +
   geom_sf(data = shp.world.robin.pacific, color = NA) +
   geom_sf(data = shp.sa.segs.robin.pacific, size = 1.1) +
-  geom_sf(data = shp.sa.countours.robin.pacific, size = 0.1) +
+  geom_sf(data = shp.sa.contours.robin.pacific, size = 0.1) +
   geom_sf_label_repel(data = shp.sa.segs.robin.pacific,
                       aes(label = segment),
                       size = 5,
@@ -280,7 +269,7 @@ p.segs <- ggplot() +
         panel.ontop = T)
 
 # Define Vanuatu segment and bounding boxes
-shp.van <- shp.sa.countours.robin.pacific %>%
+shp.van <- shp.sa.contours.robin.pacific %>%
 				filter(segment == 'Vanuatu') %>%
 				slice(1)
 shp.van.buf <- shp.sa.segs.robin.pacific.buffer %>%
@@ -303,7 +292,7 @@ p.van.buf <- ggplot() +
 		geom_sf(data = shp.van.box %>% st_difference(shp.van.buf), fill = 'cornflowerblue', alpha = 0.3) +
 		geom_sf(data = shp.van.box.wide %>% st_difference(shp.van.box), fill = 'cornflowerblue', alpha = 0.5) +
     geom_sf(data = shp.van, size = 1.1) +
-    geom_sf(data = shp.sa.countours.robin.pacific %>% filter(segment == 'Vanuatu'), size = 0.2) +
+    geom_sf(data = shp.sa.contours.robin.pacific %>% filter(segment == 'Vanuatu'), size = 0.2) +
     labs(color = bquote(mWm^-2),
 				 title = 'Vanuatu',
 				 subtitle = 'Interpolation Domain') +
@@ -326,14 +315,13 @@ p.van <- ggplot() +
 		geom_sf(data = shp.van.box %>% st_difference(shp.van.buf), size = 0.1, fill = 'transparent') +
 		geom_sf(data = shp.van.box.wide %>% st_difference(shp.van.box), size = 0.1, fill = 'transparent') +
     geom_sf(data = shp.van, size = 1.1) +
-    geom_sf(data = shp.sa.countours.robin.pacific %>% filter(segment == 'Vanuatu'), size = 0.2) +
+    geom_sf(data = shp.sa.contours.robin.pacific %>% filter(segment == 'Vanuatu'), size = 0.2) +
     geom_sf(data = shp.van.hf,
             aes(color = `heat-flow (mW/m2)`),
             size = 1) +
     labs(color = bquote(mWm^-2),
 				 title = 'Vanuatu',
-				 subtitle = bquote(n==.(nrow(shp.van.hf))),
-				 caption = 'from Lucazeau (2019)') +
+				 subtitle = bquote(n==.(nrow(shp.van.hf)))) +
 		viridis.scale.grey +
     coord_sf(expand = F,
              xlim = c(st_bbox(shp.van.box.wide)$xmin, st_bbox(shp.van.box.wide)$xmax),

@@ -53,10 +53,13 @@ files <- list.files('data/sa2006/gmts', full.names = TRUE)
 cat('\nSegments:', seg.names, sep = '\n')
 
 # Contours Robinson pacific centered
-shp.sa.countours.robin.pacific <- read_latlong(files, seg.names, proj4.robin.pacific)
+purrr::map2_df(files, seg.names,
+							 ~read_latlong(.x,
+														 .y,
+														 proj4.robin.pacific)) -> shp.sa.contours.robin.pacific
 
 # Filter for segment boundary
-shp.sa.countours.robin.pacific %>%
+shp.sa.contours.robin.pacific %>%
   group_by(segment) %>%
   filter(row_number() == 1) -> shp.sa.segs.robin.pacific
 

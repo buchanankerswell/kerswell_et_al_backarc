@@ -6,7 +6,7 @@ load('data/hf.Rdata')
 fpath <- list.files('data/diff', pattern = '.RData', full.names = T)
 fname <- purrr::map_chr(list.files('data/diff', pattern = '.RData'),
 					 ~.x %>%
-					 stringr::str_replace('_diff.RData', ''))
+					 stringr::str_replace('.RData', ''))
 
 # Load data
 for (i in fpath) load(i)
@@ -31,18 +31,17 @@ purrr::map2_df(shp.box, seg.names,
 					 mutate(segment = .y, .before = country)) -> shp.hf.crop
 
 # Summarize heat flow data
-hf.summary <-
-				shp.hf.crop %>%
-				st_set_geometry(NULL) %>%
-				group_by(segment) %>%
-				rename(Segment = segment) %>%
-				summarise(n = n(),
-									Min = round(min(hf)),
-									Max = round(max(hf)),
-									Median =round(median(hf)),
-									IQR = round(IQR(hf)),
-									Mean = round(mean(hf)),
-									Sigma = round(sd(hf)))
+shp.hf.crop %>%
+	st_set_geometry(NULL) %>%
+	group_by(segment) %>%
+	rename(Segment = segment) %>%
+	summarise(n = n(),
+						Min = round(min(hf)),
+						Max = round(max(hf)),
+						Median =round(median(hf)),
+						IQR = round(IQR(hf)),
+						Mean = round(mean(hf)),
+						Sigma = round(sd(hf))) -> hf.summary
 
 cat('Heat flow summary:\n')
 print(hf.summary)
@@ -55,33 +54,33 @@ p <- shp.hf.crop %>%
 										 width = 0.5,
 										 outlier.size = 0.5,
 										 outlier.color = rgb(0.5, 0.5, 0.5, 0.1)) +
-				labs(x = bquote('Surface heat flow'~(mWm^-2)),
+				labs(x = bquote('Heat flow'~(mWm^-2)),
 						 y = NULL,
-						 title = 'Heat flow observations by segment',
-						 caption = 'data from Lucazeau (2019)') +
+						 title = 'Heat flow observations') +
 				scale_x_continuous(limits = c(0, 250)) +
 				scale_y_discrete(limits = rev(levels(as.factor(seg.names)))) +
-				theme_classic(base_size = 14) +
+				theme_classic(base_size = 9) +
 				theme(strip.background = element_blank())
 
 # Save plot
 cat('Saving heat flow summary plot to:\nfigs/hf_summary.png\n')
 
-ggsave(file = 'figs/hf_summary.png',
+ggsave(file = 'figs/summary/hf_summary.png',
 			 plot = p,
 			 device = 'png',
 			 type = 'cairo',
-			 width = 7,
-			 height = 7)
+			 width = 4,
+			 height = 4)
 
 # Summarise variogram models (add rmse's from f.obj)
 purrr::map_df(fname, ~get(.x)$v.mod, .id = 'segment') %>%
 	as_tibble() %>%
-	mutate('segment' = fname %>% stringr::str_replace('_', ' ')) %>%
+	mutate('segment' = seg.names) %>%
 	dplyr::select(segment, model, psill, range) %>%
 	rename(Segment = segment, Model = model,
 				 Sill = psill, Range = range) %>%
 	mutate('Sill' = round(sqrt(Sill)), 'Range' = round(Range/1000, 1)) -> variogram.summary
+
 cat('Variogram summary:\n')
 print(variogram.summary)
 
@@ -89,9 +88,12 @@ print(variogram.summary)
 p1 <- variogram.summary %>%
 		ggplot() +
 		geom_bar(aes(x = Range, y = Segment), stat = 'identity') +
+		annotate('segment', y = 'Kyushu Ryukyu', yend = 'Kyushu Ryukyu', x = 400, xend = 450, arrow = arrow(length = unit(2, 'mm')), color = 'white') +
+		annotate('segment', y = 'Vanuatu', yend = 'Vanuatu', x = 400, xend = 450, arrow = arrow(length = unit(2, 'mm')), color = 'white') +
+		coord_cartesian(xlim = c(0, 450)) +
 		labs(x = 'Range (km)', y = NULL) +
 		scale_y_discrete(limits = rev(levels(as.factor(seg.names)))) +
-		theme_classic(base_size = 14)
+		theme_classic(base_size = 9)
 
 p2 <- variogram.summary %>%
 		mutate(seg.length = shp.sa.segs.robin.pacific %>%
@@ -99,47 +101,57 @@ p2 <- variogram.summary %>%
 												as.vector()) %>%
 		ggplot() +
 		geom_point(aes(x = Range, y = seg.length/1000)) +
-		geom_text_repel(aes(x = Range, y = seg.length/1000, label = Segment), size = 3) +
+		geom_text_repel(aes(x = Range, y = seg.length/1000, label = Segment),
+										size = 2,
+										color = rgb(0, 0, 0, 0.3)) +
 		labs(x = 'Range (km)', y = 'Segment Length (km)') +
-		theme_classic(base_size = 14)
+		theme_classic(base_size = 9)
 
 p3 <- variogram.summary %>%
 		mutate(n = hf.summary$n) %>%
 		ggplot() +
 		geom_point(aes(x = Range, y = n)) +
-		geom_text_repel(aes(x = Range, y = n, label = Segment), size = 3) +
+		geom_text_repel(aes(x = Range, y = n, label = Segment),
+										size = 2,
+										color = rgb(0, 0, 0, 0.3)) +
 		labs(x = 'Range (km)', y = 'Number of observations') +
-		theme_classic(base_size = 14)
+		theme_classic(base_size = 9)
 
-purrr::map_df(shp.box, st_bbox) %>%
-		mutate(area = (xmax-xmin)*(ymax-ymin)) -> shp.area
+purrr::map_dbl(shp.box,
+		~{
+		box <- .x %>%
+						st_bbox
+		as.numeric((box$xmax-box$xmin)*(box$ymax-box$ymin))
+		}) -> shp.area
 
 p4 <- variogram.summary %>%
-		mutate(area = as.vector(shp.area$area)) %>%
+		mutate(area = shp.area) %>%
 		ggplot() +
-		geom_point(aes(x = Range, y = area/10^6)) +
-		geom_text_repel(aes(x = Range, y = area/10^6, label = Segment), size = 3) +
-		labs(x = 'Range (km)', y = bquote('Domain area'~(km^2))) +
-		theme_classic(base_size = 14)
+		geom_point(aes(x = Range, y = area/10^12)) +
+		geom_text_repel(aes(x = Range, y = area/10^12, label = Segment),
+										size = 2,
+										color = rgb(0, 0, 0, 0.3)) +
+		labs(x = 'Range (km)', y = bquote('Domain area'~(km^2%*%10^9))) +
+		theme_classic(base_size = 9)
 
 # Composition
 p <- p1 + p2 + p4 + p3 +
 		plot_annotation(tag_levels = 'a',
-										title = 'Variogram model range summary and correlations')
+										title = 'Variogram range correlations')
 
 # Save plot
 cat('Saving variogram model summary plot to:\nfigs/variogram_summary.png\n')
 
-ggsave(file = 'figs/variogram_summary.png',
+ggsave(file = 'figs/summary/variogram_summary.png',
 			 plot = p,
 			 device = 'png',
 			 type = 'cairo',
-			 width = 10,
-			 height = 10)
+			 width = 8,
+			 height = 8)
 
 # Interpolation difference
 purrr::map(fname, ~get(.x)$diff %>% st_set_geometry(NULL)) %>%
-purrr::set_names(nm = fname %>% stringr::str_replace('_', ' ')) -> hf.diff
+purrr::set_names(nm = seg.names) -> hf.diff
 
 hf.diff %>%
 		bind_rows(.id = 'Segment') %>%
@@ -163,20 +175,21 @@ p <- hf.diff %>%
 										 width = 0.5,
 										 outlier.size = 0.5,
 										 outlier.color = rgb(0.5, 0.5, 0.5, 0.1)) +
+				geom_vline(xintercept = 0, color = 'deeppink') +
 				labs(x = bquote('Heat flow difference'~(mWm^-2)),
 						 y = NULL,
-						 title = 'Similarity vs. Kriging difference by segment') +
+						 title = 'Prediction difference (similarity - Krige)') +
 				scale_x_continuous(limits = c(-2*max(hf.diff.summary$IQR), 2*max(hf.diff.summary$IQR))) +
 				scale_y_discrete(limits = rev(levels(as.factor(seg.names)))) +
-				theme_classic(base_size = 14) +
+				theme_classic(base_size = 9) +
 				theme(strip.background = element_blank())
 
 # Save plot
 cat('Saving heat flow difference summary plot to:\nfigs/hf_diff_summary.png')
 
-ggsave(file = 'figs/hf_diff_summary.png',
+ggsave(file = 'figs/summary/hf_diff_summary.png',
 			 plot = p,
 			 device = 'png',
 			 type = 'cairo',
-			 width = 7,
-			 height = 7)
+			 width = 4,
+			 height = 4)

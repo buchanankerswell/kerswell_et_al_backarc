@@ -60,9 +60,9 @@ purrr::set_names(nm = seg.names) -> shp.grid.crop
 
 # Define variogram cutoffs for experimental variograms
 cutoff <- list(5, 6, 4, 5, 3, 8, 6, 3, 5, 15, 7, 3, 5) %>%
-				purrr::set_names(seg.names)
+		purrr::set_names(seg.names)
 lags <- list(15, 15, 15, 15, 15, 15, 15, 15, 15, 15, 15, 15, 15) %>%
-				purrr::set_names(seg.names)
+		purrr::set_names(seg.names)
 lag.start <- list(3, 1, 1, 2, 5, 1, 3, 1, 2, 1, 1, 1, 3)
 
 # Calculate experimental variogram

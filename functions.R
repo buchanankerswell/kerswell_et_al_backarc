@@ -10,12 +10,12 @@ c('magrittr', 'ggplot2', 'tidyr', 'readr', 'purrr',
 	'gstat', 'ggsflabel', 'sf', 'ggrepel', 'patchwork',
 	'cowplot', 'dplyr') -> p.list
 
-cat('Loading libraries:', p.list, sep = '\n')
+#cat('Loading libraries:', p.list, sep = '\n')
 
 # auto-load quietly
 sapply(p.list, sshhh)
 
-cat('Loading functions\n')
+#cat('Loading functions\n')
 
 # Draw a widened box from a st_bbox object
 bbox_widen <- function(bbox,
@@ -49,21 +49,14 @@ bbox_widen <- function(bbox,
 
 # Read gmt files, wrap the dateline to avoid plotting horizontal lines on map,
 # make into tibble, add segment names, transform projection, and bind into one sf object
-read_latlong <- function(files, filenames = NULL, crs) {
-		f <-
-		purrr::map2(files,
-                filenames,
-                ~ st_read(.x,
-                          crs = '+proj=longlat +lon_wrap=180 +ellps=WGS84 +datum=WGS84 +no_defs',
-                          quiet = TRUE) %>%
-                  st_transform(crs) %>%
-                  tibble::as_tibble() %>%
-                  tibble::add_column('segment' = .y) %>%
-                  dplyr::group_by(segment) %>%
-                  st_as_sf()) %>%
-		     bind_rows() %>%
-				 purrr::set_names(nm = filenames) %>%
-				 dplyr::bind_rows()
+read_latlong <- function(file, fname, crs) {
+	st_read(file,
+	        crs = '+proj=longlat +lon_wrap=180 +ellps=WGS84 +datum=WGS84 +no_defs',
+	        quiet = TRUE) %>%
+	        st_transform(crs) %>%
+	        tibble::as_tibble() %>%
+	        st_as_sf() %>%
+					mutate(segment = fname, .before = geometry)
 }
 
 # Krige optimization algorithmcross-validation used for optimizing variogram model
@@ -198,7 +191,10 @@ Krige_opt <- function(seg.name,
 				         parallel = T))
 				if(class(opt) == 'try-error') opt <- NULL
 				# Save
-				fname <- paste0(seg.name %>% stringr::str_replace(' ', '_'), '_opt')
+				dir.create('data/ga', showWarnings = FALSE)
+				fname <- paste0(seg.name %>%
+												stringr::str_replace_all(' ', '_') %>%
+												stringr::str_replace_all('\\.', ''), '_opt')
 				cat('Saving results to:', paste0(fname, '.RData'), '\n')
 				assign(fname, opt)
 				save(list = fname, file = paste0('data/ga/', fname, '.RData'))
@@ -226,9 +222,12 @@ Krige_diff <- function(seg.name,
 				         hf.diff = round(hf.pred.luca - hf.pred.krige, 1),
 				         .before = geometry)
 			# Save
-				fname <- seg.name %>% stringr::str_replace(' ', '_')
+				dir.create('data/diff', showWarnings = FALSE)
+				fname <- seg.name %>%
+								stringr::str_replace_all(' ', '_') %>%
+								stringr::str_replace_all('\\.', '')
 				assign(fname, list('k' = k, 'v.grm' = v.grm, 'v.mod' = v, 'diff' = shp.hf.pred))
-				save(list = fname, file = paste0('data/diff/', fname, '_diff.RData'))
+				save(list = fname, file = paste0('data/diff/', fname, '.RData'))
 }
 
 # Plot variogram
