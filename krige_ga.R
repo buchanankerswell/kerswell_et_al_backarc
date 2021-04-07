@@ -21,11 +21,12 @@ purrr::map(shp.box,
 					 st_crop(.x)) -> shp.hf.crop
 
 # Find optimal kriging parameters by genetic algorithm
-purrr::walk2(seg.names,
-						 shp.hf.crop,
-						 ~Krige_opt(seg.name = .x,
-												data = .y,
-												param = 'hf',
-												n.init = 50,
-												maxitr = 250,
-												run = 50))
+args <- commandArgs(trailingOnly = TRUE)
+cat('Running Genetic Algorithm for', args, 'segment\n')
+
+Krige_opt(seg.name = args,
+					data = shp.hf.crop[[args]],
+					param = 'hf',
+					n.init = 50,
+					maxitr = 250,
+					run = 50)
