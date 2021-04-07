@@ -1,21 +1,18 @@
 # Load packages
 # Quiet loading
-function(p){
-	library(p, character.only=TRUE) %>%
-	suppressPackageStartupMessages() %>%
-	suppressWarnings()} -> sshhh
+sshhh <- function(p){suppressWarnings(suppressPackageStartupMessages(library(p, character.only=TRUE)))}
 
 # Package list
 c('magrittr', 'ggplot2', 'tidyr', 'readr', 'purrr',
 	'gstat', 'ggsflabel', 'sf', 'ggrepel', 'patchwork',
 	'cowplot', 'dplyr') -> p.list
 
-#cat('Loading libraries:', p.list, sep = '\n')
+cat('Loading libraries:', p.list, sep = '\n')
 
 # auto-load quietly
 sapply(p.list, sshhh)
 
-#cat('Loading functions\n')
+cat('Loading functions\n')
 
 # Draw a widened box from a st_bbox object
 bbox_widen <- function(bbox,
@@ -75,11 +72,9 @@ f.obj <- function(
   # Variogram model discritization formula
   if(v.mod >= 0 && v.mod < 1) {
     v.mod <- 'Sph'
-  } else if(v.mod >= 1 && v.mod < 2) {
+  } else if(v.mod >= 1 && v.mod <= 2) {
     v.mod <- 'Exp'
-  } else if(v.mod >= 2 && v.mod <= 3) {
-    v.mod <- 'Gau'
-  }
+	}
 	# Experimental variogram
 	cutoff <- max(st_distance(data))/cutoff
 	lags <- 15
@@ -141,7 +136,7 @@ Krige_opt <- function(seg.name,
 											maxitr = 200,
 											run = 50){
 				# Cost function (to minimize)
-				cat('Ten-fold cross-validation over',
+			cat('Ten-fold cross-validation over',
 						nrow(data), 'grid points\n')
 				cat('Defining cost function\n')
 				v.opt <- function(x){
@@ -159,7 +154,7 @@ Krige_opt <- function(seg.name,
 				tibble(
 					cutoff = runif(n.init, 3, 15),
 					lag.start = runif(n.init, 1, 5),
-				  v.mod = runif(n.init, 0, 3),
+				  v.mod = runif(n.init, 0, 2),
 				  v.sill = runif(n.init, 1, 2000000),
 				  v.range = runif(n.init, 1, 1000000),
 					v.nug = runif(n.init, 0, 2000000),
@@ -171,25 +166,23 @@ Krige_opt <- function(seg.name,
 						'Population:', n.init, '\n',
 						'Max generations:', maxitr, '\n',
 						'Run cutoff:', run, '\n')
-				opt <- try(
-					GA::ga(type = "real-valued", 
-				         fitness = function(x) -v.opt(x),
-				         lower = c(3, 1, 0, 1, 1, 0, 1),
-				         upper = c(15, 5, 3, 2000000, 1000000, 2000000, 10000000),
-				         names = c('cutoff',
-													 'lag.start',
-													 'v.mod',
-													 'v.sill',
-													 'v.range',
-													 'v.nug',
-													 'maxdist'),
-				         suggestions = suggestions,
-				         popSize = n.init,
-				         maxiter = maxitr,
-				         run = run,
-								 monitor = T,
-				         parallel = T))
-				if(class(opt) == 'try-error') opt <- NULL
+				GA::ga(type = "real-valued", 
+			         fitness = function(x) -v.opt(x),
+			         lower = c(3, 1, 0, 1, 1, 0, 1),
+			         upper = c(15, 5, 2, 2000000, 1000000, 2000000, 10000000),
+			         names = c('cutoff',
+												 'lag.start',
+												 'v.mod',
+												 'v.sill',
+												 'v.range',
+												 'v.nug',
+												 'maxdist'),
+			         suggestions = suggestions,
+			         popSize = n.init,
+			         maxiter = maxitr,
+			         run = run,
+							 monitor = T,
+			         parallel = T) -> opt
 				# Save
 				dir.create('data/ga', showWarnings = FALSE)
 				fname <- paste0(seg.name %>%
