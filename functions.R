@@ -98,20 +98,25 @@ f.obj <- function(
            model = f,
            maxdist = maxdist,
            verbose = T) %>%
-	drop_na()-> k
-  # Calculating cost function after Li et al 2018
-  # Simultaneously minimizes misfit on variogram model and kriged interpolation errors
-  # Weights
-  wi <- 0.3 # interpolation error
-  wf <- 0.7 # variogram fit error
-  # Calculate variogram fit error
-  # Root mean weighted (Nj/hj^2) sum of squared errors * (1-wi)/v.sigma
-  sqrt((attr(f, "SSErr"))/nrow(v)) * ((1-wi)/sd(v$gamma)) -> v.s
-  # Calculate interpolation error
-  # RMSE * wi/i.sigma
-  sqrt(sum((k$residual^2))/nrow(k)) * wi/sd(k$var1.pred) -> i.s
-  # Cost
-  v.s + i.s
+	drop_na() %>%
+	try() -> k
+	if(class(k) == 'try-error') {
+		return(NULL)
+	} else {
+  	# Calculating cost function after Li et al 2018
+  	# Simultaneously minimizes misfit on variogram model and kriged interpolation errors
+  	# Weights
+  	wi <- 0.7 # interpolation error
+  	wf <- 0.3 # variogram fit error
+  	# Calculate variogram fit error
+  	# Root mean weighted (Nj/hj^2) sum of squared errors * (1-wi)/v.sigma
+  	sqrt((attr(f, "SSErr"))/nrow(v)) * ((1-wi)/sd(v$gamma)) -> v.s
+  	# Calculate interpolation error
+  	# RMSE * wi/i.sigma
+  	sqrt(sum((k$residual^2))/nrow(k)) * wi/sd(k$var1.pred) -> i.s
+  	# Cost
+  	return(v.s + i.s)
+	}
 }
 
 # Kriging
