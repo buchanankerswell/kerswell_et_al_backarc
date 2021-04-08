@@ -101,7 +101,7 @@ f.obj <- function(
 	drop_na() %>%
 	try() -> k
 	if(class(k) == 'try-error') {
-		return(NULL)
+		return(Inf)
 	} else {
   	# Calculating cost function after Li et al 2018
   	# Simultaneously minimizes misfit on variogram model and kriged interpolation errors
