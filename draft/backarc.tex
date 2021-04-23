@@ -200,6 +200,23 @@ Kerswell}{buchanankerswell@u.boisestate.edu}
 \begin{abstract}
 
 \end{abstract}
+\begin{verbatim}
+## Loading libraries:
+## magrittr
+## ggplot2
+## tidyr
+## readr
+## purrr
+## gstat
+## ggsflabel
+## sf
+## ggrepel
+## patchwork
+## cowplot
+## dplyr
+## Loading functions
+\end{verbatim}
+
 \section{Introduction}
 
 Heat escaping the solid Earth's surface indicates a dynamically cooling
@@ -1056,22 +1073,71 @@ Third Law interpolations are more appropriate on a case-by-case basis.
 
 \subsection{Heat Flow Sampling and Hypothesis Testing}
 
-Testing hypotheses relating to subduction dynamics and seismicity
-require sampling of heat flow. Sampling in previous work commonly uses a
-three-part strategy: 1) draw a cross-section line perpendicular to the
-trench, 2) draw a rectangle with arbitrary width bisected by the section
-line, 3) gather all heat flow observations within the rectangle and
-project them onto the section line. This sampling strategy is simple and
-most effective for section lines with nearby, equally spaced,
-high-density observations (almost never the case). The method
-increasingly violates the First Law as the size of the sampling
-rectangle increases, including more disparate points. This strategy must
-also be repeated many times along strike to fully characterize the
-spatial distribution of heat flow near subduction zone segments.
-Repeated sampling along strike has not been done in previous studies.
+Testing hypotheses relating to subduction dynamics require sampling of
+heat flow in order to apply statistical models. Sampling in previous
+work commonly uses a three-part strategy: 1) draw a cross-section line
+perpendicular to the trench, 2) draw a rectangle with arbitrary width
+bisected by the section line, 3) gather all heat flow observations
+within the rectangle and project them onto the section line (e.g.,
+Currie et al., 2004; Currie \& Hyndman, 2006; Hyndman et al., 2005; Wada
+\& Wang, 2009). This sampling strategy is simple and most effective if
+measurements along section lines are equally spaced with high spatial
+density. Observations along straight transects perpendicular to
+trenches, however, are rare in the NGHF except for a few studies
+e.g.~near the Lesser Antilles and Sumatra Banda Sea segments,
+\ref{fig:NGHF}, (Lucazeau, 2019). There are additional limitations to
+this method, including: 1) the method increasingly violates the First
+Law as the size of the sampling rectangle increases---projecting more
+disparate points onto the section line---and 2) sampling must be
+repeated many times along strike to fully characterize the spatial
+distribution of heat flow near subduction zone segments. Despite these
+limitations, previous work use single transects to characterize whole
+subduction zones, which are then compared to make broad claims about
+global subduction dynamics (e.g., Currie et al., 2004; Currie \&
+Hyndman, 2006; Hyndman et al., 2005; Kerswell et al., 2020; Wada \&
+Wang, 2009).
 
-The Third Law has been used successfully in calculating global surface
-heat flux {[}{]} and testing lithospheric cooling models {[}{]}.
+Hypotheses such as common depths of slab-mantle mechanical coupling and
+commonly thin backarc lithospheres (Currie et al., 2004; Currie \&
+Hyndman, 2006; Furukawa, 1993; Kerswell et al., 2020; Wada \& Wang,
+2009) cannot be adequately tested using the single-transect method
+described above. First and Third Law interpolations show that spatial
+variance in heat flow near subduction zone segments is simply too high
+to support any claim that subduction dynamics are operating on vastly
+similar spatiotemporal scales either within or among subduction zone
+segments. For example, sampling along section lines offset at 50 \(km\)
+from previously published section lines (Currie et al., 2004; Currie \&
+Hyndman, 2006; Furukawa, 1993; Wada \& Wang, 2009) is unlikely to
+reproduce results. Insofar as heat flow can reliably answer questions
+about subduction zone dynamics in space and time, hypothesis must be
+qualified with sampling techniques that consider the appropriate number
+of dimensions for the question being asked. Sampling and projection onto
+a one-dimensional section line is insufficient for testing hypotheses
+about the two-dimensional distribution of dynamic processes.
+
+In simple terms, heat flow interpolations near subduction zones imply
+either 1) disorganized subsurface structure and spatially heterogeneous
+dynamics, or 2) broad obfuscation of subsurface structure and dynamics
+by near-surface processes. Therefore we encourage a more
+antireductionist view of subduction zone dynamics. We point out that
+while testing of many important subduction-related questions may not be
+feasible with the current global dataset, the idea of broad dynamic
+commonality among subduction systems does not hold up to scrutiny from
+the heat flow interpolations presented here.
+
+Important question arise from the present interpolations:
+
+\begin{enumerate}
+\def\labelenumi{\arabic{enumi}.}
+\item
+  Is collecting more heat flow data beneficial for future subduction
+  zone research?
+\item
+  Where should data collection efforts be focused?
+\item
+  Should First or Third Law methods be favored when prioritizing data
+  collection targets?
+\end{enumerate}
 
 \section{Conclusions}
 
@@ -1209,215 +1275,220 @@ predictions}
 
 \hypertarget{refs}{}
 \begin{CSLReferences}{1}{0}
-\leavevmode\hypertarget{ref-bardossy1997}{}%
+\leavevmode\vadjust pre{\hypertarget{ref-bardossy1997}{}}%
 Bárdossy, A. (1997). Introduction to geostatistics. \emph{Institute of
 Hydraulic Engineering, University of Stuttgart}.
 
-\leavevmode\hypertarget{ref-chapman1975}{}%
+\leavevmode\vadjust pre{\hypertarget{ref-chapman1975}{}}%
 Chapman, D. S., \& Pollack, H. N. (1975). Global heat flow: A new look.
 \emph{Earth and Planetary Science Letters}, \emph{28}(1), 23--32.
 
-\leavevmode\hypertarget{ref-chiles2009}{}%
+\leavevmode\vadjust pre{\hypertarget{ref-chiles2009}{}}%
 Chiles, J.-P., \& Delfiner, P. (2009). \emph{Geostatistics: Modeling
 spatial uncertainty} (Vol. 497). John Wiley \& Sons.
 
-\leavevmode\hypertarget{ref-cressie2015}{}%
+\leavevmode\vadjust pre{\hypertarget{ref-cressie2015}{}}%
 Cressie, N. (2015). \emph{Statistics for spatial data}. John Wiley \&
 Sons.
 
-\leavevmode\hypertarget{ref-currie2006}{}%
+\leavevmode\vadjust pre{\hypertarget{ref-currie2006}{}}%
 Currie, C., \& Hyndman, R. D. (2006). The thermal structure of
 subduction zone back arcs. \emph{Journal of Geophysical Research: Solid
 Earth}, \emph{111}(B8).
 
-\leavevmode\hypertarget{ref-currie2004}{}%
+\leavevmode\vadjust pre{\hypertarget{ref-currie2004}{}}%
 Currie, C., Wang, K., Hyndman, R. D., \& He, J. (2004). The thermal
 effects of steady-state slab-driven mantle flow above a subducting
 plate: The cascadia subduction zone and backarc. \emph{Earth and
 Planetary Science Letters}, \emph{223}(1-2), 35--48.
 
-\leavevmode\hypertarget{ref-davies2013}{}%
+\leavevmode\vadjust pre{\hypertarget{ref-davies2013}{}}%
 Davies, J. H. (2013). Global map of solid earth surface heat flow.
 \emph{Geochemistry, Geophysics, Geosystems}, \emph{14}(10), 4608--4622.
 
-\leavevmode\hypertarget{ref-fourier1827}{}%
+\leavevmode\vadjust pre{\hypertarget{ref-fourier1827}{}}%
 Fourier, J. (1827). M{é}moire sur les temp{é}ratures du globe terrestre
 et des espaces plan{é}taires. \emph{M{é}moires de l'Acad{é}mie Royale
 Des Sciences de l'Institut de France}, \emph{7}, 570--604.
 
-\leavevmode\hypertarget{ref-furlong2013}{}%
+\leavevmode\vadjust pre{\hypertarget{ref-furlong2013}{}}%
 Furlong, K. P., \& Chapman, D. S. (2013). Heat flow, heat generation,
 and the thermal state of the lithosphere. \emph{Annual Review of Earth
 and Planetary Sciences}, \emph{41}, 385--410.
 
-\leavevmode\hypertarget{ref-furukawa1993}{}%
+\leavevmode\vadjust pre{\hypertarget{ref-furukawa1993}{}}%
 Furukawa, Y. (1993). Depth of the decoupling plate interface and thermal
 structure under arcs. \emph{Journal of Geophysical Research: Solid
 Earth}, \emph{98}(B11), 20005--20013.
 
-\leavevmode\hypertarget{ref-gao2014}{}%
+\leavevmode\vadjust pre{\hypertarget{ref-gao2014}{}}%
 Gao, X., \& Wang, K. (2014). Strength of stick-slip and creeping
 subduction megathrusts from heat flow observations. \emph{Science},
 \emph{345}(6200), 1038--1041.
 
-\leavevmode\hypertarget{ref-goldberg1989}{}%
+\leavevmode\vadjust pre{\hypertarget{ref-goldberg1989}{}}%
 Goldberg, D. E. (1989). Genetic algorithms in search.
 \emph{Optimization, and MachineLearning}.
 
-\leavevmode\hypertarget{ref-goodchild2004}{}%
+\leavevmode\vadjust pre{\hypertarget{ref-goodchild2004}{}}%
 Goodchild, M. F. (2004). The validity and usefulness of laws in
 geographic information science and geography. \emph{Annals of the
 Association of American Geographers}, \emph{94}(2), 300--303.
 
-\leavevmode\hypertarget{ref-goovaerts1997}{}%
+\leavevmode\vadjust pre{\hypertarget{ref-goovaerts1997}{}}%
 Goovaerts, P. (1997). \emph{Geostatistics for natural resources
 evaluation}. Oxford University Press on Demand.
 
-\leavevmode\hypertarget{ref-goutorbe2011}{}%
+\leavevmode\vadjust pre{\hypertarget{ref-goutorbe2011}{}}%
 Goutorbe, B., Poort, J., Lucazeau, F., \& Raillard, S. (2011). Global
 heat flow trends resolved from multiple geological and geophysical
 proxies. \emph{Geophysical Journal International}, \emph{187}(3),
 1405--1419.
 
-\leavevmode\hypertarget{ref-graler2016}{}%
+\leavevmode\vadjust pre{\hypertarget{ref-graler2016}{}}%
 Gräler, B., Pebesma, E., \& Heuvelink, G. (2016). Spatio-temporal
 interpolation using gstat. \emph{The R Journal}, \emph{8}, 204--218.
 Retrieved from
 \url{https://journal.r-project.org/archive/2016/RJ-2016-014/index.html}
 
-\leavevmode\hypertarget{ref-hasterok2013}{}%
+\leavevmode\vadjust pre{\hypertarget{ref-hasterok2013}{}}%
 Hasterok, D. (2013). A heat flow based cooling model for tectonic
 plates. \emph{Earth and Planetary Science Letters}, \emph{361}, 34--43.
 
-\leavevmode\hypertarget{ref-hasterok2008}{}%
+\leavevmode\vadjust pre{\hypertarget{ref-hasterok2008}{}}%
 Hasterok, D., \& Chapman, D. (2008). Global heat flow: A new database
 and a new approach. In \emph{AGU fall meeting abstracts} (Vol. 2008, pp.
 T21C--1985).
 
-\leavevmode\hypertarget{ref-hasterok2011}{}%
+\leavevmode\vadjust pre{\hypertarget{ref-hasterok2011}{}}%
 Hasterok, D., Chapman, D., \& Davis, E. (2011). Oceanic heat flow:
 Implications for global heat loss. \emph{Earth and Planetary Science
 Letters}, \emph{311}(3-4), 386--395.
 
-\leavevmode\hypertarget{ref-jennings2021}{}%
+\leavevmode\vadjust pre{\hypertarget{ref-hyndman2005}{}}%
+Hyndman, R. D., Currie, C. A., \& Mazzotti, S. P. (2005). Subduction
+zone backarcs, mobile belts, and orogenic heat. \emph{GSA Today},
+\emph{15}(2), 4--10.
+
+\leavevmode\vadjust pre{\hypertarget{ref-jennings2021}{}}%
 Jennings, S., \& Hasterok, D. (2021). HeatFlow.org. \emph{Heatflow.org}.
 Retrieved from \url{http://heatflow.org/}
 
-\leavevmode\hypertarget{ref-kerswell2020}{}%
+\leavevmode\vadjust pre{\hypertarget{ref-kerswell2020}{}}%
 Kerswell, B. C., Kohn, M. J., \& Gerya, T. V. (2020). Backarc
 lithospheric thickness and serpentine stability control slab-mantle
 coupling depths in subduction zones. \emph{Earth and Space Science Open
 Archive}, 34. \url{https://doi.org/10.1002/essoar.10503710.1}
 
-\leavevmode\hypertarget{ref-krige1951}{}%
+\leavevmode\vadjust pre{\hypertarget{ref-krige1951}{}}%
 Krige, D. G. (1951). A statistical approach to some basic mine valuation
 problems on the witwatersrand. \emph{Journal of the Southern African
 Institute of Mining and Metallurgy}, \emph{52}(6), 119--139.
 
-\leavevmode\hypertarget{ref-lee1965}{}%
+\leavevmode\vadjust pre{\hypertarget{ref-lee1965}{}}%
 Lee, W. H., \& Uyeda, S. (1965). Review of heat flow data.
 \emph{Terrestrial Heat Flow}, \emph{8}, 87--190.
 
-\leavevmode\hypertarget{ref-li2018}{}%
+\leavevmode\vadjust pre{\hypertarget{ref-li2018}{}}%
 Li, Z., Zhang, X., Clarke, K. C., Liu, G., \& Zhu, R. (2018). An
 automatic variogram modeling method with high reliability fitness and
 estimates. \emph{Computers \& Geosciences}, \emph{120}, 48--59.
 
-\leavevmode\hypertarget{ref-lucazeau2019}{}%
+\leavevmode\vadjust pre{\hypertarget{ref-lucazeau2019}{}}%
 Lucazeau, F. (2019). Analysis and mapping of an updated terrestrial heat
 flow data set. \emph{Geochemistry, Geophysics, Geosystems},
 \emph{20}(8), 4001--4024.
 
-\leavevmode\hypertarget{ref-matheron1963}{}%
+\leavevmode\vadjust pre{\hypertarget{ref-matheron1963}{}}%
 Matheron, G. (1963). Principles of geostatistics. \emph{Economic
 Geology}, \emph{58}(8), 1246--1266.
 
-\leavevmode\hypertarget{ref-matheron2019}{}%
+\leavevmode\vadjust pre{\hypertarget{ref-matheron2019}{}}%
 Matheron, G. (2019). \emph{Matheron's theory of regionalized variables}.
 International Association for.
 
-\leavevmode\hypertarget{ref-parsons1977}{}%
+\leavevmode\vadjust pre{\hypertarget{ref-parsons1977}{}}%
 Parsons, B., \& Sclater, J. G. (1977). An analysis of the variation of
 ocean floor bathymetry and heat flow with age. \emph{Journal of
 Geophysical Research}, \emph{82}(5), 803--827.
 
-\leavevmode\hypertarget{ref-pebesma2004}{}%
+\leavevmode\vadjust pre{\hypertarget{ref-pebesma2004}{}}%
 Pebesma, E. (2004). Multivariable geostatistics in {S}: The gstat
 package. \emph{Computers \& Geosciences}, \emph{30}, 683--691.
 
-\leavevmode\hypertarget{ref-pebesma2018}{}%
+\leavevmode\vadjust pre{\hypertarget{ref-pebesma2018}{}}%
 Pebesma, E. (2018). {Simple Features for R: Standardized Support for
 Spatial Vector Data}. \emph{{The R Journal}}, \emph{10}(1), 439--446.
 \url{https://doi.org/10.32614/RJ-2018-009}
 
-\leavevmode\hypertarget{ref-pollack1977}{}%
+\leavevmode\vadjust pre{\hypertarget{ref-pollack1977}{}}%
 Pollack, H. N., \& Chapman, D. S. (1977). On the regional variation of
 heat flow, geotherms, and lithospheric thickness. \emph{Tectonophysics},
 \emph{38}(3-4), 279--296.
 
-\leavevmode\hypertarget{ref-pollack1993}{}%
+\leavevmode\vadjust pre{\hypertarget{ref-pollack1993}{}}%
 Pollack, H. N., Hurter, S. J., \& Johnson, J. R. (1993). Heat flow from
 the earth's interior: Analysis of the global data set. \emph{Reviews of
 Geophysics}, \emph{31}(3), 267--280.
 
-\leavevmode\hypertarget{ref-proj2021}{}%
+\leavevmode\vadjust pre{\hypertarget{ref-proj2021}{}}%
 PROJ contributors. (2021). \emph{{PROJ} coordinate transformation
 software library}. Open Source Geospatial Foundation. Retrieved from
 \url{https://proj.org/}
 
-\leavevmode\hypertarget{ref-rudnick1998}{}%
+\leavevmode\vadjust pre{\hypertarget{ref-rudnick1998}{}}%
 Rudnick, R. L., McDonough, W. F., \& O'Connell, R. J. (1998). Thermal
 structure, thickness and composition of continental lithosphere.
 \emph{Chemical Geology}, \emph{145}(3-4), 395--411.
 
-\leavevmode\hypertarget{ref-sclater1970}{}%
+\leavevmode\vadjust pre{\hypertarget{ref-sclater1970}{}}%
 Sclater, J. G., \& Francheteau, J. (1970). The implications of
 terrestrial heat flow observations on current tectonic and geochemical
 models of the crust and upper mantle of the earth. \emph{Geophysical
 Journal International}, \emph{20}(5), 509--542.
 
-\leavevmode\hypertarget{ref-scrucca2013}{}%
+\leavevmode\vadjust pre{\hypertarget{ref-scrucca2013}{}}%
 Scrucca, L. (2013). GA: A package for genetic algorithms in r.
 \emph{Journal of Statistical Software}, \emph{53}(4), 1--37.
 
-\leavevmode\hypertarget{ref-scrucca2016}{}%
+\leavevmode\vadjust pre{\hypertarget{ref-scrucca2016}{}}%
 Scrucca, L. (2016). On some extensions to GA package: Hybrid
 optimisation, parallelisation and islands evolution. \emph{arXiv
 Preprint arXiv:1605.01931}.
 
-\leavevmode\hypertarget{ref-shapiro2004}{}%
+\leavevmode\vadjust pre{\hypertarget{ref-shapiro2004}{}}%
 Shapiro, N. M., \& Ritzwoller, M. H. (2004). Inferring surface heat flux
 distributions guided by a global seismic model: Particular application
 to antarctica. \emph{Earth and Planetary Science Letters},
 \emph{223}(1-2), 213--224.
 
-\leavevmode\hypertarget{ref-stein1992}{}%
+\leavevmode\vadjust pre{\hypertarget{ref-stein1992}{}}%
 Stein, C. A., \& Stein, S. (1992). A model for the global variation in
 oceanic depth and heat flow with lithospheric age. \emph{Nature},
 \emph{359}(6391), 123--129.
 
-\leavevmode\hypertarget{ref-stein1994}{}%
+\leavevmode\vadjust pre{\hypertarget{ref-stein1994}{}}%
 Stein, C. A., \& Stein, S. (1994). Constraints on hydrothermal heat flux
 through the oceanic lithosphere from global heat flow. \emph{Journal of
 Geophysical Research: Solid Earth}, \emph{99}(B2), 3081--3095.
 
-\leavevmode\hypertarget{ref-syracuse2006}{}%
+\leavevmode\vadjust pre{\hypertarget{ref-syracuse2006}{}}%
 Syracuse, E. M., \& Abers, G. A. (2006). Global compilation of
 variations in slab depth beneath arc volcanoes and implications.
 \emph{Geochemistry, Geophysics, Geosystems}, \emph{7}(5).
 
-\leavevmode\hypertarget{ref-wada2009}{}%
+\leavevmode\vadjust pre{\hypertarget{ref-wada2009}{}}%
 Wada, I., \& Wang, K. (2009). Common depth of slab-mantle decoupling:
 Reconciling diversity and uniformity of subduction zones.
 \emph{Geochemistry, Geophysics, Geosystems}, \emph{10}(10).
 
-\leavevmode\hypertarget{ref-wilkinson2016}{}%
+\leavevmode\vadjust pre{\hypertarget{ref-wilkinson2016}{}}%
 Wilkinson, M. D., Dumontier, M., Aalbersberg, Ij. J., Appleton, G.,
 Axton, M., Baak, A., et al. (2016). The FAIR guiding principles for
 scientific data management and stewardship. \emph{Scientific Data},
 \emph{3}(1), 1--9.
 
-\leavevmode\hypertarget{ref-zhu2018}{}%
+\leavevmode\vadjust pre{\hypertarget{ref-zhu2018}{}}%
 Zhu, A.-X., Lu, G., Liu, J., Qin, C.-Z., \& Zhou, C. (2018). Spatial
 prediction based on third law of geography. \emph{Annals of GIS},
 \emph{24}(4), 225--240.
