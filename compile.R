@@ -19,11 +19,13 @@ cat('Defining CRS (projections) ',
 # Create sliver around twenty-five degree long to
 # cut country boundaries so they don't project
 # as straight lines across the globe
-st_polygon(x = list(rbind(c(25.000001, 90),
-			  c(25, 90),
-                          c(25, -90),
-                          c(25.000001, -90),
-                          c(25.000001, 90)))) %>%
+st_polygon(
+  x = list(rbind(
+    c(25.000001, 90),
+    c(25, 90),
+    c(25, -90),
+    c(25.000001, -90),
+    c(25.000001, 90)))) %>%
   st_sfc() %>%
   st_set_crs(proj4.wgs) -> shp.sliv
 
@@ -36,27 +38,30 @@ rnaturalearth::ne_countries(returnclass = 'sf') %>%
 
 # Read syracuse et al 2006 Segments
 cat('\nLoading Syracuse and Abers (2006) segment boundaries ...')
-c('Alaska Aleutians',
+c('Alaska_Aleutians',
   'Andes',
-  'Central America',
-  'Kamchatka Marianas',
-  'Kyushu Ryukyu',
-  'Lesser Antilles',
-  'N. Philippines',
-  'New Britain Solomon',
-  'S. Philippines',
+  'Central_America',
+  'Kamchatka_Marianas',
+  'Kyushu_Ryukyu',
+  'Lesser_Antilles',
+  'N_Philippines',
+  'New_Britain_Solomon',
+  'S_Philippines',
   'Scotia',
-  'Sumatra Banda Sea',
-  'Tonga New Zealand',
+  'Sumatra_Banda_Sea',
+  'Tonga_New_Zealand',
   'Vanuatu') -> seg.names
 files <- list.files('data/sa2006/gmts', full.names = TRUE)
 cat('\nSegments:', seg.names, sep = '\n')
 
 # Contours Robinson pacific centered
-purrr::map2_df(files, seg.names,
-							 ~read_latlong(.x,
-														 .y,
-														 proj4.robin.pacific)) -> shp.sa.contours.robin.pacific
+purrr::map2_df(
+  files,
+  seg.names,
+  ~read_latlong(
+  .x,
+  .y,
+  proj4.robin.pacific)) -> shp.sa.contours.robin.pacific
 
 # Filter for segment boundary
 shp.sa.contours.robin.pacific %>%
