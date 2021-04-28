@@ -25,12 +25,13 @@ purrr::map(
 
 # Find optimal kriging parameters by genetic algorithm
 args <- commandArgs(trailingOnly = TRUE)
-cat('Running Genetic Algorithm for', args, 'segment\n')
+cat('Running Genetic Algorithm for', args[1], 'segment\n')
 
 Krige_opt(
   seg.name = args,
-  data = shp.hf.crop[[args]],
+  data = shp.hf.crop[[args[1]]],
   param = 'hf',
   n.init = 50,
   maxitr = 250,
-  run = 50)
+  run = 50,
+  nfold = as.numeric(args[2]))

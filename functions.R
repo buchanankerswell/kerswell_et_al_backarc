@@ -106,6 +106,7 @@ f.obj <- function(
     locations = data,
     model = f,
     maxdist = maxdist,
+    nfold = fold,
     verbose = T) %>%
   drop_na() %>%
   try() -> k
@@ -150,10 +151,11 @@ Krige_opt <- function(
   param,
   n.init = 50,
   maxitr = 200,
-  run = 50){
+  run = 50,
+  nfold = 10){
   # Cost function (to minimize)
   cat(
-    'Ten-fold cross-validation over',
+    nfold, 'fold cross-validation over',
     nrow(data), 'grid points\n')
   cat('Defining cost function\n')
   v.opt <- function(x){
@@ -166,7 +168,8 @@ Krige_opt <- function(
       v.sill = x[4],
       v.range = x[5],
       v.nug = x[6],
-      maxdist = x[7])}
+      maxdist = x[7],
+      fold = nfold)}
   # Suggested chromosomes for initial population
   cat('Initializing', n.init, 'chromosomes\n')
   tibble(
@@ -183,7 +186,8 @@ Krige_opt <- function(
   cat('Optimizing using genetic algorithm with:\n',
     'Population:', n.init, '\n',
     'Max generations:', maxitr, '\n',
-    'Run cutoff:', run, '\n')
+    'Run cutoff:', run, '\n',
+    'Cross-fold validation:', nfold, '\n')
   GA::ga(
     type = "real-valued", 
     fitness = function(x) -v.opt(x),
