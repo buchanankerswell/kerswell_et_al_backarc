@@ -3,8 +3,8 @@ source('functions.R')
 load('data/hf.Rdata')
 
 # Define paths and names
-fpaths <- list.files('data/diff_byeye', pattern = '.RData', full.names = T)
-fnames <- purrr::map_chr(list.files('data/diff_byeye', pattern = '.RData'),
+fpaths <- list.files('data/diff_ga', pattern = '.RData', full.names = T)
+fnames <- purrr::map_chr(list.files('data/diff_ga', pattern = '.RData'),
 					 ~.x %>%
 					 stringr::str_replace('.RData', ''))
 
@@ -12,7 +12,7 @@ fnames <- purrr::map_chr(list.files('data/diff_byeye', pattern = '.RData'),
 for (i in fpaths) load(i)
 
 # Bounding Boxes
-purrr::map(seg.names,
+purrr::map(fnames,
 					 ~shp.sa.segs.robin.pacific.buffer %>%
 					 filter(segment == .x) %>%
 					 st_bbox() %>%
@@ -21,21 +21,21 @@ purrr::map(seg.names,
 																	'bottom' = 0.1,
 																	'left' = 0.1,
 																	'right' = 0.1))) %>%
-purrr::set_names(nm = seg.names) -> shp.box
+purrr::set_names(nm = fnames) -> shp.box
 
 # Crop data
 purrr::map(shp.box,
 					 ~shp.hf %>%
 					 rename(hf = `heat-flow (mW/m2)`) %>%
 					 st_crop(.x)) %>%
-purrr::set_names(nm = seg.names) -> shp.hf.crop
+purrr::set_names(nm = fnames) -> shp.hf.crop
 
 # Color scale
 viridis.scale.white <- scale_color_viridis_c(option = 'magma', limits = c(0, 250), na.value = 'white')
 viridis.scale.grey <- scale_color_viridis_c(option = 'magma', limits = c(0, 250), na.value = 'grey50')
 
 # Draw plots
-p <- purrr::pmap(list(seg.names, fnames), ~{
+p <- purrr::pmap(list(fnames, fnames), ~{
 	cat('Drawing', ..1, '\n')
 	shp.hf <- shp.hf.crop[[..1]]
 	shp.cont <- shp.sa.contours.robin.pacific %>% st_crop(shp.hf)
@@ -207,48 +207,48 @@ tibble(lat = c(2.5,
 	st_as_sf(coords = c(2, 1), crs = proj4.wgs) %>%
  	st_transform(proj4.robin.pacific)	-> features
 
-p1 <-
-(p$Central_America$p.luca.pred +
- geom_sf_text(data = features %>% filter(segment == 'Central America'),
-							aes(label = label), color = 'black') +
- theme(plot.caption = element_blank())) +
-(p$Central_America$p.krige.pred + theme(axis.text.y = element_blank())) +
-(p$Central_America$p.diff.pred + theme(axis.text.y = element_blank())) +
-plot_layout(guides = 'collect') +
-plot_annotation(tag_levels = 'a') &
-guides(color = guide_colorbar(barwidth = unit(50, 'mm'))) &
-theme(plot.title = element_text(hjust = 1), axis.text = element_text(size = 8), legend.position = 'bottom', legend.justification = 'right')
+# p1 <-
+#         (p$Central_America$p.luca.pred +
+#          geom_sf_text(data = features %>% filter(segment == 'Central America'),
+#                       aes(label = label), color = 'black') +
+#          theme(plot.caption = element_blank())) +
+# (p$Central_America$p.krige.pred + theme(axis.text.y = element_blank())) +
+# (p$Central_America$p.diff.pred + theme(axis.text.y = element_blank())) +
+# plot_layout(guides = 'collect') +
+# plot_annotation(tag_levels = 'a') &
+# guides(color = guide_colorbar(barwidth = unit(50, 'mm'))) &
+# theme(plot.title = element_text(hjust = 1), axis.text = element_text(size = 8), legend.position = 'bottom', legend.justification = 'right')
 
 # Save
-ggsave(file = 'figs/diff_byeye/custom/Central_America.png',
-			 plot = p1,
-			 device = 'png',
-			 type = 'cairo',
-			 width = 8,
-			 height = 3.2
-)
+# ggsave(file = 'figs/diff_ga/custom/Central_America.png',
+#        plot = p1,
+#        device = 'png',
+#        type = 'cairo',
+#        width = 8,
+#        height = 3.2
+# )
 
-p2 <-
-(p$Lesser_Antilles$p.luca.pred +
- geom_sf_text(data = features %>% filter(segment == 'Lesser Antilles'),
-							aes(label = label), color = 'white') +
- theme(plot.caption = element_blank())) +
-(p$Lesser_Antilles$p.krige.pred + theme(axis.text.y = element_blank())) +
-(p$Lesser_Antilles$p.diff.pred + theme(axis.text.y = element_blank())) +
-plot_layout(guides = 'collect') +
-plot_annotation(tag_levels = 'a') &
-guides(color = guide_colorbar(barwidth = unit(50, 'mm'))) &
-theme(plot.title = element_text(hjust = 1), axis.text = element_text(size = 8), legend.position = 'bottom', legend.justification = 'right')
+# p2 <-
+# (p$Lesser_Antilles$p.luca.pred +
+#  geom_sf_text(data = features %>% filter(segment == 'Lesser Antilles'),
+#               aes(label = label), color = 'white') +
+#  theme(plot.caption = element_blank())) +
+# (p$Lesser_Antilles$p.krige.pred + theme(axis.text.y = element_blank())) +
+# (p$Lesser_Antilles$p.diff.pred + theme(axis.text.y = element_blank())) +
+# plot_layout(guides = 'collect') +
+# plot_annotation(tag_levels = 'a') &
+# guides(color = guide_colorbar(barwidth = unit(50, 'mm'))) &
+# theme(plot.title = element_text(hjust = 1), axis.text = element_text(size = 8), legend.position = 'bottom', legend.justification = 'right')
 
 
 # Save
-ggsave(file = 'figs/diff_byeye/custom/Lesser_Antilles.png',
-			 plot = p2,
-			 device = 'png',
-			 type = 'cairo',
-			 width = 7,
-			 height = 3.65
-)
+# ggsave(file = 'figs/diff_ga/custom/Lesser_Antilles.png',
+#        plot = p2,
+#        device = 'png',
+#        type = 'cairo',
+#        width = 7,
+#        height = 3.65
+# )
 
 p3 <-
 (p$Scotia$p.luca.pred +
@@ -264,7 +264,7 @@ theme(plot.title = element_text(hjust = 1), axis.text = element_text(size = 8), 
 
 
 # Save
-ggsave(file = 'figs/diff_byeye/custom/Scotia.png',
+ggsave(file = 'figs/diff_ga/custom/Scotia.png',
 			 plot = p3,
 			 device = 'png',
 			 type = 'cairo',
@@ -285,7 +285,7 @@ guides(color = guide_colorbar(barwidth = unit(50, 'mm'))) &
 theme(plot.title = element_text(hjust = 1), axis.text = element_text(size = 8), legend.position = 'bottom', legend.justification = 'right')
 
 # Save
-ggsave(file = 'figs/diff_byeye/custom/Sumatra_Banda_Sea.png',
+ggsave(file = 'figs/diff_ga/custom/Sumatra_Banda_Sea.png',
 			 plot = p4,
 			 device = 'png',
 			 type = 'cairo',
@@ -306,7 +306,7 @@ guides(color = guide_colorbar(barwidth = unit(50, 'mm'))) &
 theme(plot.title = element_text(hjust = 1), axis.text = element_text(size = 8), legend.position = 'bottom', legend.justification = 'right')
 
 # Save
-ggsave(file = 'figs/diff_byeye/custom/Vanuatu.png',
+ggsave(file = 'figs/diff_ga/custom/Vanuatu.png',
 			 plot = p5,
 			 device = 'png',
 			 type = 'cairo',

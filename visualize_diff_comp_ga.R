@@ -3,8 +3,8 @@ source('functions.R')
 load('data/hf.Rdata')
 
 # Define paths and names
-fpaths <- list.files('data/diff_byeye', pattern = '.RData', full.names = T)
-fnames <- purrr::map_chr(list.files('data/diff_byeye', pattern = '.RData'),
+fpaths <- list.files('data/diff_ga', pattern = '.RData', full.names = T)
+fnames <- purrr::map_chr(list.files('data/diff_ga', pattern = '.RData'),
 					 ~.x %>%
 					 stringr::str_replace('.RData', ''))
 
@@ -12,7 +12,7 @@ fnames <- purrr::map_chr(list.files('data/diff_byeye', pattern = '.RData'),
 for (i in fpaths) load(i)
 
 # Bounding Boxes
-purrr::map(seg.names,
+purrr::map(fnames,
 					 ~shp.sa.segs.robin.pacific.buffer %>%
 					 filter(segment == .x) %>%
 					 st_bbox() %>%
@@ -21,14 +21,14 @@ purrr::map(seg.names,
 																	'bottom' = 0.1,
 																	'left' = 0.1,
 																	'right' = 0.1))) %>%
-purrr::set_names(nm = seg.names) -> shp.box
+purrr::set_names(nm = fnames) -> shp.box
 
 # Crop data
 purrr::map(shp.box,
 					 ~shp.hf %>%
 					 rename(hf = `heat-flow (mW/m2)`) %>%
 					 st_crop(.x)) %>%
-purrr::set_names(nm = seg.names) -> shp.hf.crop
+purrr::set_names(nm = fnames) -> shp.hf.crop
 
 # Color scale
 viridis.scale.white <- scale_color_viridis_c(option = 'magma', limits = c(0, 250), na.value = 'white')
@@ -39,15 +39,15 @@ p.widths <- list(11, 11, 8, 8, 8, 8, 8, 8, 8, 8, 11, 8, 8)
 p.heights <- list(8, 9, 8, 12, 9, 11, 12, 8.5, 13, 9, 11, 14, 11)
 
 # Draw plots
-purrr::pwalk(list(seg.names, fnames, p.heights, p.widths), ~{
+purrr::pwalk(list(fnames, p.heights[which(seg.names %in% fnames)], p.widths[which(seg.names %in% fnames)]), ~{
 	cat('Plotting', ..1, '\n')
 	shp.hf <- shp.hf.crop[[..1]]
 	shp.cont <- shp.sa.contours.robin.pacific %>% st_crop(shp.hf)
 	shp.seg <- shp.sa.segs.robin.pacific %>% st_crop(shp.hf)
-	shp.diff <- get(..2)$diff
-	shp.krige <- get(..2)$k
-	v.grm <- get(..2)$v.grm
-	v.mod <- get(..2)$v.mod
+	shp.diff <- get(..1)$diff
+	shp.krige <- get(..1)$k
+	v.grm <- get(..1)$v.grm
+	v.mod <- get(..1)$v.mod
 	v.line <- variogramLine(v.mod, maxdist = max(v.grm$dist))
 	p.luca.pred <- ggplot() +
 									geom_sf(data = shp.diff, aes(color = hf.pred.luca),
@@ -135,7 +135,7 @@ purrr::pwalk(list(seg.names, fnames, p.heights, p.widths), ~{
 	p.pts +
 	p.hist +
 	p.vgrm +
-	plot_annotation(title = ..1,
+	plot_annotation(title = ..1 %>% stringr::str_replace_all('_', ' '),
 									theme = theme(legend.position = 'right',
 																legend.direction = 'vertical'))
 	if(..1 != 'Andes') {
@@ -148,11 +148,11 @@ purrr::pwalk(list(seg.names, fnames, p.heights, p.widths), ~{
 		p.comp <- p + plot_layout(design = design, heights = c(1, 0.5))
 	}
 	# Save
-	cat('Saving plot to', paste0('figs/diff_byeye/comp/', ..2, '.png'), '\n')
-	ggsave(file = paste0('figs/diff_byeye/comp/', ..2, '.png'),
+	cat('Saving plot to', paste0('figs/diff_ga/comp/', ..1, '.png'), '\n')
+	ggsave(file = paste0('figs/diff_ga/comp/', ..1, '.png'),
 				 device = 'png',
 				 type = 'cairo',
 				 plot = p.comp,
-				 height = ..3,
-				 width = ..4)
+				 height = ..2,
+				 width = ..3)
 })

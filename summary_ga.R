@@ -3,9 +3,9 @@ source('functions.R')
 load('data/hf.Rdata')
 
 # Define paths and names
-fpath <- list.files('data/diff', pattern = '.RData', full.names = T)
+fpath <- list.files('data/diff_ga', pattern = '.RData', full.names = T)
 purrr::map_chr(
-  list.files('data/diff', pattern = '.RData'),
+  list.files('data/diff_ga', pattern = '.RData'),
   ~.x %>%
   stringr::str_replace('.RData', '')) -> fnames
 
@@ -77,10 +77,10 @@ ggplot() +
   theme(strip.background = element_blank()) -> p
 
 # Save plot
-cat('Saving heat flow summary plot to:\nfigs/summary/hf_summary.png\n')
+cat('Saving heat flow summary plot to:\nfigs/summary_ga/hf_summary.png\n')
 
 ggsave(
-  file = 'figs/summary/hf_summary.png',
+  file = 'figs/summary_ga/hf_summary.png',
   plot = p,
   device = 'png',
   type = 'cairo',
@@ -173,7 +173,7 @@ p <- p1 + p2 + p4 + p3 +
 cat('Saving variogram model summary plot to:\nfigs/variogram_summary.png\n')
 
 ggsave(
-  file = 'figs/summary/variogram_summary.png',
+  file = 'figs/summary_ga/variogram_summary.png',
   plot = p,
   device = 'png',
   type = 'cairo',
@@ -222,7 +222,7 @@ ggplot() +
 cat('Saving heat flow difference summary plot to:\nfigs/hf_diff_summary.png')
 
 ggsave(
-  file = 'figs/summary/hf_diff_summary.png',
+  file = 'figs/summary_ga/hf_diff_summary.png',
   plot = p,
   device = 'png',
   type = 'cairo',

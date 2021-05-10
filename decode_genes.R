@@ -75,7 +75,7 @@ purrr::map2(v.grms, v.mods,
   ~{fit.variogram(.x, model = .y)}) %>%
 purrr::set_names(fnames) -> v.fits
 
-cat('\nPlotting variogram models and saving to figs/vgrms/decoded.png')
+cat('\nPlotting variogram models and saving to figs/vgrms_decoded.png')
 purrr::pmap(
   list(v.grms, v.fits, fnames),
   ~plot_vgrm(..1, ..2, ..3 %>% stringr::str_replace_all('_', ' '))) %>%
@@ -83,7 +83,7 @@ wrap_plots() -> p
 
 # Save plot
 ggsave(
-  'figs/vgrms/decoded.png',
+  'figs/vgrms_decoded.png',
   plot = p,
   device = 'png',
   type = 'cairo',

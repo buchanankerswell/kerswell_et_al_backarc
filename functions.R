@@ -3,19 +3,19 @@
 sshhh <- function(p){
   suppressWarnings(
     suppressPackageStartupMessages(
-      library(p, character.only=TRUE)))}
+      library(p, quietly = T, character.only=TRUE)))}
 
 # Package list
 c('magrittr', 'ggplot2', 'tidyr', 'readr', 'purrr',
   'gstat', 'ggsflabel', 'sf', 'ggrepel', 'patchwork',
   'cowplot', 'dplyr') -> p.list
 
-cat('Loading libraries:', p.list, sep = '\n')
+#cat('Loading libraries:', p.list, sep = '\n')
 
 # auto-load quietly
 sapply(p.list, sshhh)
 
-cat('Loading functions\n')
+#cat('Loading functions\n')
 
 # Draw a widened box from a st_bbox object
 bbox_widen <- function(
@@ -134,14 +134,28 @@ Krige <- function(
   data,
   v.mod,
   param,
-  grid) {
+  grid,
+  cv = FALSE) {
   # Kriging
-  krige(formula = get(param)~1,
+  krige(
+    formula = get(param)~1,
+    locations = data,
+    newdata = grid,
+    model = v.mod) %>%
+  as_tibble() %>%
+  st_as_sf() -> k
+  if(cv == TRUE) {
+    cat('\nCalculating cross-validation error')
+    krige.cv(
+        formula = get(param)~1,
         locations = data,
-        newdata = grid,
-        model = v.mod) %>%
-    as_tibble() %>%
-    st_as_sf()
+        model = v.mod,
+        nfold = 10,
+        verbose = T) %>%
+    drop_na() -> k.cv
+  }
+  attr(k, 'cv.rmse') <- sqrt(sum(k.cv$residual^2)/nrow(k.cv))
+  return(k)
 }
 
 # Optimize krige results
@@ -229,7 +243,7 @@ Krige_diff <- function(
   data.compare,
   path){
   v <- fit.variogram(v.grm, model = v.mod)
-  k <- Krige(data, v, param, grid)
+  k <- Krige(data, v, param, grid, cv = T)
   # Difference
   shp.hf.pred <-
   data.compare %>%

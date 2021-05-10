@@ -45,6 +45,6 @@ purrr::pwalk(list(
   Krige_diff,
   param = 'hf',
   data.compare = shp.hf.pred,
-  path = 'data/diff/')
+  path = 'data/diff_ga/')
 
 cat('\nDone')
