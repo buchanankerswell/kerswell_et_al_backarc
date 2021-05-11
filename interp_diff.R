@@ -82,14 +82,21 @@ ggsave(
 )
 
 # Interpolation difference
-cat('\nCalculating interpolation differences')
+cat('\nCalculating interpolation differences\n')
+pb <- progress::progress_bar$new(
+  format = "Interpolating [:bar] :percent in :elapsed",
+  total = length(seg.names), clear = FALSE, width= 60)
 purrr::pwalk(list(
   seg.names,
   shp.hf.crop,
   v.grms,
   v.mods,
   shp.grid.crop),
-  Krige_diff,
-  param = 'hf',
-  data.compare = shp.hf.pred,
-  path = 'data/diff/')
+  ~{pb$tick()
+    cat('\n', ..1, '\n')
+    Krige_diff(..1, ..2, ..3, ..4, ..5,
+               param = 'hf',
+               data.compare = shp.hf.pred,
+               path = 'data/diff/')})
+
+cat('\nDone\n')

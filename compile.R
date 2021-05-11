@@ -229,3 +229,5 @@ d.volc.no.spread <- shp.volc.no.spread %>% st_set_geometry(NULL)
 fname.save <- 'data/hf.RData'
 cat('\nSaving data to', fname.save, '\n', sep = ' ')
 save.image(fname.save)
+
+cat('\nDone\n')

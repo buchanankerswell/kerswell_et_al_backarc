@@ -21,11 +21,12 @@ abstract: Surface heat flow near subduction zones provides indirect observations
 plain_language_summary:
 output:
   rticles::agu_article:
-    pandoc_args: ['--filter=pandoc-crossref', '--csl=g3.csl', '--lua-filter=multiple-bibliographies.lua']
+    pandoc_args: ['--filter=pandoc-crossref', '--lua-filter=multiple-bibliographies.lua']
     citation_package: default
+csl: g3.csl
 bibliography_main: ref.bib
 bibliography_nghf: tglobe.bib
-csl: g3.csl
+link-citations: yes
 figPrefix:
 - Figure
 - Figures
@@ -296,7 +297,7 @@ knitr::include_graphics('../figs/summary/hf_summary.png')
 
 ## Variogram Models
 
-The optimal variogram models and associated errors $C_F(\Theta)$ and $C_I(\Theta)$ are given in @tbl:variogram.summary.table. Almost twice as many experimental variograms are fit with spherical models (8) compared to exponential models (5). Variogram model sills vary substantially among the subduction zone segments between 9 and 1538 $mWm^{-2}$. Variogram model ranges also vary substantially among segments from 4 to 1676 $km$.
+The optimal variogram models and associated errors are given in @tbl:variogram.summary.table. Almost twice as many experimental variograms are fit with spherical models (8) compared to exponential models (5). Variogram model sills vary substantially among the subduction zone segments between 9 and 1538 $mWm^{-2}$. Variogram model ranges also vary substantially among segments from 4 to 1676 $km$.
 
 No apparent correlation exists between variogram model range and subduction zone segment length, number of heat flow observations, nor domain area (@fig:variogram.summary.plot). Most subduction zone segments show spatial dependence of a few hundred kilometers or less, irrespective of the number of observations or segment size. The exceptions are Kyushu Ryukyu (range = 1774 $km$) and Vanuatu (range = 573 $km$), whose model variogram ranges are, perhaps, anomalously high.
 
@@ -322,7 +323,7 @@ knitr::kable(caption = 'Predicted heat flow ($mWm^{-2}$) differences {#tbl:diff.
 
 Prediction differences are either approximately normally distributed, or skewed right. Right skew and a tendency of medians to deviate positively from zero both reflect a systematic overprediction of heat flow by the similarity method compared to Kriging (@fig:diff.summary.plot). However, Alaska Aleutians, Scotia, and Tonga New Zealand have negative median differences. While there is a tendency for the similarity method to overpredict heat flow compared to Kriging, it is not true in every case.
 
-```{r diff.summary.plot, out.width="60%", fig.cap="Point-by-point differences of predicted heat flow between similarity and Kriging interpolations. The differences for most subduction zone segments are median-centered at or near-zero with IQRs from 16 to 62. Outliers (shadowy dots) extend to extreme positive and negative differences."}
+```{r diff.summary.plot, out.width="60%", fig.cap="Point-by-point differences of predicted heat flow between similarity and Kriging interpolations (difference = similarity - Krige). The differences for most subduction zone segments are median-centered at or near-zero with IQRs from 16 to 62. Outliers (shadowy dots) extend to extreme positive and negative differences."}
 knitr::include_graphics('../figs/summary/hf_diff_summary.png')
 ```
 
@@ -558,7 +559,86 @@ We use the general-purpose functions in the "R" package `GA` [@scrucca2013; @scr
 
 : Parameters and ranges used in the optimization algorithm {#tbl:search}
 
-### Genetic algorithm results
+## Genetic algorithm results
+
+The optimal variogram models and associated errors $C_F(\Theta)$ and $C_I(\Theta)$ are given in @tbl:ga.variogram.summary.table.
+
+```{r ga.diff.summary.table}
+# ga.hf.diff.summary %>%
+# knitr::kable(
+#   caption = 'Predicted heat flow ($mWm^{-2}$) differences {#tbl:ga.diff.summary.table}',
+#   format = 'pandoc')
+```
+
+```{r ga.diff.summary.plot, out.width="60%", fig.cap="Point-by-point differences of predicted heat flow between similarity and Kriging interpolations (difference = similarity - Krige). The differences for most subduction zone segments are median-centered at or near-zero with IQRs from 16 to 62. Outliers (shadowy dots) extend to extreme positive and negative differences."}
+# knitr::include_graphics('../figs/summary/ga_hf_diff_summary.png')
+```
+
+```{r ga.alaska.comp, fig.cap="Similarity vs. Kriging predictions for Alaska Aleutians."}
+# knitr::include_graphics('../figs/diff_ga/comp/Alaska_Aleutians.png')
+```
+
+
+```{r ga.andes.comp, fig.cap="Similarity vs. Kriging predictions for the Andes."}
+# knitr::include_graphics('../figs/diff_ga/comp/Andes.png')
+```
+
+
+```{r ga.central.america.comp, fig.cap="Similarity vs. Kriging predictions for Central America."}
+# knitr::include_graphics('../figs/diff_ga/comp/Central_America.png')
+```
+
+
+```{r ga.kamchatka.marianas.comp, fig.cap="Similarity vs. Kriging predictions for Kamchatka Marianas."}
+# knitr::include_graphics('../figs/diff_ga/comp/Kamchatka_Marianas.png')
+```
+
+
+```{r ga.kyushu.ryukyu.comp, fig.cap="Similarity vs. Kriging predictions for Kyushu Ryukyu."}
+# knitr::include_graphics('../figs/diff_ga/comp/Kyushu_Ryukyu.png')
+```
+
+
+```{r ga.lesser.antilles.comp, fig.cap="Similarity vs. Kriging predictions for the Lesser Antilles."}
+# knitr::include_graphics('../figs/diff_ga/comp/Lesser_Antilles.png')
+```
+
+
+```{r ga.n.philippines.comp, fig.cap="Similarity vs. Kriging predictions for N. Philippines."}
+# knitr::include_graphics('../figs/diff_ga/comp/N_Philippines.png')
+```
+
+
+```{r ga.new.britain.solomon.comp, fig.cap="Similarity vs. Kriging predictions for New Britain Solomon."}
+# knitr::include_graphics('../figs/diff_ga/comp/New_Britain_Solomon.png')
+```
+
+
+```{r ga.s.philippines.comp, fig.cap="Similarity vs. Kriging predictions for S. Philippines."}
+# knitr::include_graphics('../figs/diff_ga/comp/S_Philippines.png')
+```
+
+
+```{r ga.sumatra.banda.sea.comp, fig.cap="Similarity vs. Kriging predictions for Sumatra Banda Sea."}
+# knitr::include_graphics('../figs/diff_ga/comp/Sumatra_Banda_Sea.png')
+```
+
+
+```{r ga.scotia.comp, fig.cap="Similarity vs. Kriging predictions for Scotia."}
+# knitr::include_graphics('../figs/diff_ga/comp/Scotia.png')
+```
+
+
+```{r ga.tonga.new.zealand.comp, fig.cap="Similarity vs. Kriging predictions for Tonga New Zealand."}
+# knitr::include_graphics('../figs/diff_ga/comp/Tonga_New_Zealand.png')
+```
+
+
+```{r ga.vanuatu.comp, fig.cap="Similarity vs. Kriging predictions for Vanuatu."}
+# knitr::include_graphics('../figs/diff_ga/comp/Vanuatu.png')
+```
+
+\clearpage
 
 ## New Global Heat Flow Database References
 

@@ -37,7 +37,6 @@ end
 local all_cites = {}
 --- Document meta value
 local doc_meta = pandoc.Meta{}
-
 --- Div used by pandoc-citeproc to insert the bibliography.
 local refs_div = pandoc.Div({}, pandoc.Attr('refs'))
 
@@ -112,7 +111,6 @@ local function meta_for_pandoc_citeproc (bibliography)
     new_meta[field] = doc_meta[field]
   end
   new_meta.bibliography = bibliography
-  print(dump(new_meta))
   return new_meta
 end
 
@@ -127,7 +125,6 @@ local function create_topic_bibliography (div)
   end
   local tmp_blocks = {pandoc.Para(all_cites), refs_div}
   local tmp_meta = meta_for_pandoc_citeproc(bibfile)
-  print(dump(tmp_meta))
   local tmp_doc = pandoc.Pandoc(tmp_blocks, tmp_meta)
   local res = run_citeproc(tmp_doc, true) -- try to be quiet
   -- First block of the result contains the dummy paragraph, second is

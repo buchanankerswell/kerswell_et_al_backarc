@@ -151,7 +151,7 @@ Krige <- function(
         locations = data,
         model = v.mod,
         nfold = 10,
-        verbose = T) %>%
+        verbose = F) %>%
     drop_na() -> k.cv
   }
   attr(k, 'cv.rmse') <- sqrt(sum(k.cv$residual^2)/nrow(k.cv))

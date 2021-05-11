@@ -3,7 +3,7 @@ source('functions.R')
 load('data/hf.Rdata')
 
 # Define paths and names
-fpath <- list.files('data/diff', pattern = '.RData', full.names = T)
+list.files('data/diff', pattern = '.RData', full.names = T) -> fpath
 purrr::map_chr(
   list.files('data/diff', pattern = '.RData'),
   ~.x %>%
@@ -36,7 +36,7 @@ purrr::map2_df(shp.box, seg.names,
 shp.hf.crop %>%
 st_set_geometry(NULL) %>%
 group_by(segment) %>%
-mutate('segment' = segment %>% stringr::str_replace_all('_', ' ') %>%
+mutate('segment' = segment %>% stringr::str_replace_all('_', ' ')) %>%
 rename(Segment = segment) %>%
 summarise(
   n = n(),
@@ -52,22 +52,23 @@ print(hf.summary)
 
 # Visualize
 shp.hf.crop %>%
+mutate('segment' = segment %>% stringr::str_replace_all('_', ' ')) %>%
 group_by(segment) %>%
-mutate('segment' = segment %>% stringr::str_replace_all('_', ' ') %>%
 ggplot() +
-  geom_boxplot(
-    aes(x = hf, y = segment, group = segment),
-    width = 0.5,
-    outlier.size = 0.5,
-    outlier.color = rgb(0.5, 0.5, 0.5, 0.1)) +
-  labs(
-    x = bquote('Heat flow'~(mWm^-2)),
-    y = NULL,
-    title = 'Heat flow observations') +
-  scale_x_continuous(limits = c(0, 250)) +
-  scale_y_discrete(limits = rev(levels(as.factor(seg.names)))) +
-  theme_classic(base_size = 9) +
-  theme(strip.background = element_blank()) -> p
+geom_boxplot(
+  aes(x = hf, y = segment, group = segment),
+  width = 0.5,
+  outlier.size = 0.5,
+  outlier.color = rgb(0.5, 0.5, 0.5, 0.1)) +
+labs(
+  x = bquote('Heat flow'~(mWm^-2)),
+  y = NULL,
+  title = 'Heat flow observations') +
+scale_x_continuous(limits = c(0, 250)) +
+scale_y_discrete(
+  limits = rev(levels(as.factor(seg.names %>% stringr::str_replace_all('_', ' '))))) +
+theme_classic(base_size = 9) +
+theme(strip.background = element_blank()) -> p
 
 # Save plot
 cat('Saving heat flow summary plot to:\nfigs/hf_summary.png\n')
@@ -84,7 +85,7 @@ ggsave(
 purrr::map_df(fname,
   ~get(.x)$v.mod, .id = 'segment') %>%
   as_tibble() %>%
-  mutate('segment' = seg.names) %>%
+  mutate('segment' = seg.names %>% stringr::str_replace_all('_', ' ')) %>%
   dplyr::select(segment, model, psill, range) %>%
   rename(
     Segment = segment, Model = model,
@@ -92,21 +93,37 @@ purrr::map_df(fname,
   mutate(
     'Sill' = round(sqrt(Sill)),
     'Range' = round(Range/1000, 1),
-    'RMSE' = round(attr(get(.x)$k, 'cv.rmse'), 1)) -> variogram.summary
+    'RMSE' = purrr::map_dbl(fname, ~round(attr(get(.x)$k, 'cv.rmse'), 1))) -> variogram.summary
 
 cat('Variogram summary:\n')
 print(variogram.summary)
 
 # Visualize
 variogram.summary %>%
+mutate('Segment' = Segment %>% stringr::str_replace_all('_', ' ')) %>%
 ggplot() +
-  geom_bar(aes(x = Range, y = Segment), stat = 'identity') +
-  annotate('segment', y = 'Kyushu Ryukyu', yend = 'Kyushu Ryukyu', x = 400, xend = 450, arrow = arrow(length = unit(2, 'mm')), color = 'white') +
-  annotate('segment', y = 'Vanuatu', yend = 'Vanuatu', x = 400, xend = 450, arrow = arrow(length = unit(2, 'mm')), color = 'white') +
-  coord_cartesian(xlim = c(0, 450)) +
-  labs(x = 'Range (km)', y = NULL) +
-  scale_y_discrete(limits = rev(levels(as.factor(seg.names)))) +
-  theme_classic(base_size = 9) -> p1
+geom_bar(aes(x = Range, y = Segment), stat = 'identity') +
+annotate(
+  'segment',
+  y = 'Kyushu Ryukyu',
+  yend = 'Kyushu Ryukyu',
+  x = 400,
+  xend = 450,
+  arrow = arrow(length = unit(2, 'mm')),
+  color = 'white') +
+annotate(
+  'segment',
+  y = 'Vanuatu',
+  yend = 'Vanuatu',
+  x = 400,
+  xend = 450,
+  arrow = arrow(length = unit(2, 'mm')),
+  color = 'white') +
+coord_cartesian(xlim = c(0, 450)) +
+labs(x = 'Range (km)', y = NULL) +
+scale_y_discrete(
+  limits = rev(levels(as.factor(seg.names %>% stringr::str_replace_all('_', ' '))))) +
+theme_classic(base_size = 9) -> p1
 
 variogram.summary %>%
 mutate(
@@ -114,31 +131,29 @@ mutate(
   st_length() %>%
   as.vector()) %>%
 ggplot() +
-  geom_point(aes(x = Range, y = seg.length/1000)) +
-  geom_text_repel(
-    aes(x = Range, y = seg.length/1000, label = Segment),
-    size = 2,
-    color = rgb(0, 0, 0, 0.3)) +
-  labs(x = 'Range (km)', y = 'Segment Length (km)') +
-  theme_classic(base_size = 9) -> p2
+geom_point(aes(x = Range, y = seg.length/1000)) +
+geom_text_repel(
+  aes(x = Range, y = seg.length/1000, label = Segment),
+  size = 2,
+  color = rgb(0, 0, 0, 0.3)) +
+labs(x = 'Range (km)', y = 'Segment Length (km)') +
+theme_classic(base_size = 9) -> p2
 
 variogram.summary %>%
 mutate(n = hf.summary$n) %>%
 ggplot() +
-  geom_point(aes(x = Range, y = n)) +
-  geom_text_repel(
-    aes(x = Range, y = n, label = Segment),
-    size = 2,
-    color = rgb(0, 0, 0, 0.3)) +
-  labs(x = 'Range (km)', y = 'Number of observations') +
-  theme_classic(base_size = 9) -> p3
+geom_point(aes(x = Range, y = n)) +
+geom_text_repel(
+  aes(x = Range, y = n, label = Segment),
+  size = 2,
+  color = rgb(0, 0, 0, 0.3)) +
+labs(x = 'Range (km)', y = 'Number of observations') +
+theme_classic(base_size = 9) -> p3
 
-purrr::map_dbl(shp.box,
-  ~{
-  box <- .x %>%
-    st_bbox
-  as.numeric((box$xmax-box$xmin)*(box$ymax-box$ymin))
-}) -> shp.area
+purrr::map_dbl(
+  shp.box,
+  ~{box <- .x %>% st_bbox
+    as.numeric((box$xmax-box$xmin)*(box$ymax-box$ymin))}) -> shp.area
 
 variogram.summary %>%
 mutate(area = shp.area) %>%
@@ -175,7 +190,7 @@ purrr::set_names(nm = seg.names) -> hf.diff
 hf.diff %>%
 bind_rows(.id = 'Segment') %>%
 group_by(Segment) %>%
-mutate('Segment' = Segment %>% stringr::str_replace_all('_', ' ') %>%
+mutate('Segment' = Segment %>% stringr::str_replace_all('_', ' ')) %>%
 summarise(
   Min = round(min(hf.diff)),
   Max = round(max(hf.diff)),
@@ -190,23 +205,24 @@ print(hf.diff.summary)
 # Visualize
 hf.diff %>%
 bind_rows(.id = 'segment') %>%
+mutate('segment' = segment %>% stringr::str_replace_all('_', ' ')) %>%
 group_by(segment) %>%
-mutate('segment' = segment %>% stringr::str_replace_all('_', ' ') %>%
 ggplot() +
-  geom_boxplot(
-    aes(x = hf.diff, y = segment, group = segment),
-    width = 0.5,
-    outlier.size = 0.5,
-    outlier.color = rgb(0.5, 0.5, 0.5, 0.1)) +
-  geom_vline(xintercept = 0, color = 'deeppink') +
-  labs(
-    x = bquote('Heat flow difference'~(mWm^-2)),
-    y = NULL,
-    title = 'Prediction difference (similarity - Krige)') +
-  scale_x_continuous(limits = c(-2*max(hf.diff.summary$IQR), 2*max(hf.diff.summary$IQR))) +
-  scale_y_discrete(limits = rev(levels(as.factor(seg.names)))) +
-  theme_classic(base_size = 9) +
-  theme(strip.background = element_blank()) -> p
+geom_boxplot(
+  aes(x = hf.diff, y = segment, group = segment),
+  width = 0.5,
+  outlier.size = 0.5,
+  outlier.color = rgb(0.5, 0.5, 0.5, 0.1)) +
+geom_vline(xintercept = 0, color = 'deeppink') +
+labs(
+  x = bquote('Heat flow difference'~(mWm^-2)),
+  y = NULL,
+  title = 'Prediction difference') +
+scale_x_continuous(limits = c(-2*max(hf.diff.summary$IQR), 2*max(hf.diff.summary$IQR))) +
+scale_y_discrete(
+  limits = rev(levels(as.factor(seg.names %>% stringr::str_replace_all('_', ' '))))) +
+theme_classic(base_size = 9) +
+theme(strip.background = element_blank()) -> p
 
 # Save plot
 cat('Saving heat flow difference summary plot to:\nfigs/hf_diff_summary.png')
@@ -218,3 +234,5 @@ ggsave(
   type = 'cairo',
   width = 4,
   height = 4)
+
+cat('\nDone')

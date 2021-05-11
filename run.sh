@@ -10,3 +10,6 @@ Rscript summary.R
 echo '\nVisualizing results'
 Rscript visualize_diff.R
 Rscript visualize_diff_comp.R
+echo '\nRendering PDF document'
+R -e 'rmarkdown::render("draft/backarc.Rmd")'
+open draft/backarc.pdf
