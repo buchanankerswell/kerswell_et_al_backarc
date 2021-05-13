@@ -5,8 +5,9 @@ load('data/hf.RData')
 # Load decoded genes
 cat('\nLoading decoded chromosomes from data/genes_decoded.RData')
 load('data/genes_decoded.RData')
-fnames <- list.files(path = 'data/ga') %>%
-  stringr::str_replace_all('\\_opt.RData', '')
+
+list.files(path = 'data/ga') %>%
+stringr::str_replace_all('\\_opt.RData', '') -> fnames
 
 # Bounding Boxes
 cat('\nDefining bounding boxes')
@@ -36,15 +37,20 @@ purrr::map(shp.box, ~shp.grid %>% st_crop(.x)) %>%
 
 # Interpolation difference
 cat('\nCalculating interpolation differences\n')
+pb <- progress::progress_bar$new(
+  format = "Interpolating [:bar] :percent in :elapsed",
+  total = length(seg.names), clear = FALSE, width= 60)
 purrr::pwalk(list(
   fnames,
   shp.hf.crop,
   v.grms,
   v.mods,
   shp.grid.crop),
-  Krige_diff,
-  param = 'hf',
-  data.compare = shp.hf.pred,
-  path = 'data/diff_ga/')
+  ~{pb$tick()
+    cat('\n', ..1, '\n')
+    Krige_diff(..1, ..2, ..3, ..4, ..5,
+               param = 'hf',
+               data.compare = shp.hf.pred,
+               path = 'data/diff_ga/')})
 
-cat('\nDone')
+cat('\nDone\n')

@@ -71,7 +71,7 @@ theme_classic(base_size = 9) +
 theme(strip.background = element_blank()) -> p
 
 # Save plot
-cat('Saving heat flow summary plot to:\nfigs/hf_summary.png\n')
+cat('Saving heat flow summary plot to:\nfigs/summary/hf_summary.png\n')
 
 ggsave(
   file = 'figs/summary/hf_summary.png',
@@ -167,13 +167,15 @@ ggplot() +
   theme_classic(base_size = 9) -> p4
 
 # Composition
-p <- p1 + p2 + p4 + p3 +
+p1 + p2 +
+(p4 + theme(axis.title.y = element_text(margin = margin(0, -100, 0, 0)))) +
+p3 +
   plot_annotation(
   tag_levels = 'a',
-  title = 'Variogram range correlations')
+  title = 'Variogram range correlations') -> p
 
 # Save plot
-cat('Saving variogram model summary plot to:\nfigs/variogram_summary.png\n')
+cat('Saving variogram model summary plot to:\nfigs/summary/variogram_summary.png\n')
 
 ggsave(
   file = 'figs/summary/variogram_summary.png',
@@ -225,7 +227,7 @@ theme_classic(base_size = 9) +
 theme(strip.background = element_blank()) -> p
 
 # Save plot
-cat('Saving heat flow difference summary plot to:\nfigs/hf_diff_summary.png')
+cat('Saving heat flow difference summary plot to:\nfigs/summary/hf_diff_summary.png')
 
 ggsave(
   file = 'figs/summary/hf_diff_summary.png',
@@ -235,4 +237,4 @@ ggsave(
   width = 4,
   height = 4)
 
-cat('\nDone')
+cat('\nDone\n')

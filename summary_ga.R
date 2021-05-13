@@ -3,19 +3,19 @@ source('functions.R')
 load('data/hf.Rdata')
 
 # Define paths and names
-fpath <- list.files('data/diff_ga', pattern = '.RData', full.names = T)
+list.files('data/diff_ga', pattern = '.RData', full.names = T) -> fpath
 purrr::map_chr(
   list.files('data/diff_ga', pattern = '.RData'),
   ~.x %>%
   stringr::str_replace('.RData', '')) -> fnames
 
-# Load data
+# Load interpolation data
 for (i in fpath) load(i)
 
 # Define paths and names
-fpath <- list.files('data/ga', pattern = '.RData', full.names = T)
+list.files('data/ga', pattern = '.RData', full.names = T) -> fpath
 
-# Load data
+# Load variogram and Kriging data
 for (i in fpath) load(i)
 
 # Bounding Boxes
@@ -61,20 +61,20 @@ group_by(segment) %>%
 mutate('segment' = segment %>%
   stringr::str_replace_all('_', ' ')) %>%
 ggplot() +
-  geom_boxplot(
-    aes(x = hf, y = segment, group = segment),
-    width = 0.5,
-    outlier.size = 0.5,
-    outlier.color = rgb(0.5, 0.5, 0.5, 0.1)) +
-  labs(
-    x = bquote('Heat flow'~(mWm^-2)),
-    y = NULL,
-    title = 'Heat flow observations') +
-  scale_x_continuous(limits = c(0, 250)) +
-  scale_y_discrete(limits = rev(levels(as.factor(
-    fnames %>% stringr::str_replace_all('_', ' '))))) +
-  theme_classic(base_size = 9) +
-  theme(strip.background = element_blank()) -> p
+geom_boxplot(
+  aes(x = hf, y = segment, group = segment),
+  width = 0.5,
+  outlier.size = 0.5,
+  outlier.color = rgb(0.5, 0.5, 0.5, 0.1)) +
+labs(
+  x = bquote('Heat flow'~(mWm^-2)),
+  y = NULL,
+  title = 'Heat flow observations') +
+scale_x_continuous(limits = c(0, 250)) +
+scale_y_discrete(limits = rev(levels(as.factor(
+  fnames %>% stringr::str_replace_all('_', ' '))))) +
+theme_classic(base_size = 9) +
+theme(strip.background = element_blank()) -> p
 
 # Save plot
 cat('Saving heat flow summary plot to:\nfigs/summary_ga/hf_summary.png\n')
@@ -87,27 +87,37 @@ ggsave(
   width = 4,
   height = 4)
 
-# Summarise variogram models (add rmse's from f.obj)
+# Summarise variogram models
 purrr::map_df(paste0(fnames, '_opt'),
   ~as_tibble(get(.x)@solution), .id = 'segment') %>%
-  mutate(
-    'segment' = fnames[as.numeric(segment)] %>%
-      stringr::str_replace_all('_', ' '),
-    'v.sill' = round(sqrt(v.sill)),
-    'v.range' = round(v.range/1000, 1),
-    'v.nug' = round(sqrt(v.nug)),
-    'maxdist' = round(maxdist/1000, 1),
-    'X Validation' = -purrr::map_dbl(paste0(fnames, '_opt'),
-      ~get(.x)@fitnessValue)) %>%
-  rename(
-    Segment = segment,
-    'Lag Cutoff' = cutoff,
-    'Lag Window' = lag.start,
-    Model = v.mod,
-    Sill = v.sill,
-    'Effective Range' = v.range,
-    Nugget = v.nug,
-    'Local Search' = maxdist) -> variogram.summary
+mutate(
+  'segment' = fnames[as.numeric(segment)] %>%
+    stringr::str_replace_all('_', ' '),
+  'v.mod' = purrr::map_chr(paste0(fnames, '_opt'), ~{
+    # Get ga result
+     o <- get(.x)@solution
+    # Variogram model discritization formula
+     if(o[3] >= 0 && o[3] < 1) {
+       v.mod <- 'Sph'
+     } else if(o[3] >= 1 && o[3] <= 2) {
+       v.mod <- 'Exp'
+     }}),
+  'v.sill' = round(sqrt(v.sill)),
+  'v.range' = round(v.range/1000, 1),
+  'v.nug' = round(sqrt(v.nug)),
+  'maxdist' = round(maxdist/1000, 1),
+  'cost' = round(-purrr::map_dbl(paste0(fnames, '_opt'),
+    ~get(.x)@fitnessValue), 3)) %>%
+rename(
+  Segment = segment,
+  Cost = cost,
+  'Lag Cutoff' = cutoff,
+  'Lag Window' = lag.start,
+  Model = v.mod,
+  Sill = v.sill,
+  'Effective Range' = v.range,
+  Nugget = v.nug,
+  'Local Search' = maxdist) -> variogram.summary
 
 cat('Variogram summary:\n')
 print(variogram.summary)
@@ -115,11 +125,11 @@ print(variogram.summary)
 # Visualize
 variogram.summary %>%
 ggplot() +
-  geom_bar(aes(x = `Effective Range`, y = Segment), stat = 'identity') +
-  labs(x = 'Effective Range (km)', y = NULL) +
-  scale_y_discrete(limits = rev(levels(as.factor(
-    fnames %>% stringr::str_replace_all('_', ' '))))) +
-  theme_classic(base_size = 9) -> p1
+geom_bar(aes(x = `Effective Range`, y = Segment), stat = 'identity') +
+labs(x = 'Effective Range (km)', y = NULL) +
+scale_y_discrete(limits = rev(levels(as.factor(
+  fnames %>% stringr::str_replace_all('_', ' '))))) +
+theme_classic(base_size = 9) -> p1
 
 variogram.summary %>%
 mutate(
@@ -128,24 +138,24 @@ mutate(
   st_length() %>%
   as.vector()) %>%
 ggplot() +
-  geom_point(aes(x = `Effective Range`, y = seg.length/1000)) +
-  geom_text_repel(
-    aes(x = `Effective Range`, y = seg.length/1000, label = Segment),
-    size = 2,
-    color = rgb(0, 0, 0, 0.3)) +
-  labs(x = 'Effective Range (km)', y = 'Segment Length (km)') +
-  theme_classic(base_size = 9) -> p2
+geom_point(aes(x = `Effective Range`, y = seg.length/1000)) +
+geom_text_repel(
+  aes(x = `Effective Range`, y = seg.length/1000, label = Segment),
+  size = 2,
+  color = rgb(0, 0, 0, 0.3)) +
+labs(x = 'Effective Range (km)', y = 'Segment Length (km)') +
+theme_classic(base_size = 9) -> p2
 
 variogram.summary %>%
 mutate(n = hf.summary$n) %>%
 ggplot() +
-  geom_point(aes(x = `Effective Range`, y = n)) +
-  geom_text_repel(
-    aes(x = `Effective Range`, y = n, label = Segment),
-    size = 2,
-    color = rgb(0, 0, 0, 0.3)) +
-  labs(x = 'Effective Range (km)', y = 'Number of observations') +
-  theme_classic(base_size = 9) -> p3
+geom_point(aes(x = `Effective Range`, y = n)) +
+geom_text_repel(
+  aes(x = `Effective Range`, y = n, label = Segment),
+  size = 2,
+  color = rgb(0, 0, 0, 0.3)) +
+labs(x = 'Effective Range (km)', y = 'Number of observations') +
+theme_classic(base_size = 9) -> p3
 
 purrr::map_dbl(shp.box, ~{
   box <- .x %>% st_bbox
@@ -155,22 +165,24 @@ purrr::map_dbl(shp.box, ~{
 variogram.summary %>%
 mutate(area = shp.area) %>%
 ggplot() +
-  geom_point(aes(x = `Effective Range`, y = area/10^12)) +
-  geom_text_repel(
-    aes(x = `Effective Range`, y = area/10^12, label = Segment),
-    size = 2,
-    color = rgb(0, 0, 0, 0.3)) +
-  labs(x = 'Effective Range (km)', y = bquote('Domain area'~(km^2%*%10^9))) +
-  theme_classic(base_size = 9) -> p4
+geom_point(aes(x = `Effective Range`, y = area/10^12)) +
+geom_text_repel(
+  aes(x = `Effective Range`, y = area/10^12, label = Segment),
+  size = 2,
+  color = rgb(0, 0, 0, 0.3)) +
+labs(x = 'Effective Range (km)', y = bquote('Domain area'~(km^2%*%10^9))) +
+theme_classic(base_size = 9) -> p4
 
 # Composition
-p <- p1 + p2 + p4 + p3 +
+p1 + p2 +
+(p4 + theme(axis.title.y = element_text(margin = margin(0, -100, 0, 0)))) +
+p3 +
   plot_annotation(
   tag_levels = 'a',
-  title = 'Variogram range correlations')
+  title = 'Variogram range correlations') -> p
 
 # Save plot
-cat('Saving variogram model summary plot to:\nfigs/variogram_summary.png\n')
+cat('Saving variogram model summary plot to:\nfigs/summary_ga/variogram_summary.png\n')
 
 ggsave(
   file = 'figs/summary_ga/variogram_summary.png',
@@ -187,6 +199,7 @@ purrr::set_names(nm = fnames) -> hf.diff
 hf.diff %>%
 bind_rows(.id = 'Segment') %>%
 group_by(Segment) %>%
+mutate('Segment' = Segment %>% stringr::str_replace_all('_', ' ')) %>%
 summarise(
   Min = round(min(hf.diff)),
   Max = round(max(hf.diff)),
@@ -202,24 +215,26 @@ print(hf.diff.summary)
 hf.diff %>%
 bind_rows(.id = 'segment') %>%
 group_by(segment) %>%
+mutate('segment' = segment %>% stringr::str_replace_all('_', ' ')) %>%
 ggplot() +
-  geom_boxplot(
-    aes(x = hf.diff, y = segment, group = segment),
-    width = 0.5,
-    outlier.size = 0.5,
-    outlier.color = rgb(0.5, 0.5, 0.5, 0.1)) +
-  geom_vline(xintercept = 0, color = 'deeppink') +
-  labs(
-    x = bquote('Heat flow difference'~(mWm^-2)),
-    y = NULL,
-    title = 'Prediction difference (similarity - Krige)') +
-  scale_x_continuous(limits = c(-2*max(hf.diff.summary$IQR), 2*max(hf.diff.summary$IQR))) +
-  scale_y_discrete(limits = rev(levels(as.factor(fnames)))) +
-  theme_classic(base_size = 9) +
-  theme(strip.background = element_blank())
+geom_boxplot(
+  aes(x = hf.diff, y = segment, group = segment),
+  width = 0.5,
+  outlier.size = 0.5,
+  outlier.color = rgb(0.5, 0.5, 0.5, 0.1)) +
+geom_vline(xintercept = 0, color = 'deeppink') +
+labs(
+  x = bquote('Heat flow difference'~(mWm^-2)),
+  y = NULL,
+  title = 'Prediction difference') +
+scale_x_continuous(limits = c(-2*max(hf.diff.summary$IQR), 2*max(hf.diff.summary$IQR))) +
+scale_y_discrete(
+  limits = rev(levels(as.factor(fnames %>% stringr::str_replace_all('_', ' '))))) +
+theme_classic(base_size = 9) +
+theme(strip.background = element_blank()) -> p
 
 # Save plot
-cat('Saving heat flow difference summary plot to:\nfigs/hf_diff_summary.png')
+cat('Saving heat flow difference summary plot to:\nfigs/summary_ga/hf_diff_summary.png')
 
 ggsave(
   file = 'figs/summary_ga/hf_diff_summary.png',
@@ -228,3 +243,5 @@ ggsave(
   type = 'cairo',
   width = 4,
   height = 4)
+
+cat('\nDone\n')

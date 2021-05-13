@@ -93,4 +93,4 @@ ggsave(
 
 # Save
 cat('\nSaving variograms to data/genes_decoded.RData')
-save(v.mods, v.grms, file = 'data/genes_decoded.RData')
+save(v.mods, v.grms, v.fits, file = 'data/genes_decoded.RData')

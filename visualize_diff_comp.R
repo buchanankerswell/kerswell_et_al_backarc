@@ -46,21 +46,21 @@ scale_color_viridis_c(
   na.value = 'grey50') -> viridis.scale.grey
 
 # Plot sizes
-p.widths <- list(11, 11, 8, 8, 8, 8, 8, 8, 8, 8, 11, 8, 8)
-p.heights <- list(8, 9, 8, 12, 9, 11, 12, 8.5, 13, 9, 11, 14, 11)
+p.widths <- c(11, 11, 8, 8, 8, 8, 8, 8, 8, 8, 11, 8, 8)
+p.heights <- c(8, 9, 8, 12, 9, 11, 12, 8.5, 13, 9, 11, 14, 11)
 
 # Draw plots
-purrr::pwalk(list(seg.names, fnames, p.heights, p.widths), ~{
+purrr::pwalk(list(fnames, p.heights, p.widths), ~{
   cat('Plotting', ..1, '\n')
   shp.hf <- shp.hf.crop[[..1]]
   shp.cont <- shp.sa.contours.robin.pacific %>% st_crop(shp.hf)
   shp.seg <- shp.sa.segs.robin.pacific %>%
     st_crop(shp.hf) %>%
     mutate('segment' = segment %>% stringr::str_replace_all('_', ' '))
-  shp.diff <- get(..2)$diff
-  shp.krige <- get(..2)$k
-  v.grm <- get(..2)$v.grm
-  v.mod <- get(..2)$v.mod
+  shp.diff <- get(..1)$diff
+  shp.krige <- get(..1)$k
+  v.grm <- get(..1)$v.grm
+  v.mod <- get(..1)$v.mod
   v.line <- variogramLine(v.mod, maxdist = max(v.grm$dist))
   ggplot() +
   geom_sf(data = shp.diff, aes(color = hf.pred.luca),
@@ -166,13 +166,13 @@ purrr::pwalk(list(seg.names, fnames, p.heights, p.widths), ~{
      p + plot_layout(design = design, heights = c(1, 0.5)) -> p.comp
   }
   # Save
-  cat('Saving plot to', paste0('figs/diff/comp/', ..2, '.png'), '\n')
-  ggsave(file = paste0('figs/diff/comp/', ..2, '.png'),
+  cat('Saving plot to', paste0('figs/diff/comp/', ..1, '.png'), '\n')
+  ggsave(file = paste0('figs/diff/comp/', ..1, '.png'),
          device = 'png',
          type = 'cairo',
          plot = p.comp,
-         height = ..3,
-         width = ..4)
+         height = ..2,
+         width = ..3)
 })
 
 cat('\nDone\n')
